@@ -24,7 +24,7 @@ const Navbar: React.FC = () => {
       localStorage.removeItem("user");
       localStorage.removeItem("token");
       dispatch(clearUser());
-      router.replace("/loginPage");
+      router.replace("/");
     }
   };
   useEffect(() => {
@@ -62,7 +62,7 @@ const Navbar: React.FC = () => {
                 {user && user.userName ? (
                   <div className="text-white hover:text-gray-300">
                     <Link
-                      href="/profile"
+                      href="/pages/profile"
                       className="text-white hover:text-gray-300"
                       onClick={() => setIsOpen(false)}
                     >
@@ -78,7 +78,7 @@ const Navbar: React.FC = () => {
             <>
               <li>
                 <Link
-                  href="/registerPage"
+                  href="/pages/registerPage"
                   className="text-white hover:text-gray-300"
                   onClick={() => setIsOpen(false)}
                 >
@@ -87,7 +87,7 @@ const Navbar: React.FC = () => {
               </li>
               <li>
                 <Link
-                  href="/loginPage"
+                  href="/pages/loginPage"
                   className="text-white hover:text-gray-300"
                   onClick={() => setIsOpen(false)}
                 >
@@ -108,7 +108,7 @@ const Navbar: React.FC = () => {
           )}
           <li>
             <Link
-              href="/ui"
+              href="/pages/ui"
               className="text-white hover:text-gray-300"
               onClick={() => setIsOpen(false)}
             >

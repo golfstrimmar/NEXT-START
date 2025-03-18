@@ -1,13 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import socketReducer from "./slices/socketSlice";
-// import auctionsReducer from "./slices/auctionsSlice";
+// import auctionsReducer from "./slices/auctionsSlice"; --kann sein
 import authReducer from "./slices/authSlice";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
 export const store = configureStore({
   reducer: {
     socket: socketReducer,
-    // auctions: auctionsReducer,
+    // auctions: auctionsReducer, --kann sein
     auth: authReducer,
   },
   middleware: (getDefaultMiddleware) =>

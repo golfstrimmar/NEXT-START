@@ -75,7 +75,7 @@ const LoginPage = () => {
         setSuccessMessage("Google login successful");
         setOpenModalMessage(true);
         setTimeout(() => {
-          router.replace("/profile");
+          router.replace("/pages/profile");
           setSuccessMessage("");
           setOpenModalMessage(false);
         }, 2000);
@@ -87,7 +87,7 @@ const LoginPage = () => {
         setTimeout(() => {
           setSuccessMessage("");
           setOpenModalMessage(false);
-          router.replace("/registerPage");
+          router.replace("/pages/registerPage");
           setEmail("");
         }, 2000);
       });
@@ -99,7 +99,7 @@ const LoginPage = () => {
         setTimeout(() => {
           setSuccessMessage("");
           setOpenModalMessage(false);
-          router.replace("/registerPage");
+          router.replace("/pages/registerPage");
         }, 2000);
       });
 
