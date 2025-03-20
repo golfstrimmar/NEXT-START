@@ -12,13 +12,18 @@ interface InputProps {
     | "tel"
     | "date"
     | "password"
+    | "search"
     | "time";
   data: string;
   value: string;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
-  inputRef: RefObject<HTMLInputElement | HTMLTextAreaElement>;
+  inputRef?: RefObject<HTMLInputElement | HTMLTextAreaElement>; // Сделали необязательным
+  onClick?: (
+    e: React.MouseEvent<HTMLInputElement | HTMLTextAreaElement, MouseEvent>
+  ) => void;
+  activ?: boolean; // Добавили activ как опциональный пропс
 }
 
 const Input: React.FC<InputProps> = ({
@@ -27,16 +32,23 @@ const Input: React.FC<InputProps> = ({
   value,
   onChange,
   inputRef,
+  onClick,
+  activ,
 }) => {
   return (
     <div className={styles["input-field"]}>
       {typeInput === "textarea" ? (
         <textarea
+          rows="5"
           id={data}
           name={data}
           value={value}
           ref={inputRef as RefObject<HTMLTextAreaElement>}
           onChange={onChange}
+          onClick={onClick}
+          className={`${
+            activ ? "bg-emerald-400  " : ""
+          } cursor-pointer border rounded  px-1   border-emerald-900`}
           required
         />
       ) : (
@@ -46,10 +58,11 @@ const Input: React.FC<InputProps> = ({
           name={data}
           type={typeInput}
           value={value}
-          onChange={(e) => {
-            console.log("Input onChange:", e.target.value);
-            onChange(e);
-          }}
+          onChange={onChange}
+          onClick={onClick}
+          className={`${
+            activ ? "bg-emerald-400  " : ""
+          } cursor-pointer border rounded  px-1   border-emerald-900`}
           required
         />
       )}

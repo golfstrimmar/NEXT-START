@@ -5,7 +5,8 @@ import Burger from "../ui/Burger/Burger";
 import styles from "./Navbar.module.scss";
 import { useSelector, useDispatch } from "react-redux";
 import { clearUser } from "@/app/redux/slices/authSlice";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams, usePathname } from "next/navigation";
+
 interface User {
   _id?: string;
   userName: string;
@@ -19,6 +20,11 @@ const Navbar: React.FC = () => {
   const dispatch = useDispatch();
   const user = useSelector((state: any) => state.auth.user as User);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const pathname = usePathname();
+  const [activeLink, setactiveLink] = useState<string>("");
+  useEffect(() => {
+    setactiveLink(pathname);
+  }, [pathname]);
   const handleLogout = () => {
     if (user) {
       localStorage.removeItem("user");
@@ -49,8 +55,12 @@ const Navbar: React.FC = () => {
           <li>
             <Link
               href="/"
-              className="text-white hover:text-gray-300 transition-colors duration-200"
-              onClick={() => setIsOpen(false)}
+              className={` hover:text-gray-300 transition-colors duration-200 ${
+                activeLink === "/" ? "text-blue" : "text-white "
+              }`}
+              onClick={() => {
+                setIsOpen(false);
+              }}
             >
               Home
             </Link>
@@ -63,8 +73,14 @@ const Navbar: React.FC = () => {
                   <div className="text-white hover:text-gray-300">
                     <Link
                       href="/pages/profile"
-                      className="text-white hover:text-gray-300"
-                      onClick={() => setIsOpen(false)}
+                      className={` hover:text-gray-300 transition-colors duration-200 ${
+                        activeLink === "/pages/profile"
+                          ? "text-blue"
+                          : "text-white "
+                      }`}
+                      onClick={() => {
+                        setIsOpen(false);
+                      }}
                     >
                       <p>Hallo, {user.userName} !</p>
                     </Link>
@@ -79,8 +95,14 @@ const Navbar: React.FC = () => {
               <li>
                 <Link
                   href="/pages/registerPage"
-                  className="text-white hover:text-gray-300"
-                  onClick={() => setIsOpen(false)}
+                  className={` hover:text-gray-300 transition-colors duration-200 ${
+                    activeLink === "/pages/registerPage"
+                      ? "text-blue"
+                      : "text-white "
+                  }`}
+                  onClick={() => {
+                    setIsOpen(false);
+                  }}
                 >
                   Register
                 </Link>
@@ -88,8 +110,14 @@ const Navbar: React.FC = () => {
               <li>
                 <Link
                   href="/pages/loginPage"
-                  className="text-white hover:text-gray-300"
-                  onClick={() => setIsOpen(false)}
+                  className={` hover:text-gray-300 transition-colors duration-200 ${
+                    activeLink === "/pages/loginPage"
+                      ? "text-blue"
+                      : "text-white "
+                  }`}
+                  onClick={() => {
+                    setIsOpen(false);
+                  }}
                 >
                   Login
                 </Link>
@@ -109,8 +137,12 @@ const Navbar: React.FC = () => {
           <li>
             <Link
               href="/pages/ui"
-              className="text-white hover:text-gray-300"
-              onClick={() => setIsOpen(false)}
+              className={` hover:text-gray-300 transition-colors duration-200 ${
+                activeLink === "/pages/ui" ? "text-blue" : "text-white "
+              }`}
+              onClick={() => {
+                setIsOpen(false);
+              }}
             >
               UI kit
             </Link>

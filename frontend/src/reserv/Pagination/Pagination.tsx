@@ -1,4 +1,35 @@
 // import Pagination from "@/reserv/Pagination/Pagination";
+//  const [currentPage, setCurrentPage] = useState<number>(1);
+//  const itemsPerPage = 5;
+//  const indexOfLastItem = currentPage * itemsPerPage;
+//  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+//   Обновление currentAuctions по createdAt
+//   useEffect(() => {
+//     if (activeSortType === "createdAt") {
+//       setTempAuctions(sortAuctions);
+//       setCurrentAuctions(sortAuctions.slice(indexOfFirstItem, indexOfLastItem));
+//     }
+//   }, [sortAuctions, indexOfFirstItem, indexOfLastItem, activeSortType]);
+
+//   // Обновление currentAuctions по endTime
+//   useEffect(() => {
+//     if (activeSortType === "endTime") {
+//       setTempAuctions(sortEndTime);
+//       setCurrentAuctions(sortEndTime.slice(indexOfFirstItem, indexOfLastItem));
+//     }
+//   }, [sortEndTime, indexOfFirstItem, indexOfLastItem, activeSortType]);
+
+//   // Обновление currentAuctions без сортировки
+//   useEffect(() => {
+//     if (activeSortType === "none") {
+//       const activeAuctions = auctions.filter(isAuctionActive);
+//       setTempAuctions(activeAuctions);
+//       setCurrentAuctions(
+//         activeAuctions.slice(indexOfFirstItem, indexOfLastItem)
+//       );
+//     }
+//   }, [auctions, activeSortType, indexOfFirstItem, indexOfLastItem]);
+
 //  {
 //    currentAuctions.length > 0 && (
 //      <Pagination
