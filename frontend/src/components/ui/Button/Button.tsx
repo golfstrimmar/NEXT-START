@@ -4,9 +4,16 @@ import styles from "./Button.module.scss";
 interface ButtonProps {
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   children: React.ReactNode;
+  buttonText?: string;
+  buttonValue?: string;
 }
 
-const Button: React.FC<ButtonProps> = ({ onClick, children }) => {
+const Button: React.FC<ButtonProps> = ({
+  onClick,
+  children,
+  buttonText,
+  buttonValue,
+}) => {
   const [ripples, setRipples] = useState<
     { x: number; mValue: number; y: number; key: number }[]
   >([]);
@@ -36,7 +43,10 @@ const Button: React.FC<ButtonProps> = ({ onClick, children }) => {
   return (
     <>
       <button
-        onClick={handleButtonClick}
+        onClick={(e) => {
+          handleButtonClick(e);
+        }}
+        value={buttonValue}
         className={`${styles.rippleButton} ripple-button relative text-white bg-[#2422a7] hover:bg-[#9ba8f1] focus:ring-4 focus:outline-none focus:ring-[#2422a7]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-center transition duration-200 ease-in-out cursor-pointer overflow-hidden`}
       >
         {ripples.map((ripple) => (
@@ -51,7 +61,7 @@ const Button: React.FC<ButtonProps> = ({ onClick, children }) => {
             }}
           />
         ))}
-        {children}
+        {buttonText ? buttonText : children}
       </button>
     </>
   );

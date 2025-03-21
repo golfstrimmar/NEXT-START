@@ -3,35 +3,54 @@ import React, { useState, useEffect } from "react";
 import HomeImg from "@/assets/svg/home.svg";
 import Image from "next/image";
 import IMG10 from "@/assets/images/15.jpg";
+import Slider from "@/components/Slider";
+import Button from "@/components/ui/Button/Button";
+
+type Slide = {
+  src: string;
+  title: string;
+  subtitle?: string;
+  buttonText: string;
+  buttonLink: string;
+};
+
 export default function Home() {
+  const slides: Slide[] = [
+    {
+      src: "/images/i-1.jpg",
+      title: "Simplicity and precision",
+      subtitle: "Discounts up to 30%",
+      buttonText: "Buy now",
+      buttonLink: "/products",
+    },
+    {
+      src: "/images/i-2.jpg",
+      title: "Stay on trend",
+      buttonText: "Watch",
+      buttonLink: "/products",
+    },
+    {
+      src: "/images/i-3.jpg",
+      title: "Eternal classics",
+      buttonText: "To learn more",
+      buttonLink: "/about",
+    },
+  ];
+
+  // const handlerShop = (
+  //   e?:
+  //     | React.FormEvent<HTMLFormElement>
+  //     | React.MouseEvent<HTMLButtonElement, MouseEvent>
+  // ) => {
+  //   e?.preventDefault();
+  //   console.log("<====e.target.value====>", e.target.value);
+  // };
+
   return (
-    <div className=" min-h-screen  font-[family-name:var(--font-geist-sans)]">
+    <div className="">
       <div>
-        <HomeImg className="inline-block mr-2 w-8 h-8"></HomeImg>
-        <h1 className="text-3xl font-semibold italic text-gray-800 text-center">
-          Home
-        </h1>
-        <div className="w-1/4">
-          <Image
-            alt="IMG10"
-            src={IMG10}
-            sizes="100%"
-            style={{
-              width: "100%",
-              height: "auto",
-              objectFit: "cover",
-              aspectRatio: "1.5/1",
-            }}
-          />
-        </div>
-        <div className="home-img relative aspect-[1.5/1] w-1/2 h-auto">
-          <Image
-            className="object-contain absolute"
-            src="https://res.cloudinary.com/dke0nudcz/image/upload/v1735521101/urvu7z8wv1m3rxfg0sjk.jpg"
-            alt="Picture of the author"
-            fill
-          />
-        </div>
+        {/* <HomeImg className="inline-block mr-2 w-8 h-8"></HomeImg> */}
+        <Slider slides={slides} />
       </div>
     </div>
   );
