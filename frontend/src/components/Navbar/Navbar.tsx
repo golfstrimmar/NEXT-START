@@ -72,11 +72,9 @@ const Navbar: React.FC = () => {
                 {user && user.userName ? (
                   <div className="text-white hover:text-gray-300">
                     <Link
-                      href="/pages/profile"
+                      href="/profile"
                       className={` hover:text-gray-300 transition-colors duration-200 ${
-                        activeLink === "/pages/profile"
-                          ? "text-blue"
-                          : "text-white "
+                        activeLink === "/profile" ? "text-blue" : "text-white "
                       }`}
                       onClick={() => {
                         setIsOpen(false);
@@ -94,11 +92,9 @@ const Navbar: React.FC = () => {
             <>
               <li>
                 <Link
-                  href="/pages/registerPage"
+                  href="/registerPage"
                   className={` hover:text-gray-300 transition-colors duration-200 ${
-                    activeLink === "/pages/registerPage"
-                      ? "text-blue"
-                      : "text-white "
+                    activeLink === "/registerPage" ? "text-blue" : "text-white "
                   }`}
                   onClick={() => {
                     setIsOpen(false);
@@ -109,11 +105,9 @@ const Navbar: React.FC = () => {
               </li>
               <li>
                 <Link
-                  href="/pages/loginPage"
+                  href="/loginPage"
                   className={` hover:text-gray-300 transition-colors duration-200 ${
-                    activeLink === "/pages/loginPage"
-                      ? "text-blue"
-                      : "text-white "
+                    activeLink === "/loginPage" ? "text-blue" : "text-white "
                   }`}
                   onClick={() => {
                     setIsOpen(false);
@@ -136,9 +130,9 @@ const Navbar: React.FC = () => {
           )}
           <li>
             <Link
-              href="/pages/ui"
+              href="/ui"
               className={` hover:text-gray-300 transition-colors duration-200 ${
-                activeLink === "/pages/ui" ? "text-blue" : "text-white "
+                activeLink === "/ui" ? "text-blue" : "text-white "
               }`}
               onClick={() => {
                 setIsOpen(false);
