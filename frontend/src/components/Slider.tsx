@@ -1,10 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Button from "./ui/Button/Button";
 import { useRouter } from "next/navigation";
 
-// Тип для слайдов (можно расширить, добавив title, subtitle и т.д.)
+// Тип для слайдов
 type Slide = {
   src: string;
   title: string;
@@ -14,27 +14,82 @@ type Slide = {
 };
 
 const Slider = ({ slides }: { slides: Slide[] }) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(slides.length); // Начинаем с середины
+  const [isReady, setIsReady] = useState(false); // Флаг готовности
   const router = useRouter();
-  // Автопроигрывание
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
-    return () => clearInterval(timer); // Очистка при размонтировании
-  }, []);
+  const sliderRef = useRef<HTMLDivElement>(null);
 
-  // Переключение слайдов
+  // Создаём длинную ленту слайдов (3 набора)
+  const extendedSlides = [...slides, ...slides, ...slides];
+
+  // Устанавливаем начальную позицию после первого рендера
+  useEffect(() => {
+    if (sliderRef.current) {
+      sliderRef.current.style.transition = "none";
+      sliderRef.current.style.transform = `translateX(-${
+        slides.length * 100
+      }%)`;
+      setTimeout(() => {
+        if (sliderRef.current) {
+          sliderRef.current.style.transition = "transform 500ms ease-in-out";
+        }
+        setIsReady(true); // Готово к анимации
+      }, 0);
+    }
+  }, [slides.length]);
+
+  // useEffect(() => {
+  //   if (!isReady) return; // Ждём готовности
+  //   const timer = setInterval(() => {
+  //     setCurrentSlide((prev) => prev + 1);
+  //   }, 5000);
+  //   return () => clearInterval(timer);
+  // }, [isReady]);
+
+  // Обработка перехода и сброса
+  const handleTransitionEnd = () => {
+    if (currentSlide >= slides.length * 2) {
+      // Конец второго набора
+      if (sliderRef.current) {
+        sliderRef.current.style.transition = "none";
+        setCurrentSlide(slides.length); // Сбрасываем в середину
+        sliderRef.current.style.transform = `translateX(-${
+          slides.length * 100
+        }%)`;
+        setTimeout(() => {
+          if (sliderRef.current) {
+            sliderRef.current.style.transition = "transform 500ms ease-in-out";
+          }
+        }, 0);
+      }
+    } else if (currentSlide < slides.length) {
+      // Начало первого набора
+      if (sliderRef.current) {
+        sliderRef.current.style.transition = "none";
+        setCurrentSlide(slides.length * 2 - 1); // Конец второго набора
+        sliderRef.current.style.transform = `translateX(-${
+          (slides.length * 2 - 1) * 100
+        }%)`;
+        setTimeout(() => {
+          if (sliderRef.current) {
+            sliderRef.current.style.transition = "transform 500ms ease-in-out";
+          }
+        }, 0);
+      }
+    }
+  };
+
+  // Переключение слайдов вручную
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    if (isReady) setCurrentSlide((prev) => prev + 1);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    if (isReady) setCurrentSlide((prev) => prev - 1);
   };
 
   const goToSlide = (index: number) => {
-    setCurrentSlide(index);
+    if (isReady) setCurrentSlide(slides.length + index);
   };
 
   const handlerShop = (
@@ -44,7 +99,7 @@ const Slider = ({ slides }: { slides: Slide[] }) => {
   ) => {
     if (e && e.preventDefault) {
       e.preventDefault();
-      const buttonValue = (e.target as HTMLButtonElement).value; // string | undefined
+      const buttonValue = (e.target as HTMLButtonElement).value;
       console.log("<====buttonValue====>", buttonValue);
       if (buttonValue) {
         router.push(buttonValue);
@@ -53,58 +108,61 @@ const Slider = ({ slides }: { slides: Slide[] }) => {
   };
 
   return (
-    <div className="relative mx-auto w-[100vw] h-[300px] md:h-[500px] overflow-hidden">
-      {/* Слайды */}
-      {slides.map((slide, index) => (
-        <div
-          key={index}
-          className={` absolute top-0 left-0 w-full h-full transition-opacity duration-500 ${
-            currentSlide === index ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <div className="mx-auto max-w-7xl py-[15%] px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl md:text-4xl font-bold text-white relative z-10">
-              {slide.title}
-            </h2>
-            <p className="text-lg text-[#edbafd] mt-2 relative z-10">
-              {slide.subtitle}
-            </p>
-            <div className="relative z-10 mt-8">
-              <Button
-                buttonValue={slide.buttonLink}
-                buttonText={slide.buttonText}
-                onClick={(e) => {
-                  handlerShop(e);
-                }}
-              >
-                {slide.buttonText}
-              </Button>
-            </div>
-          </div>
-          <Image
-            src={slide.src}
-            alt={`Slide ${index + 1}`}
-            fill
-            className="object-cover"
-            sizes="100vw"
-          />
-        </div>
-      ))}
-
-      {/* <button
-        onClick={prevSlide}
-        className="absolute top-1/2 left-4 transform -translate-y-1/2 p-2 bg-gray-800/70 text-white rounded-full hover:bg-gray-900 hover:scale-110 transition"
+    <div className="relative mx-auto max-w-[100vw] h-[300px] md:h-[500px] overflow-hidden">
+      {/* Контейнер для слайдов */}
+      <div
+        ref={sliderRef}
+        className="flex w-full h-full"
+        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        onTransitionEnd={handleTransitionEnd}
       >
-        &#10094; 
-      </button>  */}
+        {extendedSlides.map((slide, index) => (
+          <div key={index} className="relative w-full h-full flex-shrink-0">
+            <div className="mx-auto max-w-7xl py-[15%] px-4 sm:px-6 lg:px-8">
+              <h2 className="text-2xl md:text-4xl font-bold text-white relative z-10">
+                {slide.title}
+              </h2>
+              <p className="text-lg text-[#edbafd] mt-2 relative z-10">
+                {slide.subtitle}
+              </p>
+              <div className="relative z-10 mt-8">
+                <Button
+                  buttonValue={slide.buttonLink}
+                  buttonText={slide.buttonText}
+                  onClick={(e) => handlerShop(e)}
+                >
+                  {slide.buttonText}
+                </Button>
+              </div>
+            </div>
+            <Image
+              src={slide.src}
+              alt={`Slide ${index + 1}`}
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority // Предзагрузка всех слайдов
+            />
+          </div>
+        ))}
+      </div>
 
-      {/* Стрелка вправо 
+      {/* Стрелка влево */}
+      <button
+        onClick={prevSlide}
+        className="absolute top-1/2 left-4 transform -translate-y-1/2  w-[30px] h-[30px] bg-gray-800/70 text-white rounded-full hover:bg-gray-900  transition cursor-pointer text-[15px] grid place-items-center
+"
+      >
+        ❮
+      </button>
+
+      {/* Стрелка вправо */}
       <button
         onClick={nextSlide}
-        className="absolute top-1/2 right-4 transform -translate-y-1/2 p-2 bg-gray-800/70 text-white rounded-full hover:bg-gray-900 hover:scale-110 transition"
+        className="absolute top-1/2 right-4 transform -translate-y-1/2   w-[30px] h-[30px]  bg-gray-800/70 text-white rounded-full hover:bg-gray-900  transition cursor-pointer text-[15px] grid place-items-center"
       >
-        &#10095;
-     </button>*/}
+        ❯
+      </button>
 
       {/* Точки */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
@@ -113,7 +171,9 @@ const Slider = ({ slides }: { slides: Slide[] }) => {
             key={index}
             onClick={() => goToSlide(index)}
             className={`w-3 h-3 rounded-full cursor-pointer transition-colors ${
-              currentSlide === index ? "bg-white" : "bg-gray-400"
+              currentSlide % slides.length === index
+                ? "bg-white"
+                : "bg-gray-400"
             } hover:bg-gray-200`}
           />
         ))}

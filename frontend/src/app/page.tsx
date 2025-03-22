@@ -5,7 +5,7 @@ import Image from "next/image";
 import IMG10 from "@/assets/images/15.jpg";
 import Slider from "@/components/Slider";
 import Button from "@/components/ui/Button/Button";
-
+import SwiperSlider from "@/components/SwiperSlider";
 type Slide = {
   src: string;
   title: string;
@@ -17,7 +17,7 @@ type Slide = {
 export default function Home() {
   const slides: Slide[] = [
     {
-      src: "/images/i-1.jpg",
+      src: "/images/i-3.jpg",
       title: "Simplicity and precision",
       subtitle: "Discounts up to 30%",
       buttonText: "Buy now",
@@ -30,7 +30,7 @@ export default function Home() {
       buttonLink: "/products",
     },
     {
-      src: "/images/i-3.jpg",
+      src: "/images/i-1.jpg",
       title: "Eternal classics",
       buttonText: "To learn more",
       buttonLink: "/about",
@@ -50,7 +50,8 @@ export default function Home() {
     <div className="">
       <div>
         {/* <HomeImg className="inline-block mr-2 w-8 h-8"></HomeImg> */}
-        <Slider slides={slides} />
+        {/* <Slider slides={slides} /> */}
+        <SwiperSlider slides={slides} />
       </div>
     </div>
   );
