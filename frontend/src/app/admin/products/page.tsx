@@ -10,7 +10,7 @@ interface Product {
   color?: string;
 }
 
-const fetchProducts = async () => {
+const fetchProducts = async (): Promise<Product[]> => {
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/products`,
@@ -18,11 +18,11 @@ const fetchProducts = async () => {
         cache: "no-store",
       }
     );
-    if (!response.ok) throw new Error("Error");
+    if (!response.ok) throw new Error("Failed to fetch products");
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching products:", err);
     return [];
   }
 };
@@ -33,7 +33,7 @@ export default async function ProductsPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Products</h1>
-      <ProductList products={products} />
+      <ProductList initialProducts={products} />
     </div>
   );
 }
