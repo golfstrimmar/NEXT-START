@@ -148,8 +148,10 @@ const navigation = {
     },
   ],
   pages: [
+    { name: "Shop", href: "/products" },
     { name: "Company", href: "#" },
     { name: "Stores", href: "#" },
+    { name: "Admin", href: "/admin" },
   ],
 };
 

@@ -1,8 +1,8 @@
 import React from "react";
 import "./ModalMessage.scss";
 interface ModalMessageProps {
-  message: string; // Сообщение, которое будет отображаться
-  open: boolean; // Флаг для управления видимостью модального окна
+  message: string;
+  open: boolean;
 }
 const ModalMessage: React.FC<ModalMessageProps> = ({ message, open }) => {
   return (

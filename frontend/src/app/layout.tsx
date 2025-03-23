@@ -31,16 +31,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <GoogleOAuthProvider clientId={googleClientId}>
-          <ClientWrapper>
-            <Navbar />
-            <main className=" pb-[100px] ">
-              {/* <div className="container mx-auto p-2 md:p-0">{children}</div>   */}
-              {children}
-            </main>
-            <Footer />
-          </ClientWrapper>
-        </GoogleOAuthProvider>
+        {/* <GoogleOAuthProvider clientId={googleClientId}> */}
+        {/* <ClientWrapper> */}
+        <Navbar />
+        <main className=" pb-[100px] ">
+          {/* <div className="container mx-auto p-2 md:p-0">{children}</div>   */}
+          {children}
+        </main>
+        <Footer />
+        {/* </ClientWrapper> */}
+        {/* </GoogleOAuthProvider> */}
       </body>
     </html>
   );

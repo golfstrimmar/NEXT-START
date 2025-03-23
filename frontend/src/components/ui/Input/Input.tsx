@@ -15,6 +15,7 @@ interface InputProps {
     | "search"
     | "time";
   data: string;
+  name: string;
   value: string;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -29,6 +30,7 @@ interface InputProps {
 const Input: React.FC<InputProps> = ({
   typeInput,
   data,
+  name,
   value,
   onChange,
   inputRef,
@@ -41,7 +43,7 @@ const Input: React.FC<InputProps> = ({
         <textarea
           rows="5"
           id={data}
-          name={data}
+          name={name}
           value={value}
           ref={inputRef as RefObject<HTMLTextAreaElement>}
           onChange={onChange}
@@ -55,7 +57,7 @@ const Input: React.FC<InputProps> = ({
         <input
           id={data}
           ref={inputRef as RefObject<HTMLInputElement>}
-          name={data}
+          name={name}
           type={typeInput}
           value={value}
           onChange={onChange}
