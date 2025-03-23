@@ -6,7 +6,7 @@ const Sidebar: React.FC = () => {
   const router = useRouter();
 
   return (
-    <div className="fixed inset-y-0 left-0 w-64 bg-gray-800 text-white flex flex-col">
+    <div className="  w-64 bg-gray-800 text-white flex flex-col ">
       <div className="p-4 border-b border-gray-700">
         <h2 className="text-xl font-bold">Admin Panel</h2>
       </div>

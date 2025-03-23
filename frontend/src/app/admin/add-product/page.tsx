@@ -156,7 +156,7 @@ const AddProductPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <ModalMessage message={successMessage} open={openModalMessage} />
-      <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+      <div className="mx-auto max-w-2xl px-4  sm:px-6  lg:max-w-7xl lg:px-8">
         <h1 className="text-2xl font-bold mb-6">Add New Product</h1>
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           <Input

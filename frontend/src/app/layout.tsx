@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar/Navbar";
-import Footer from "@/components/Footer";
+import FooterConditional from "@/components/FooterConditional";
 import ClientWrapper from "@/components/ClientWrapper";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
@@ -34,11 +34,11 @@ export default function RootLayout({
         {/* <GoogleOAuthProvider clientId={googleClientId}> */}
         {/* <ClientWrapper> */}
         <Navbar />
-        <main className=" pb-[100px] ">
+        <main className=" ">
           {/* <div className="container mx-auto p-2 md:p-0">{children}</div>   */}
           {children}
         </main>
-        <Footer />
+        <FooterConditional />
         {/* </ClientWrapper> */}
         {/* </GoogleOAuthProvider> */}
       </body>
