@@ -1,8 +1,9 @@
 "use client";
-import React, { useState, useMemo } from "react";
-
+import React, { useState, useMemo, useEffect } from "react";
+import Pagination from "@/reserv/Pagination/Pagination";
+import ModalProductEdit from "@/components/admin/ModalProductEdit";
 interface Product {
-  id: string;
+  _id: string;
   name: string;
   price: string;
   imageSrc: string;
@@ -17,33 +18,101 @@ interface ProductListProps {
 const ProductList: React.FC<ProductListProps> = ({ initialProducts }) => {
   const [nameFilter, setNameFilter] = useState<string>("");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const itemsPerPage = 2;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-  // Фильтрация продуктов на клиенте
   const filteredProducts = useMemo(() => {
-    return initialProducts.filter((product) => {
+    return products.filter((product) => {
       const nameMatch = product.name
         .toLowerCase()
         .includes(nameFilter.toLowerCase());
-      const priceNum = parseInt(product.price.replace("$", "")); // Предполагаем формат "$50"
+      const priceNum = parseInt(product.price.replace("$", ""));
       const priceMatch = priceNum >= priceRange[0] && priceNum <= priceRange[1];
       return nameMatch && priceMatch;
     });
-  }, [initialProducts, nameFilter, priceRange]);
+  }, [products, nameFilter, priceRange]);
+
+  const currentProducts = useMemo(() => {
+    return filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+  }, [filteredProducts, indexOfFirstItem, indexOfLastItem]);
+
+  useEffect(() => {
+    setProducts(initialProducts);
+  }, [initialProducts]);
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     const isMin = e.target.name === "minPrice";
-
     setPriceRange((prev) => {
       const [min, max] = prev;
-      if (isMin) {
-        // Если новая минимальная цена больше текущей максимальной, увеличиваем максимальную
-        return [value, Math.max(value, max)];
-      } else {
-        // Если новая максимальная цена меньше текущей минимальной, уменьшаем минимальную
-        return [Math.min(min, value), value];
-      }
+      if (isMin) return [value, Math.max(value, max)];
+      return [Math.min(min, value), value];
     });
+    setCurrentPage(1);
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNameFilter(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleEdit = (product: Product) => {
+    setEditingProduct({ ...product });
+  };
+
+  const handleSaveEdit = async (updatedProduct: Product) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/products`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: updatedProduct._id, ...updatedProduct }),
+        }
+      );
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          `Failed to update product: ${errorData.error || response.statusText}`
+        );
+      }
+      setProducts((prev) =>
+        prev.map((p) => (p._id === updatedProduct._id ? updatedProduct : p))
+      );
+      setEditingProduct(null); // Закрываем модалку
+    } catch (error) {
+      console.error("Error updating product:", error);
+      alert(error.message);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this product?")) {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/products?id=${id}`,
+          {
+            method: "DELETE",
+          }
+        );
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            `Failed to delete product: ${
+              errorData.error || response.statusText
+            }`
+          );
+        }
+        setProducts((prev) => prev.filter((p) => p._id !== id));
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        alert(error.message);
+      }
+    }
   };
 
   if (
@@ -57,8 +126,7 @@ const ProductList: React.FC<ProductListProps> = ({ initialProducts }) => {
 
   return (
     <div>
-      {/* Фильтры */}
-      <div className=" space-y-4">
+      <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700">
             Filter by name
@@ -67,7 +135,7 @@ const ProductList: React.FC<ProductListProps> = ({ initialProducts }) => {
             type="text"
             placeholder="Enter part of the name"
             value={nameFilter}
-            onChange={(e) => setNameFilter(e.target.value)}
+            onChange={handleNameChange}
             className="mt-1 px-4 py-2 border rounded-md w-full"
           />
         </div>
@@ -98,8 +166,7 @@ const ProductList: React.FC<ProductListProps> = ({ initialProducts }) => {
         </div>
       </div>
 
-      {/* Таблица */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow">
+      <div className="overflow-x-auto bg-white rounded-lg shadow mt-6">
         <table className="min-w-full">
           <thead className="bg-gray-50">
             <tr>
@@ -115,10 +182,13 @@ const ProductList: React.FC<ProductListProps> = ({ initialProducts }) => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Color
               </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {filteredProducts.map((product) => (
+            {currentProducts.map((product) => (
               <tr key={product._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
                   <img
@@ -132,11 +202,42 @@ const ProductList: React.FC<ProductListProps> = ({ initialProducts }) => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   {product.color || "N/A"}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <button
+                    onClick={() => handleEdit(product)}
+                    className="text-indigo-600 hover:text-indigo-800 mr-4"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(product._id)}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {editingProduct && (
+        <ModalProductEdit
+          product={editingProduct}
+          onSave={handleSaveEdit}
+          onCancel={() => setEditingProduct(null)}
+        />
+      )}
+
+      {filteredProducts.length > 0 && (
+        <Pagination
+          items={filteredProducts}
+          itemsPerPage={itemsPerPage}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
+      )}
     </div>
   );
 };

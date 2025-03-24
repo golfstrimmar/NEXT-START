@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import ProductCard from "@/components/ProductCard";
+import Pagination from "@/reserv/Pagination/Pagination";
 
 interface Product {
   _id: string;
@@ -17,6 +18,11 @@ const ProductsList: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 3;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const [currentProducts, setCurrentProducts] = useState<Product[]>([]);
 
   const fetchProducts = async () => {
     try {
@@ -37,6 +43,10 @@ const ProductsList: React.FC = () => {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    setCurrentProducts(products?.slice(indexOfFirstItem, indexOfLastItem));
+  }, [products, indexOfFirstItem, indexOfLastItem]);
+
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
@@ -49,10 +59,18 @@ const ProductsList: React.FC = () => {
         <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
           {!loading &&
             !error &&
-            products.map((product) => (
+            currentProducts.map((product) => (
               <ProductCard key={product._id} product={product} />
             ))}
         </div>
+        {products.length > 0 && (
+          <Pagination
+            items={products}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
+        )}
       </div>
     </div>
   );
