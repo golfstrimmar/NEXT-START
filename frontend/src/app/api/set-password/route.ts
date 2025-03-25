@@ -17,32 +17,23 @@ export async function POST(req: NextRequest) {
 
     await client.connect();
     const usersCollection = db.collection("users");
-    const user = await usersCollection.findOne({ email });
 
-    if (!user || !user.password) {
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
-    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const result = await usersCollection.updateOne(
+      { email },
+      { $set: { password: hashedPassword, isPasswordSet: true } }
+    );
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
+    if (result.modifiedCount === 0) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     return NextResponse.json(
-      {
-        message: "Login successful",
-        user: { email: user.email, name: user.name },
-      },
+      { message: "Password set successfully" },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error in login:", error);
+    console.error("Error setting password:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
