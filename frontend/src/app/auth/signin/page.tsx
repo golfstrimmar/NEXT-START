@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function SignIn() {
@@ -11,16 +10,21 @@ export default function SignIn() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
-
-    if (result?.error) {
-      setError(result.error);
-    } else {
-      router.push("/products"); // Перенаправляем на страницу продуктов
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to login");
+      }
+      const data = await response.json();
+      console.log("Login successful:", data);
+      router.push("/products");
+    } catch (err) {
+      setError((err as Error).message);
     }
   };
 
@@ -39,6 +43,7 @@ export default function SignIn() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 px-4 py-2 border rounded-md w-full"
+              required
             />
           </div>
           <div>
@@ -50,11 +55,12 @@ export default function SignIn() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 px-4 py-2 border rounded-md w-full"
+              required
             />
           </div>
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md"
+            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
             Sign In
           </button>

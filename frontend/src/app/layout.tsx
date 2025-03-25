@@ -4,7 +4,10 @@ import "./globals.css";
 import Navbar from "@/components/Navbar/Navbar";
 import FooterConditional from "@/components/FooterConditional";
 import ClientWrapper from "@/components/ClientWrapper";
-import { GoogleOAuthProvider } from "@react-oauth/google";
+// import { GoogleOAuthProvider } from "@react-oauth/google";
+
+// import ClientSessionProvider from "@/components/ClientSessionProvider";
+
 const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,9 +36,11 @@ export default function RootLayout({
       >
         {/* <GoogleOAuthProvider clientId={googleClientId}> */}
         {/* <ClientWrapper> */}
+
         <Navbar />
         <main className=" ">
           {/* <div className="container mx-auto p-2 md:p-0">{children}</div>   */}
+          {/* <ClientSessionProvider></ClientSessionProvider> */}
           {children}
         </main>
         <FooterConditional />

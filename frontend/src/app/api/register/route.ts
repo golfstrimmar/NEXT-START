@@ -1,42 +1,55 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcrypt";
 import dbConnect from "@/lib/db";
-import User from "@/models/User";
-import bcrypt from "bcryptjs";
+import User, { IUser } from "@/models/User";
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
     await dbConnect();
-    const { email, password } = await request.json();
 
-    // Проверяем, есть ли уже пользователи
-    const userCount = await User.countDocuments();
-    const isFirstUser = userCount === 0;
+    const {
+      username,
+      email,
+      password,
+    }: { username: string; email: string; password: string } = await req.json();
 
-    // Проверяем, существует ли пользователь
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    // Валидация входных данных
+    if (!username || !email || !password) {
       return NextResponse.json(
-        { error: "User already exists" },
+        { error: "All fields are required" },
         { status: 400 }
       );
     }
 
+    // Проверка существования пользователя
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "User with this email or username already exists" },
+        { status: 400 }
+      );
+    }
+
+    // Хеширование пароля
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({
+
+    // Создание нового пользователя
+    const user: IUser = new User({
+      username,
       email,
       password: hashedPassword,
-      role: isFirstUser ? "admin" : "user", // Первый пользователь — админ
     });
+
     await user.save();
 
     return NextResponse.json(
-      { message: "User registered successfully" },
+      { message: "Registration successful" },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error registering user:", error);
+    console.error("Registration error:", error);
     return NextResponse.json(
-      { error: "Failed to register user" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
