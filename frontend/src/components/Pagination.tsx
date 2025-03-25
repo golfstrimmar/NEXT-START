@@ -15,15 +15,6 @@ const Pagination = <T,>({
   currentPage,
   setCurrentPage,
 }: PaginationProps<T>) => {
-  useEffect(() => {
-    items.map((post) => {
-      console.log(
-        "===== items pagination=====",
-        new Date(post.createdAt).toLocaleString()
-      );
-    });
-  }, [items]);
-
   const totalPages = Math.ceil(items.length / itemsPerPage);
 
   const prevPage = () => {

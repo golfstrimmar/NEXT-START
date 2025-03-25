@@ -1,6 +1,8 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -19,12 +21,31 @@ export default function SignIn() {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to login");
+      } else {
+        const data = await response.json();
+        console.log("Login successful:", data);
       }
-      const data = await response.json();
-      console.log("Login successful:", data);
       router.push("/products");
     } catch (err) {
       setError((err as Error).message);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      console.log("Trying to sign in with Google...");
+      const result = await signIn("google");
+      console.log("Google sign-in result:", result);
+      if (result?.error) {
+        setError(result.error);
+        console.error("Google sign-in error:", result.error);
+      } else {
+        console.log("Sign in successful, redirecting...");
+        router.push("/products");
+      }
+    } catch (err) {
+      setError((err as Error).message);
+      console.error("Unexpected error during Google sign-in:", err);
     }
   };
 
@@ -65,6 +86,14 @@ export default function SignIn() {
             Sign In
           </button>
         </form>
+        <div className="mt-4">
+          <button
+            onClick={handleGoogleSignIn}
+            className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+          >
+            Sign In with Google
+          </button>
+        </div>
       </div>
     </div>
   );

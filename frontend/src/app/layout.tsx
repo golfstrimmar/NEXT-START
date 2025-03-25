@@ -3,10 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar/Navbar";
 import FooterConditional from "@/components/FooterConditional";
-import ClientWrapper from "@/components/ClientWrapper";
-// import { GoogleOAuthProvider } from "@react-oauth/google";
 
-// import ClientSessionProvider from "@/components/ClientSessionProvider";
+import AuthProvider from "@/components/SessionProvider";
 
 const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 const geistSans = Geist({
@@ -34,18 +32,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* <GoogleOAuthProvider clientId={googleClientId}> */}
-        {/* <ClientWrapper> */}
-
-        <Navbar />
-        <main className=" ">
-          {/* <div className="container mx-auto p-2 md:p-0">{children}</div>   */}
-          {/* <ClientSessionProvider></ClientSessionProvider> */}
-          {children}
-        </main>
+        <Navbar />{" "}
+        <AuthProvider>
+          <main className=" ">{children}</main>
+        </AuthProvider>
         <FooterConditional />
-        {/* </ClientWrapper> */}
-        {/* </GoogleOAuthProvider> */}
       </body>
     </html>
   );

@@ -71,7 +71,7 @@ app.get("/auth/google/callback", async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "10h" }
     );
-    res.redirect(`http://localhost:3001/dashboard?token=${jwtToken}`);
+    res.redirect(`http://localhost:3000/dashboard?token=${jwtToken}`);
   } catch (error) {
     console.error("Google callback error:", error);
     res.status(500).send("Authentication failed");
