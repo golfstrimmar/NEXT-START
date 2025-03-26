@@ -18,6 +18,7 @@ export default function SignIn() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to login");
@@ -34,6 +35,7 @@ export default function SignIn() {
   const handleGoogleSignIn = async () => {
     try {
       const result = await signIn("google", { redirect: false });
+
       if (result?.error) {
         setError(result.error);
       } else {
@@ -77,7 +79,7 @@ export default function SignIn() {
           </div>
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700  cursor-pointer"
           >
             Sign In
           </button>
@@ -85,7 +87,7 @@ export default function SignIn() {
         <div className="mt-4">
           <button
             onClick={handleGoogleSignIn}
-            className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700  cursor-pointer"
           >
             Sign In with Google
           </button>

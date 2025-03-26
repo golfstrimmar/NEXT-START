@@ -23,43 +23,40 @@ export const authConfig: AuthOptions = {
     signIn: "/auth/signin",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       try {
         const usersCollection = db.collection("users");
         const existingUser = await usersCollection.findOne({
           email: user.email,
         });
+
         if (!existingUser) {
           await usersCollection.insertOne({
             email: user.email,
             name: user.name,
             image: user.image,
             googleId: account.providerAccountId,
-            isPasswordSet: false, // Флаг, что пароль не задан
+            isPasswordSet: false,
             createdAt: new Date(),
           });
           return "/auth/set-password"; // Перенаправляем на страницу задания пароля
         }
-        return true; // Разрешаем вход для существующих пользователей
+        return true;
       } catch (error) {
         console.error("Error in signIn callback:", error);
         return false;
       }
     },
     async redirect({ url, baseUrl }) {
-      // Если URL — страница задания пароля, перенаправляем туда
-      if (url === "/auth/set-password") {
-        return baseUrl + url;
-      }
-      // Иначе — на /products
-      return baseUrl + "/products";
+      return url === "/auth/set-password"
+        ? `${baseUrl}${url}`
+        : `${baseUrl}/products`;
     },
   },
   debug: true,
 };
 
 const handler = NextAuth(authConfig);
-
 export { handler as GET, handler as POST };
 
 process.on("SIGINT", async () => {

@@ -8,6 +8,10 @@ const db = client.db("shop");
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
+
+    console.log("Received request to set password for:", email);
+    console.log("Password before hashing:", password);
+
     if (!email || !password) {
       return NextResponse.json(
         { error: "Email and password are required" },
@@ -19,15 +23,21 @@ export async function POST(req: NextRequest) {
     const usersCollection = db.collection("users");
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await usersCollection.updateOne(
+
+    const updatedUser = await usersCollection.findOneAndUpdate(
       { email },
-      { $set: { password: hashedPassword, isPasswordSet: true } }
+      { $set: { password: hashedPassword, isPasswordSet: true } },
+      { returnDocument: "after" } // Покажет обновленный документ
     );
 
-    if (result.modifiedCount === 0) {
+    console.log("Updated user:", updatedUser);
+
+    if (!updatedUser) {
+      console.error("Password update failed, user not found.");
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    console.log("Password successfully updated!");
     return NextResponse.json(
       { message: "Password set successfully" },
       { status: 200 }
@@ -38,7 +48,5 @@ export async function POST(req: NextRequest) {
       { error: "Internal Server Error" },
       { status: 500 }
     );
-  } finally {
-    await client.close();
   }
 }

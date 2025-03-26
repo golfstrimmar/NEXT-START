@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 export default function SetPassword() {
   const [password, setPassword] = useState("");
@@ -12,10 +12,17 @@ export default function SetPassword() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    console.log("<==== session ====>", session);
     if (!session?.user?.email) {
       setError("User not authenticated");
       return;
     }
+
+    console.log("Sending request to set password:", {
+      email: session.user.email,
+      password,
+    });
 
     try {
       const response = await fetch("/api/set-password", {
@@ -24,9 +31,12 @@ export default function SetPassword() {
         body: JSON.stringify({ email: session.user.email, password }),
       });
 
+      console.log("Response status:", response.status);
+      const responseData = await response.json();
+      console.log("Response data:", responseData);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to set password");
+        throw new Error(responseData.error || "Failed to set password");
       }
 
       router.push("/products"); // Успешно, перенаправляем
@@ -56,7 +66,7 @@ export default function SetPassword() {
           </div>
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 cursor-pointer"
           >
             Set Password
           </button>
