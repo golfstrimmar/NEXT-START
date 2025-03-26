@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Fragment, useState } from "react";
@@ -22,6 +23,7 @@ import {
   ShoppingBagIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { useSession, signOut } from "next-auth/react";
 
 const navigation = {
   categories: [
@@ -155,8 +157,11 @@ const navigation = {
   ],
 };
 
-export default function Example() {
+export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const { data: session, status } = useSession(); // Получаем данные сессии
+
+  if (status === "loading") return null; // Ждём загрузки сессии
 
   return (
     <div className="bg-white">
@@ -273,22 +278,39 @@ export default function Example() {
             </div>
 
             <div className="space-y-6 border-t border-gray-200 px-4 py-6">
-              <div className="flow-root">
-                <a
-                  href="#"
-                  className="-m-2 block p-2 font-medium text-gray-900"
-                >
-                  Sign in
-                </a>
-              </div>
-              <div className="flow-root">
-                <a
-                  href="#"
-                  className="-m-2 block p-2 font-medium text-gray-900"
-                >
-                  Create account
-                </a>
-              </div>
+              {/* Мобильное меню */}
+              {session ? (
+                <div className="flow-root">
+                  <span className="-m-2 block p-2 text-gray-900">
+                    Привет, {session.user?.name}
+                  </span>
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                    className="-m-2 block p-2 font-medium text-gray-900 hover:text-gray-700"
+                  >
+                    Выйти
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flow-root">
+                    <Link
+                      href="/auth/signin"
+                      className="-m-2 block p-2 font-medium text-gray-900"
+                    >
+                      Sign in
+                    </Link>
+                  </div>
+                  <div className="flow-root">
+                    <Link
+                      href="/auth/signup"
+                      className="-m-2 block p-2 font-medium text-gray-900"
+                    >
+                      Create account
+                    </Link>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="border-t border-gray-200 px-4 py-6">
@@ -331,21 +353,13 @@ export default function Example() {
 
               {/* Logo */}
               <div className="ml-4 flex lg:ml-0">
-                {/* <a href="#">
-                  <span className="sr-only">Your Company</span>
-                  <img
-                    alt=""
-                    src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-                    className="h-8 w-auto"
-                  />
-                </a> */}
                 <Link href={`/`} className="">
                   <Image
                     src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
                     width={40}
                     height={40}
                     alt="tailwindcss"
-                  ></Image>
+                  />
                 </Link>
               </div>
 
@@ -364,12 +378,10 @@ export default function Example() {
                         transition
                         className="absolute inset-x-0 top-full text-sm text-gray-500 transition data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
                       >
-                        {/* Presentational element used to render the bottom shadow, if we put the shadow on the actual panel it pokes out the top, so we use this shorter element to hide the top of the shadow */}
                         <div
                           aria-hidden="true"
                           className="absolute inset-0 top-1/2 bg-white shadow-sm"
                         />
-
                         <div className="relative bg-white">
                           <div className="mx-auto max-w-7xl px-8">
                             <div className="grid grid-cols-2 gap-x-8 gap-y-10 py-16">
@@ -449,32 +461,39 @@ export default function Example() {
 
               <div className="ml-auto flex items-center">
                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                  {/* <a
-                    href="#"
-                    className="text-sm font-medium text-gray-700 hover:text-gray-800"
-                  >
-                    Sign in
-                  </a> */}
-
-                  {/* <a
-                    href="#"
-                    className="text-sm font-medium text-gray-700 hover:text-gray-800"
-                  >
-                    Create account
-                  </a> */}
-                  <Link
-                    href="/auth/signin"
-                    className="text-sm font-medium text-gray-700 hover:text-gray-800"
-                  >
-                    Sign in
-                  </Link>
-                  <span aria-hidden="true" className="h-6 w-px bg-gray-200" />
-                  <Link
-                    href="/auth/signup"
-                    className="text-sm font-medium text-gray-700 hover:text-gray-800"
-                  >
-                    Create account
-                  </Link>
+                  {/* Десктопное меню */}
+                  {session ? (
+                    <>
+                      <span className="text-sm font-medium text-gray-700">
+                        Привет, {session.user?.name}
+                      </span>
+                      <button
+                        onClick={() => signOut({ callbackUrl: "/" })}
+                        className="text-sm font-medium text-gray-700 hover:text-gray-800"
+                      >
+                        Выйти
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href="/auth/signin"
+                        className="text-sm font-medium text-gray-700 hover:text-gray-800"
+                      >
+                        Sign in
+                      </Link>
+                      <span
+                        aria-hidden="true"
+                        className="h-6 w-px bg-gray-200"
+                      />
+                      <Link
+                        href="/auth/signup"
+                        className="text-sm font-medium text-gray-700 hover:text-gray-800"
+                      >
+                        Create account
+                      </Link>
+                    </>
+                  )}
                 </div>
 
                 <div className="hidden lg:ml-8 lg:flex">
