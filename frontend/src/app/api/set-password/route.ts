@@ -21,9 +21,7 @@ export async function POST(req: NextRequest) {
 
     await client.connect();
     const usersCollection = db.collection("users");
-
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const updatedUser = await usersCollection.findOneAndUpdate(
       { email },
       { $set: { password: hashedPassword, isPasswordSet: true } },
