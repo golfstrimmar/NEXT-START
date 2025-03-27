@@ -24,7 +24,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useSession, signOut } from "next-auth/react";
-
+import { useRouter } from "next/navigation";
 const navigation = {
   categories: [
     {
@@ -159,10 +159,10 @@ const navigation = {
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const { data: session, status } = useSession(); // Получаем данные сессии
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
-  if (status === "loading") return null; // Ждём загрузки сессии
-
+  if (status === "loading") return null;
   return (
     <div className="bg-white">
       {/* Mobile menu */}
@@ -472,11 +472,20 @@ export default function Navbar() {
                   {session ? (
                     <>
                       {session.user?.image && (
-                        <img
-                          className="rounded-full mr-2 w-10 h-10"
-                          src={session.user?.image}
-                          alt={session.user?.name || "User avatar"}
-                        />
+                        <>
+                          <img
+                            className="rounded-full mr-2 w-10 h-10"
+                            src={session.user?.image}
+                            alt={session.user?.name || "User avatar"}
+                          />
+                          <button
+                            onClick={() => {
+                              router.push("/profile");
+                            }}
+                          >
+                            User{" "}
+                          </button>
+                        </>
                       )}
                       <span className="text-sm font-medium text-gray-700">
                         Hallo, {session.user?.name}
