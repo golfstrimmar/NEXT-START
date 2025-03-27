@@ -342,10 +342,7 @@ export default function Navbar() {
           Get free delivery on orders over $100
         </p>
 
-        <nav
-          aria-label="Top"
-          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
-        >
+        <nav aria-label="Top" className="mx-auto max-w-7xl ">
           <div className="border-b border-gray-200">
             <div className="flex h-16 items-center">
               <button
@@ -472,20 +469,14 @@ export default function Navbar() {
                   {session ? (
                     <>
                       {session.user?.image && (
-                        <>
-                          <img
-                            className="rounded-full mr-2 w-10 h-10"
-                            src={session.user?.image}
-                            alt={session.user?.name || "User avatar"}
-                          />
-                          <button
-                            onClick={() => {
-                              router.push("/profile");
-                            }}
-                          >
-                            User{" "}
-                          </button>
-                        </>
+                        <img
+                          className="rounded-full mr-2 w-10 h-10 cursor-pointer"
+                          src={session.user?.image}
+                          alt={session.user?.name || "User avatar"}
+                          onClick={() => {
+                            router.push("/profile");
+                          }}
+                        />
                       )}
                       <span className="text-sm font-medium text-gray-700">
                         Hallo, {session.user?.name}

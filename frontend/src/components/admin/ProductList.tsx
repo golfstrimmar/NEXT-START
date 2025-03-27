@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useMemo, useEffect } from "react";
-import Pagination from "@/reserv/Pagination/Pagination";
+import Pagination from "@/components/Pagination";
 import ModalProductEdit from "@/components/admin/ModalProductEdit";
 interface Product {
   _id: string;
