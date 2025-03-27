@@ -1,8 +1,8 @@
 import NextAuth, { type AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { MongoClient } from "mongodb";
-
-// Создаём клиент один раз
+import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcrypt";
 const client = new MongoClient(process.env.MONGODB_URI!);
 let db;
 
@@ -21,6 +21,38 @@ export const authConfig: AuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const database = await connectToDatabase();
+        const usersCollection = database.collection("users");
+
+        const user = await usersCollection.findOne({
+          email: credentials?.email,
+        });
+        if (
+          !user ||
+          !user.password ||
+          !bcrypt.compareSync(credentials?.password || "", user.password)
+        ) {
+          console.log("Invalid credentials for:", credentials?.email);
+          return null; // Неверный email или пароль
+        }
+
+        console.log("User authenticated via credentials:", user);
+        return {
+          id: user.googleId || user.email, // id обязателен для NextAuth
+          email: user.email,
+          name: user.name,
+          googleId: user.googleId,
+          isPasswordSet: true, // Всегда true для логина по паролю
+        };
+      },
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
@@ -69,9 +101,18 @@ export const authConfig: AuthOptions = {
       }
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      console.log("Redirecting to:", url);
-      return `${baseUrl}/auth/set-password`; // Фиксируем перенаправление для теста
+    // async redirect({ url, baseUrl }) {
+    // if (url === `${baseUrl}/`) {
+    //   console.log("Sign-out detected, redirecting to:", url);
+    //   return url;
+    // }
+    // console.log("Sign-in flow, redirecting to /auth/set-password");
+    // return `${baseUrl}/products`;
+    // },
+  },
+  events: {
+    async signOut({ token }) {
+      console.log("Sign-out event triggered, token:", token);
     },
   },
   debug: true,

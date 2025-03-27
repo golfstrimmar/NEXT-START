@@ -465,13 +465,13 @@ export default function Navbar() {
                   {session ? (
                     <>
                       <span className="text-sm font-medium text-gray-700">
-                        Привет, {session.user?.name}
+                        Hallo, {session.user?.name}
                       </span>
                       <button
                         onClick={() => signOut({ callbackUrl: "/" })}
-                        className="text-sm font-medium text-gray-700 hover:text-gray-800"
+                        className="text-sm font-medium text-gray-700 hover:text-gray-800 cursor-pointer"
                       >
-                        Выйти
+                        Sign out
                       </button>
                     </>
                   ) : (

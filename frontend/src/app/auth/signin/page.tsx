@@ -1,45 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+  const { data: session, status } = useSession(); // Получаем сессию и статус
+
+  // Проверяем сессию после входа
+  useEffect(() => {
+    if (status === "authenticated" && session?.user) {
+      console.log("Session on client:", session);
+      // Если пароль не установлен, перенаправляем на страницу установки пароля
+      if (session.user.isPasswordSet === false) {
+        console.log("Password not set, redirecting to set-password");
+        router.push("/auth/set-password");
+      } else {
+        console.log("Password is set, redirecting to products");
+        router.push("/products");
+      }
+    }
+  }, [status, session, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false, // Остаёмся на странице, редирект в useEffect
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to login");
+      if (result?.error) {
+        setError("Неверный email или пароль");
+        console.log("Sign-in error:", result.error);
       } else {
-        const data = await response.json();
-        console.log("Login successful:", data);
+        console.log("Sign-in successful, waiting for session...");
       }
-      router.push("/products");
     } catch (err) {
       setError((err as Error).message);
+      console.error("Unexpected error during sign-in:", err);
     }
   };
-
   const handleGoogleSignIn = async () => {
     try {
-      const result = await signIn("google", { redirect: false });
-
+      const result = await signIn("google", { redirect: true });
       if (result?.error) {
         setError(result.error);
-      } else {
-        router.push("/products");
       }
     } catch (err) {
       setError((err as Error).message);
@@ -79,7 +90,7 @@ export default function SignIn() {
           </div>
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700  cursor-pointer"
+            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 cursor-pointer"
           >
             Sign In
           </button>
@@ -87,7 +98,7 @@ export default function SignIn() {
         <div className="mt-4">
           <button
             onClick={handleGoogleSignIn}
-            className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700  cursor-pointer"
+            className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 cursor-pointer"
           >
             Sign In with Google
           </button>
