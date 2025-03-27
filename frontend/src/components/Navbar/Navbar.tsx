@@ -281,14 +281,21 @@ export default function Navbar() {
               {/* Мобильное меню */}
               {session ? (
                 <div className="flow-root">
+                  {session.user?.image && (
+                    <img
+                      className="rounded-full mr-2 w-10 h-10"
+                      src={session.user?.image}
+                      alt={session.user?.name || "User avatar"}
+                    />
+                  )}
                   <span className="-m-2 block p-2 text-gray-900">
-                    Привет, {session.user?.name}
+                    Hallo, {session.user?.name}
                   </span>
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="-m-2 block p-2 font-medium text-gray-900 hover:text-gray-700"
                   >
-                    Выйти
+                    Sign out
                   </button>
                 </div>
               ) : (
@@ -464,6 +471,13 @@ export default function Navbar() {
                   {/* Десктопное меню */}
                   {session ? (
                     <>
+                      {session.user?.image && (
+                        <img
+                          className="rounded-full mr-2 w-10 h-10"
+                          src={session.user?.image}
+                          alt={session.user?.name || "User avatar"}
+                        />
+                      )}
                       <span className="text-sm font-medium text-gray-700">
                         Hallo, {session.user?.name}
                       </span>

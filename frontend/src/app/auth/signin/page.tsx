@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
+import { set } from "mongoose";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -36,7 +37,7 @@ export default function SignIn() {
       });
 
       if (result?.error) {
-        setError("Неверный email или пароль");
+        setError("Invalid email or password");
         console.log("Sign-in error:", result.error);
       } else {
         console.log("Sign-in successful, waiting for session...");
@@ -101,6 +102,17 @@ export default function SignIn() {
             className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 cursor-pointer"
           >
             Sign In with Google
+          </button>
+        </div>
+        <div className="mt-4 flex items-center">
+          <span className=""> Don't have an account yet?</span>
+          <button
+            onClick={() => {
+              router.push("/auth/signup");
+            }}
+            className=" px-4 py-2 font-semibold italic  text-gray-600  hover:text-gray-900 cursor-pointer transition-colors duration-300 ease-in-out"
+          >
+            signup
           </button>
         </div>
       </div>

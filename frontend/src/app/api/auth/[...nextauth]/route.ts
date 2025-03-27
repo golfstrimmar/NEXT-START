@@ -1,8 +1,10 @@
 import NextAuth, { type AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { MongoClient } from "mongodb";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { MongoClient } from "mongodb";
 import bcrypt from "bcrypt";
+
+// Создаём клиент один раз
 const client = new MongoClient(process.env.MONGODB_URI!);
 let db;
 
@@ -41,16 +43,17 @@ export const authConfig: AuthOptions = {
           !bcrypt.compareSync(credentials?.password || "", user.password)
         ) {
           console.log("Invalid credentials for:", credentials?.email);
-          return null; // Неверный email или пароль
+          return null;
         }
 
         console.log("User authenticated via credentials:", user);
         return {
-          id: user.googleId || user.email, // id обязателен для NextAuth
+          id: user.googleId || user.email,
           email: user.email,
           name: user.name,
+          image: user.image,
           googleId: user.googleId,
-          isPasswordSet: true, // Всегда true для логина по паролю
+          isPasswordSet: true,
         };
       },
     }),
@@ -69,6 +72,7 @@ export const authConfig: AuthOptions = {
         });
 
         if (!existingUser) {
+          // Новый пользователь через Google
           const newUser = {
             email: user.email,
             name: user.name,
@@ -79,36 +83,68 @@ export const authConfig: AuthOptions = {
           };
           await usersCollection.insertOne(newUser);
           console.log("New user created:", newUser);
+          user.id = newUser.googleId || newUser.email;
+          user.googleId = newUser.googleId;
+          user.image = newUser.image;
+          user.name = newUser.name;
+          user.isPasswordSet = newUser.isPasswordSet;
         } else {
-          console.log("Existing user found:", existingUser);
+          // Пользователь существует, обновляем данные от Google
+          const updateData: any = {};
+          if (!existingUser.googleId && account.providerAccountId) {
+            updateData.googleId = account.providerAccountId;
+          }
+          if (!existingUser.image && user.image) {
+            updateData.image = user.image;
+          }
+          // Всегда обновляем name из Google
+          if (user.name) {
+            updateData.name = user.name;
+          }
+          if (Object.keys(updateData).length > 0) {
+            await usersCollection.updateOne(
+              { email: user.email },
+              { $set: updateData }
+            );
+            console.log("User updated with Google data:", updateData);
+          } else {
+            console.log("No updates needed for existing user:", existingUser);
+          }
+          // Обновляем объект user для передачи в jwt и session
+          user.id = existingUser.googleId || existingUser.email;
+          user.googleId = updateData.googleId || existingUser.googleId;
+          user.image = updateData.image || existingUser.image;
+          user.name = updateData.name || existingUser.name;
+          user.isPasswordSet = existingUser.isPasswordSet;
         }
-        return true; // Продолжаем процесс создания сессии
+        return true;
       } catch (error) {
         console.error("Error in signIn callback:", error);
         return false;
       }
     },
-    async session({ session, token }) {
-      console.log("Session created:", session);
-      console.log("Token:", token);
-      const database = await connectToDatabase();
-      const usersCollection = database.collection("users");
-      const user = await usersCollection.findOne({ email: session.user.email });
-
+    async jwt({ token, user }) {
       if (user) {
-        session.user.googleId = user.googleId;
-        session.user.isPasswordSet = user.isPasswordSet;
+        token.email = user.email;
+        token.name = user.name;
+        token.image = user.image;
+        token.googleId = user.googleId;
+        token.isPasswordSet = user.isPasswordSet;
       }
+      console.log("JWT token:", token);
+      return token;
+    },
+    async session({ session, token }) {
+      if (token.email) {
+        session.user.email = token.email;
+        session.user.name = token.name;
+        session.user.image = token.image;
+        session.user.googleId = token.googleId;
+        session.user.isPasswordSet = token.isPasswordSet;
+      }
+      console.log("Session after update:", session);
       return session;
     },
-    // async redirect({ url, baseUrl }) {
-    // if (url === `${baseUrl}/`) {
-    //   console.log("Sign-out detected, redirecting to:", url);
-    //   return url;
-    // }
-    // console.log("Sign-in flow, redirecting to /auth/set-password");
-    // return `${baseUrl}/products`;
-    // },
   },
   events: {
     async signOut({ token }) {

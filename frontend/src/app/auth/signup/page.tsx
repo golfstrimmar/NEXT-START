@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 // import { signIn } from "next-auth/react";
 
 export default function SignUp() {
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -16,7 +16,7 @@ export default function SignUp() {
       const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ name, email, password }),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -56,8 +56,8 @@ export default function SignUp() {
             </label>
             <input
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="mt-1 px-4 py-2 border rounded-md w-full"
               required
             />
@@ -88,10 +88,21 @@ export default function SignUp() {
           </div>
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 cursor-pointer"
           >
             Sign Up
           </button>
+          <div className="mt-4 flex items-center">
+            <span className=""> Do you already have an account?</span>
+            <button
+              onClick={() => {
+                router.push("/auth/signin");
+              }}
+              className=" px-4 py-2 font-semibold italic  text-gray-600  hover:text-gray-900 cursor-pointer transition-colors duration-300 ease-in-out"
+            >
+              signin
+            </button>
+          </div>
         </form>
         {/* <div className="mt-4">
           <button

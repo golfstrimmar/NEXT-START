@@ -8,13 +8,13 @@ export async function POST(req: NextRequest) {
     await dbConnect();
 
     const {
-      username,
+      name,
       email,
       password,
-    }: { username: string; email: string; password: string } = await req.json();
+    }: { name: string; email: string; password: string } = await req.json();
 
     // Валидация входных данных
-    if (!username || !email || !password) {
+    if (!name || !email || !password) {
       return NextResponse.json(
         { error: "All fields are required" },
         { status: 400 }
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Проверка существования пользователя
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    const existingUser = await User.findOne({ $or: [{ email }, { name }] });
     if (existingUser) {
       return NextResponse.json(
         { error: "User with this email or username already exists" },
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
     // Создание нового пользователя
     const user: IUser = new User({
-      username,
+      name,
       email,
       password: hashedPassword,
     });
