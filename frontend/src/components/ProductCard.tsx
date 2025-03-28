@@ -1,37 +1,34 @@
 "use client";
 import React from "react";
-
+import Link from "next/link";
 interface ProductProps {
-  _id: string; // Приводим к string для совместимости с MongoDB
+  _id: string;
   name: string;
-  href: string;
   imageSrc: string;
   imageAlt: string;
-  price: string; // Меняем на string, так как "$48" — строка
-  color?: string; // Делаем опциональным, так как не все товары имеют color
+  price: string;
+  color?: string;
 }
 
 const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
   return (
     <div className="group relative">
-      <img
-        alt={product.imageAlt}
-        src={product.imageSrc}
-        className="aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:transform group-hover:scale-105 transition duration-300 ease-in-out lg:aspect-auto lg:h-80"
-      />
-      <div className="mt-4 flex justify-between">
-        <div>
-          <h3 className="text-sm text-gray-700">
-            <a href={product.href}>
-              <span aria-hidden="true" className="absolute inset-0" />
-              {product.name}
-            </a>
-          </h3>
-          {product.color && (
-            <p className="mt-1 text-sm text-gray-500">{product.color}</p>
-          )}
+      <Link href={`/products/${product._id}`} className="cursor-pointer block">
+        <img
+          alt={product.imageAlt}
+          src={product.imageSrc}
+          className="aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:transform group-hover:scale-105 transition duration-300 ease-in-out lg:aspect-auto lg:h-80 cursor-pointer"
+        />
+      </Link>
+      <div className="mt-4 ">
+        <div className="flex justify-between">
+          <h3 className="text-sm text-gray-700">{product.name}</h3>
+          <p className="text-sm font-medium text-gray-900">{product.price}</p>
         </div>
-        <p className="text-sm font-medium text-gray-900">{product.price}</p>
+
+        {product.color && (
+          <p className="mt-1 text-sm text-gray-500">{product.color}</p>
+        )}
       </div>
     </div>
   );
