@@ -1,37 +1,70 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
-export async function GET() {
-  const cookieStore = cookies();
-  const cart = cookieStore.get("cart")?.value;
+const cartStorage: { [sessionId: string]: any[] } = {};
 
-  // Если корзины нет, возвращаем пустой массив
-  if (!cart) {
-    return NextResponse.json([]);
-  }
-
-  // Парсим корзину из строки JSON
-  const cartItems = JSON.parse(cart);
-  return NextResponse.json(cartItems);
+export async function GET(request: Request) {
+  const sessionId =
+    request.headers.get("cookie")?.match(/sessionId=([^;]+)/)?.[1] || "default";
+  const cart = cartStorage[sessionId] || [];
+  return NextResponse.json(cart);
 }
 
 export async function POST(request: Request) {
-  const cookieStore = cookies();
-  const newItem = await request.json(); // Ожидаем объект товара от клиента
+  const newItem = await request.json();
 
-  // Получаем текущую корзину или создаём новую
-  const currentCart = cookieStore.get("cart")?.value
-    ? JSON.parse(cookieStore.get("cart")!.value)
-    : [];
+  let sessionId = request.headers
+    .get("cookie")
+    ?.match(/sessionId=([^;]+)/)?.[1];
+  if (!sessionId) {
+    sessionId = Math.random().toString(36).substring(2);
+  }
 
-  // Добавляем новый товар
-  const updatedCart = [...currentCart, newItem];
+  const currentCart = cartStorage[sessionId] || [];
+  const existingItemIndex = currentCart.findIndex(
+    (item: any) => item.id === newItem.id
+  );
+  let updatedCart;
+  if (existingItemIndex !== -1) {
+    updatedCart = [...currentCart];
+    updatedCart[existingItemIndex].quantity += 1;
+  } else {
+    updatedCart = [...currentCart, { ...newItem, quantity: 1 }];
+  }
 
-  // Сохраняем в cookie
-  cookieStore.set("cart", JSON.stringify(updatedCart), {
-    httpOnly: true, // Защита от доступа через JS
-    path: "/", // Доступно на всём сайте
-  });
+  cartStorage[sessionId] = updatedCart;
 
+  const response = NextResponse.json(updatedCart);
+  if (!request.headers.get("cookie")?.includes("sessionId")) {
+    response.headers.set(
+      "Set-Cookie",
+      `sessionId=${sessionId}; HttpOnly; Path=/`
+    );
+  }
+  return response;
+}
+
+export async function DELETE(request: Request) {
+  const { id } = await request.json();
+  const sessionId =
+    request.headers.get("cookie")?.match(/sessionId=([^;]+)/)?.[1] || "default";
+
+  const currentCart = cartStorage[sessionId] || [];
+  const updatedCart = currentCart.filter((item: any) => item.id !== id);
+
+  cartStorage[sessionId] = updatedCart;
+  return NextResponse.json(updatedCart);
+}
+
+export async function PUT(request: Request) {
+  const { id, quantity } = await request.json();
+  const sessionId =
+    request.headers.get("cookie")?.match(/sessionId=([^;]+)/)?.[1] || "default";
+
+  const currentCart = cartStorage[sessionId] || [];
+  const updatedCart = currentCart.map((item: any) =>
+    item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item
+  );
+
+  cartStorage[sessionId] = updatedCart;
   return NextResponse.json(updatedCart);
 }

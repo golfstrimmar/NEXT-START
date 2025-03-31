@@ -47,12 +47,10 @@ export default function Home() {
   // };
 
   return (
-    <div className="">
-      <div>
-        {/* <HomeImg className="inline-block mr-2 w-8 h-8"></HomeImg> */}
-        {/* <Slider slides={slides} /> */}
-        <SwiperSlider slides={slides} />
-      </div>
+    <div>
+      {/* <HomeImg className="inline-block mr-2 w-8 h-8"></HomeImg> */}
+      {/* <Slider slides={slides} /> */}
+      <SwiperSlider slides={slides} />
     </div>
   );
 }

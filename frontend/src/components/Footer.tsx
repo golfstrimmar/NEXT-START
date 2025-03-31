@@ -6,7 +6,7 @@ import {
 
 export default function Footer() {
   return (
-    <footer className="bg-white  px-4">
+    <footer className="bg-white  px-4 mt-auto">
       <div className="mx-auto max-w-7xl ">
         {/* Верхняя часть с колонками */}
         <div className="border-t border-gray-200 py-12">

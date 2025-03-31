@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import Pagination from "@/components/Pagination";
 import ModalProductEdit from "@/components/admin/ModalProductEdit";
+
 interface Product {
   _id: string;
   name: string;
@@ -24,7 +25,6 @@ const ProductList: React.FC<ProductListProps> = ({ initialProducts }) => {
   const itemsPerPage = 2;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const nameMatch = product.name

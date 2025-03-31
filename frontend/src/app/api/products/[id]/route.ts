@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
-import Product from "@/models/Product"; // Путь к твоей модели
+import Product from "@/models/Product";
 
 // Подключение к MongoDB
 async function connectToDatabase() {

@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
+import { Suspense } from "react";
 import ProductList from "@/components/admin/ProductList";
-
+import Loading from "@/components/Loading/Loading";
 interface Product {
   id: string;
   name: string;
@@ -33,7 +34,9 @@ export default async function ProductsPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Products</h1>
-      <ProductList initialProducts={products} />
+      <Suspense fallback={<Loading />}>
+        <ProductList initialProducts={products} />
+      </Suspense>
     </div>
   );
 }

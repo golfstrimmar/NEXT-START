@@ -4,8 +4,8 @@ import "./globals.css";
 import Navbar from "@/components/Navbar/Navbar";
 import FooterConditional from "@/components/FooterConditional";
 
-import AuthProvider from "@/components/SessionProvider";
-
+import AuthProvider from "@/providers/SessionProvider";
+import { CartProvider } from "@/providers/CartContext";
 const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,12 +30,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100 flex flex-col min-h-screen `}
       >
         <AuthProvider>
-          <Navbar />
-          <main className=" ">{children}</main>
-          <FooterConditional />
+          <CartProvider>
+            <Navbar />
+            <main className="">{children}</main>
+            <FooterConditional />
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

@@ -25,6 +25,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useCart } from "@/providers/CartContext";
 const navigation = {
   categories: [
     {
@@ -161,7 +162,8 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { data: session, status } = useSession();
   const router = useRouter();
-
+  const { cart } = useCart();
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   if (status === "loading") return null;
   return (
     <div className="bg-white">
@@ -536,13 +538,13 @@ export default function Navbar() {
 
                 {/* Cart */}
                 <div className="ml-4 flow-root lg:ml-6">
-                  <a href="#" className="group -m-2 flex items-center p-2">
+                  <a href="/cart" className="group -m-2 flex items-center p-2">
                     <ShoppingBagIcon
                       aria-hidden="true"
                       className="size-6 shrink-0 text-gray-400 group-hover:text-gray-500"
                     />
                     <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
-                      0
+                      <p> {totalItems}</p>
                     </span>
                     <span className="sr-only">items in cart, view bag</span>
                   </a>

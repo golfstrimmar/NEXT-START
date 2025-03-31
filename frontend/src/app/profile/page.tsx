@@ -16,7 +16,7 @@ const Profile: React.FC = () => {
       <div className=" mx-auto max-w-7xl my-4">
         {session ? (
           <>
-            <div className="border border-gray-200 rounded-2xl overflow-hidden  shadow-[0_0_8px_rgba(0,0,0,0.1)]">
+            <div className="border border-gray-200 rounded-2xl overflow-hidden  shadow-[0_0_8px_rgba(0,0,0,0.1)] ">
               <div className="bg-[#f8f9fa] p-2 text-center border-b border-[#e9ecef]">
                 <h2 className="text-2xl md:text-4xl font-bold text-gray-900 text-center relative z-10">
                   Profile

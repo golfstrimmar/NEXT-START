@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import ProductCard from "@/components/ProductCard";
 import Pagination from "@/components/Pagination";
-
+import Loading from "@/components/Loading/Loading";
 interface Product {
   _id: string;
   name: string;
@@ -51,7 +51,7 @@ const ProductsList: React.FC = () => {
     <div className="bg-white">
       <div className="mx-auto my-4 max-w-2xl px-4  sm:px-6 sm:py-4 lg:max-w-7xl lg:px-8">
         <h1 className="text-2xl font-bold mb-6">Products</h1>
-        {loading && <p className="text-center">loading...</p>}
+        {loading && <Loading />}
         {error && <p className="text-red-500 text-center">{error}</p>}
         {!loading && !error && products.length === 0 && (
           <p className="text-center">There are no products</p>
