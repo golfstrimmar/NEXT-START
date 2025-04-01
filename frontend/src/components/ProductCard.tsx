@@ -1,9 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import Button from "@/components/ui/Button/Button";
-import { useCart } from "@/providers/CartContext";
-import ModalMessage from "@/components/ModalMessage/ModalMessage";
+import AddToCart from "./AddToCart";
 
 interface ProductProps {
   _id: string;
@@ -16,65 +14,8 @@ interface ProductProps {
 }
 
 const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
-  const { cart, setCart } = useCart();
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-  const handleAddToCart = async () => {
-    const initialQuantity = 1;
-    const currentItem = cart.find((item) => item.id === product._id);
-    const currentQuantity = currentItem ? currentItem.quantity : 0;
-    const newQuantity = currentQuantity + initialQuantity;
-
-    if (product.stock && newQuantity > product.stock) {
-      setError(
-        `Cannot add more. Only ${product.stock} items available, you already have ${currentQuantity} in cart`
-      );
-      setShowModal(true);
-      setTimeout(() => {
-        setShowModal(false);
-        setError("");
-      }, 2000);
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/cart", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: product._id,
-          name: product.name,
-          price: product.price,
-          imageSrc: product.imageSrc,
-          imageAlt: product.imageAlt,
-          stock: product.stock,
-          quantity: initialQuantity,
-        }),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to add product to cart");
-      }
-
-      const updatedCart = await response.json();
-      setCart(updatedCart);
-    } catch (error) {
-      setError(`"Error adding to cart:", error.message`);
-      setShowModal(true);
-      setTimeout(() => {
-        setShowModal(false);
-        setError("");
-      }, 2000);
-    }
-  };
-
   return (
     <div className="group relative">
-      {error && <ModalMessage message={error} open={showModal} />}
       <Link href={`/products/${product._id}`} className="cursor-pointer block">
         <img
           alt={product.imageAlt}
@@ -91,9 +32,7 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
         {product.stock && (
           <p className="mt-1 text-sm text-gray-500">Stock: {product.stock}</p>
         )}
-        <div className="mt-2 w-full">
-          <Button onClick={handleAddToCart} buttonText="Add to Cart" />
-        </div>
+        <AddToCart product={product} />
       </div>
     </div>
   );

@@ -1,15 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCart } from "@/providers/CartContext";
 import { useSession } from "next-auth/react";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
+import Loading from "@/components/Loading/Loading";
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity } = useCart();
   const { status } = useSession();
   const [error, setError] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  useEffect(() => {
+    setLoading(false);
+  }, []);
 
   const subtotal = cart.reduce((sum, item) => {
     const price =
@@ -145,7 +150,7 @@ export default function CartPage() {
               );
             })}
           </ul>
-
+          {loading && <Loading />}
           <div className="border-t pt-4">
             <div className="flex justify-between text-lg font-medium text-gray-900">
               <p>Subtotal</p>

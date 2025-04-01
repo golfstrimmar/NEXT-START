@@ -15,7 +15,15 @@ export async function GET(
 ) {
   try {
     await connectToDatabase();
-    const product = await Product.findById(params.id);
+     const { id } = await params;
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return NextResponse.json(
+          { error: "Invalid ID format" },
+          { status: 400 }
+        );
+      }
+       await connectToDatabase();
+    const product = await Product.findById(id);
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
