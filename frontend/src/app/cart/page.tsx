@@ -5,6 +5,8 @@ import { useCart } from "@/providers/CartContext";
 import { useSession } from "next-auth/react";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import Loading from "@/components/Loading/Loading";
+import Button from "@/components/ui/Button/Button";
+import { useRouter } from "next/navigation";
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity } = useCart();
@@ -12,6 +14,7 @@ export default function CartPage() {
   const [error, setError] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const router = useRouter();
   useEffect(() => {
     setLoading(false);
   }, []);
@@ -65,7 +68,9 @@ export default function CartPage() {
       </p>
     );
   }
-
+  const handleCheckout = () => {
+    router.push("/checkout");
+  };
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
@@ -159,9 +164,9 @@ export default function CartPage() {
             <p className="mt-1 text-sm text-gray-500">
               Shipping and taxes calculated at checkout.
             </p>
-            <button className="mt-4 w-full bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700">
-              Checkout
-            </button>
+            <div className="mt-4">
+              <Button buttonText="Checkout" onClick={handleCheckout} />
+            </div>
           </div>
         </div>
       )}

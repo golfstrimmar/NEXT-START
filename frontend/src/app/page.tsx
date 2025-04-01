@@ -6,6 +6,7 @@ import IMG10 from "@/assets/images/15.jpg";
 import Slider from "@/components/Slider";
 import Button from "@/components/ui/Button/Button";
 import SwiperSlider from "@/components/SwiperSlider";
+import { useSession, signOut } from "next-auth/react";
 type Slide = {
   src: string;
   title: string;
@@ -36,15 +37,10 @@ export default function Home() {
       buttonLink: "/about",
     },
   ];
-
-  // const handlerShop = (
-  //   e?:
-  //     | React.FormEvent<HTMLFormElement>
-  //     | React.MouseEvent<HTMLButtonElement, MouseEvent>
-  // ) => {
-  //   e?.preventDefault();
-  //   console.log("<====e.target.value====>", e.target.value);
-  // };
+  const { data: session, status } = useSession();
+  useEffect(() => {
+    console.log("Session:", session);
+  }, [session]);
 
   return (
     <div>

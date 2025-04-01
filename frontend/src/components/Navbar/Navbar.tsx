@@ -575,15 +575,15 @@ export default function Navbar() {
                 <div className="ml-4 flow-root lg:ml-6">
                   <div
                     onClick={handleCartClick}
-                    className="group -m-2 flex items-center p-2 cursor-pointer"
+                    className="group -m-2 flex items-center p-2 cursor-pointer relative"
                   >
                     <ShoppingBagIcon
                       aria-hidden="true"
                       className="size-6 shrink-0 text-gray-400 group-hover:text-gray-500"
                     />
-                    <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
-                      <p>{totalItems}</p>
-                    </span>
+                    <p className="ml-2 text-[12px] font-light  text-gray-100 group-hover:text-gray-300 absolute right-0 top-2 bg-[#e11d48] rounded-full  w-4.5 h-4.5 flex justify-center items-center cursor-pointer transition-all duration-300 ease-in-out">
+                      <span>{totalItems}</span>
+                    </p>
                     <span className="sr-only">items in cart, view bag</span>
                   </div>
                 </div>
