@@ -7,6 +7,7 @@ const productSchema = new Schema({
   imageAlt: { type: String, required: true },
   color: { type: String },
   createdAt: { type: Date, default: Date.now },
+  stock: { type: Number, required: true, default: 1 },
 });
 
 const Product: Model<any> =

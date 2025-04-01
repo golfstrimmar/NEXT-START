@@ -8,6 +8,7 @@ interface Product {
   imageAlt: string;
   color?: string;
   createdAt: string;
+  stock: number;
   __v: number;
 }
 
@@ -50,6 +51,9 @@ export default async function ProductPage({
       <p className="mt-2 text-xl font-medium">Product price: {product.price}</p>
       {product.color && (
         <p className="mt-2 text-gray-500"> Product color: {product.color}</p>
+      )}
+      {product.stock && (
+        <p className="mt-2 text-gray-500"> Product stock: {product.stock}</p>
       )}
     </div>
   );

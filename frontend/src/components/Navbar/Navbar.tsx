@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Fragment, useState } from "react";
+import ModalMessage from "@/components/ModalMessage/ModalMessage";
+
 import {
   Dialog,
   DialogBackdrop,
@@ -26,6 +28,7 @@ import {
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/providers/CartContext";
+
 const navigation = {
   categories: [
     {
@@ -163,10 +166,25 @@ export default function Navbar() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { cart } = useCart();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   if (status === "loading") return null;
+  const handleCartClick = () => {
+    if (status === "authenticated") {
+      router.push("/cart");
+    } else {
+      setError("User not authenticated");
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+      }, 1500);
+    }
+  };
   return (
     <div className="bg-white">
+      {error && <ModalMessage message={error} open={showModal} />}
       {/* Mobile menu */}
       <Dialog open={open} onClose={setOpen} className="relative z-40 lg:hidden">
         <DialogBackdrop
@@ -348,16 +366,19 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className="relative rounded-md bg-white p-2 text-gray-400 lg:hidden"
+                className="relative rounded-md bg-white p-2   lg:hidden cursor-pointer transition-all duration-300 ease-in-out"
               >
                 <span className="absolute -inset-0.5" />
                 <span className="sr-only">Open menu</span>
-                <Bars3Icon aria-hidden="true" className="size-6" />
+                <Bars3Icon
+                  aria-hidden="true"
+                  className="size-6 text-gray-400 hover:text-gray-900"
+                />
               </button>
 
               {/* Logo */}
               <div className="ml-4 flex lg:ml-0">
-                <Link href={`/`} className="">
+                <Link href={`/`} onClick={() => setOpen(false)}>
                   <Image
                     src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
                     width={40}
@@ -368,7 +389,7 @@ export default function Navbar() {
               </div>
 
               {/* Flyout menus */}
-              <PopoverGroup className="hidden lg:ml-8 lg:block lg:self-stretch">
+              <PopoverGroup className="hidden lg:ml-8 lg:block lg:self-stretch ">
                 <div className="flex h-full space-x-8">
                   {navigation.categories.map((category) => (
                     <Popover key={category.name} className="flex">
@@ -450,7 +471,21 @@ export default function Navbar() {
                       </PopoverPanel>
                     </Popover>
                   ))}
-
+                  {/* <div className=" flow-root ml-6">
+                    <div
+                      onClick={handleCartClick}
+                      className="group -m-2 flex items-center p-2 cursor-pointer"
+                    >
+                      <ShoppingBagIcon
+                        aria-hidden="true"
+                        className="size-6 shrink-0 text-gray-400 group-hover:text-gray-500"
+                      />
+                      <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
+                        <p>{totalItems}</p>
+                      </span>
+                      <span className="sr-only">items in cart, view bag</span>
+                    </div>
+                  </div> */}
                   {navigation.pages.map((page) => (
                     <a
                       key={page.name}
@@ -538,16 +573,19 @@ export default function Navbar() {
 
                 {/* Cart */}
                 <div className="ml-4 flow-root lg:ml-6">
-                  <a href="/cart" className="group -m-2 flex items-center p-2">
+                  <div
+                    onClick={handleCartClick}
+                    className="group -m-2 flex items-center p-2 cursor-pointer"
+                  >
                     <ShoppingBagIcon
                       aria-hidden="true"
                       className="size-6 shrink-0 text-gray-400 group-hover:text-gray-500"
                     />
                     <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
-                      <p> {totalItems}</p>
+                      <p>{totalItems}</p>
                     </span>
                     <span className="sr-only">items in cart, view bag</span>
-                  </a>
+                  </div>
                 </div>
               </div>
             </div>

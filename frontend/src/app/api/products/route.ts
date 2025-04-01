@@ -13,6 +13,7 @@ export async function POST(request: Request) {
       imageSrc: data.imageSrc,
       imageAlt: data.imageAlt,
       color: data.color || undefined,
+      stock: data.stock,
     });
 
     await product.save();

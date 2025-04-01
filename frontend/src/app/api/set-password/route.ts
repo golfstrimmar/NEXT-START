@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const updatedUser = await usersCollection.findOneAndUpdate(
       { email },
       { $set: { password: hashedPassword, isPasswordSet: true } },
-      { returnDocument: "after" } // Покажет обновленный документ
+      { returnDocument: "after" }
     );
 
     console.log("Updated user:", updatedUser);

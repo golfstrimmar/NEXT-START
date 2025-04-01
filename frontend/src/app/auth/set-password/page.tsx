@@ -3,35 +3,47 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import ModalMessage from "@/components/ModalMessage/ModalMessage";
 
 export default function SetPassword() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
   const { data: session, status } = useSession();
-
-  useEffect(() => {
-    console.log("<==== session status ====>", status);
-    console.log("<==== session ====>", session);
-  }, [status, session]);
-
+  const [showModal, setShowModal] = useState<boolean>(false);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (status === "loading") {
       setError("Session is still loading, please wait...");
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+      }, 1500);
       return;
     }
 
     if (status !== "authenticated" || !session?.user?.email) {
       setError("User not authenticated");
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+      }, 1500);
       return;
     }
 
-    console.log("Sending request to set password:", {
-      email: session.user.email,
-      password,
-    });
+    // Валидация пароля
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+      }, 1500);
+      return;
+    }
 
     try {
       const response = await fetch("/api/set-password", {
@@ -47,10 +59,21 @@ export default function SetPassword() {
       if (!response.ok) {
         throw new Error(responseData.error || "Failed to set password");
       }
-
-      router.push("/products");
+      setError("Password set successfully, redirecting to products");
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+        router.push("/products");
+      }, 1500);
     } catch (err) {
       setError((err as Error).message);
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+        router.push("/products");
+      }, 1500);
     }
   };
 
@@ -59,7 +82,7 @@ export default function SetPassword() {
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold mb-4">Set Your Password</h1>
         <p className="mb-4">Please set a password to enable email login.</p>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {error && <ModalMessage message={error} open={showModal} />}
         {status === "loading" && <p className="mb-4">Loading session...</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

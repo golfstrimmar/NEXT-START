@@ -4,25 +4,35 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { set } from "mongoose";
-
+import ModalMessage from "@/components/ModalMessage/ModalMessage";
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string>("");
   const router = useRouter();
   const { data: session, status } = useSession(); // Получаем сессию и статус
-
+  const [showModal, setShowModal] = useState<boolean>(false);
   // Проверяем сессию после входа
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
       console.log("Session on client:", session);
       // Если пароль не установлен, перенаправляем на страницу установки пароля
       if (session.user.isPasswordSet === false) {
-        console.log("Password not set, redirecting to set-password");
-        router.push("/auth/set-password");
+        setError("Password not set, redirecting to set-password");
+        setShowModal(true);
+        setTimeout(() => {
+          setShowModal(false);
+          setError("");
+          router.push("/auth/set-password");
+        }, 1500);
       } else {
-        console.log("Password is set, redirecting to products");
-        router.push("/products");
+        setError("Password is set, redirecting to products");
+        setShowModal(true);
+        setTimeout(() => {
+          setShowModal(false);
+          setError("");
+          router.push("/products");
+        }, 1500);
       }
     }
   }, [status, session, router]);
@@ -33,18 +43,31 @@ export default function SignIn() {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false, // Остаёмся на странице, редирект в useEffect
+        redirect: false,
       });
 
       if (result?.error) {
         setError("Invalid email or password");
-        console.log("Sign-in error:", result.error);
+        setShowModal(true);
+        setTimeout(() => {
+          setShowModal(false);
+          setError("");
+        }, 1500);
       } else {
-        console.log("Sign-in successful, waiting for session...");
+        setError("Sign-in successful, waiting for session...");
+        setShowModal(true);
+        setTimeout(() => {
+          setShowModal(false);
+          setError("");
+        }, 1500);
       }
     } catch (err) {
       setError((err as Error).message);
-      console.error("Unexpected error during sign-in:", err);
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+      }, 1500);
     }
   };
   const handleGoogleSignIn = async () => {
@@ -52,10 +75,19 @@ export default function SignIn() {
       const result = await signIn("google", { redirect: true });
       if (result?.error) {
         setError(result.error);
+        setShowModal(true);
+        setTimeout(() => {
+          setShowModal(false);
+          setError("");
+        }, 1500);
       }
     } catch (err) {
       setError((err as Error).message);
-      console.error("Unexpected error during Google sign-in:", err);
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+      }, 1500);
     }
   };
 
@@ -63,7 +95,8 @@ export default function SignIn() {
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold mb-4">Sign In</h1>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {error && <ModalMessage message={error} open={showModal} />}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">

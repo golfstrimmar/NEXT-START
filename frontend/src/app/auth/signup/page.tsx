@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-// import { signIn } from "next-auth/react";
+import ModalMessage from "@/components/ModalMessage/ModalMessage";
 
 export default function SignUp() {
   const [name, setName] = useState("");
@@ -9,9 +9,21 @@ export default function SignUp() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+      }, 1500);
+      return;
+    }
+
     try {
       const response = await fetch("/api/register", {
         method: "POST",
@@ -22,33 +34,30 @@ export default function SignUp() {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to register");
       }
-      router.push("/auth/signin");
+      setError("Registration successful, waiting for session...");
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+        router.push("/auth/signin");
+      }, 1500);
     } catch (err) {
       setError((err as Error).message);
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+      }, 1500);
     }
   };
-
-  // const handleGoogleSignUp = async () => {
-  //   try {
-  //     const result = await signIn("google", { redirect: false });
-  //     console.log("Google sign-in result:", result); // Добавляем лог результата
-  //     if (result?.error) {
-  //       setError(result.error);
-  //       console.error("Google sign-in error:", result.error); // Лог ошибки
-  //     } else {
-  //       router.push("/products");
-  //     }
-  //   } catch (err) {
-  //     setError((err as Error).message);
-  //     console.error("Unexpected error during Google sign-in:", err); // Лог неожиданной ошибки
-  //   }
-  // };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+
+        {error && <ModalMessage message={error} open={showModal} />}
+
         <form onSubmit={handleEmailSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -104,14 +113,6 @@ export default function SignUp() {
             </button>
           </div>
         </form>
-        {/* <div className="mt-4">
-          <button
-            onClick={handleGoogleSignUp}
-            className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-          >
-            Sign Up with Google
-          </button>
-        </div> */}
       </div>
     </div>
   );

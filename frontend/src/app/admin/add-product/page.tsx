@@ -12,6 +12,7 @@ interface ProductForm {
   imageSrc: string;
   imageAlt: string;
   color?: string;
+  stock: number; // Добавили stock
 }
 
 const AddProductPage: React.FC = () => {
@@ -22,6 +23,7 @@ const AddProductPage: React.FC = () => {
     imageSrc: "",
     imageAlt: "",
     color: "",
+    stock: 1, // Дефолтное значение
   });
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
@@ -40,7 +42,9 @@ const AddProductPage: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Для stock преобразуем в число
+    const newValue = name === "stock" ? parseInt(value) || 0 : value;
+    setFormData((prev) => ({ ...prev, [name]: newValue }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,12 +85,22 @@ const AddProductPage: React.FC = () => {
           value: formData.imageAlt,
           message: "Image description is required",
         },
+        {
+          name: "stock",
+          value: formData.stock,
+          message: "Stock is required",
+        },
       ];
 
       for (const field of requiredFields) {
-        if (!field.value.trim()) {
+        if (
+          (typeof field.value === "string" && !field.value.trim()) ||
+          (typeof field.value === "number" && field.value <= 0)
+        ) {
           document.getElementById(field.name)?.focus();
-          throw new Error(field.message);
+          throw new Error(
+            `${field.message} (must be greater than 0 for stock)`
+          );
         }
       }
 
@@ -122,6 +136,7 @@ const AddProductPage: React.FC = () => {
           ...formData,
           price: priceValue,
           imageSrc: imageUrl,
+          stock: formData.stock, // Добавили stock
         }),
       });
 
@@ -142,6 +157,7 @@ const AddProductPage: React.FC = () => {
           imageSrc: "",
           imageAlt: "",
           color: "",
+          stock: 1,
         });
         setImage(null);
         setImagePreview(null);
@@ -156,7 +172,7 @@ const AddProductPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <ModalMessage message={successMessage} open={openModalMessage} />
-      <div className="mx-auto max-w-2xl px-4  sm:px-6  lg:max-w-7xl lg:px-8">
+      <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
         <h1 className="text-2xl font-bold mb-6">Add New Product</h1>
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           <Input
@@ -261,6 +277,18 @@ const AddProductPage: React.FC = () => {
             name="color"
             value={formData.color}
             onChange={handleChange}
+          />
+
+          <Input
+            id="stock"
+            typeInput="number"
+            data="Stock *"
+            name="stock"
+            value={formData.stock.toString()} // Преобразуем в строку для input
+            onChange={handleChange}
+            required
+            min="1" // Минимальное значение
+            aria-invalid={!!error && formData.stock <= 0}
           />
 
           {error && (
