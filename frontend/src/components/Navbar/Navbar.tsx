@@ -1,10 +1,9 @@
 "use client";
-
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Fragment, useState } from "react";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
-
 import {
   Dialog,
   DialogBackdrop,
@@ -26,9 +25,8 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useCart } from "@/providers/CartContext";
-
+import { useRouter, useParams, usePathname } from "next/navigation";
 const navigation = {
   categories: [
     {
@@ -162,6 +160,7 @@ const navigation = {
 };
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -169,7 +168,16 @@ export default function Navbar() {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const [activeLink, setactiveLink] = useState<string>("");
+
+  useEffect(() => {
+    if (pathname) {
+      setactiveLink(pathname);
+    }
+  }, [pathname]);
+
   if (status === "loading") return null;
+
   const handleCartClick = () => {
     if (status === "authenticated") {
       router.push("/cart");
@@ -394,7 +402,7 @@ export default function Navbar() {
                   {navigation.categories.map((category) => (
                     <Popover key={category.name} className="flex">
                       <div className="relative flex">
-                        <PopoverButton className="relative z-10 -mb-px flex items-center border-b-2 border-transparent pt-px text-sm font-medium text-gray-700 transition-colors duration-200 ease-out hover:text-gray-800 data-open:border-indigo-600 data-open:text-indigo-600">
+                        <PopoverButton className="relative z-10 -mb-px flex items-center border-b-2 border-transparent pt-px text-sm font-medium text-gray-700 transition-colors duration-200 ease-out hover:text-indigo-500 data-open:border-indigo-600 data-open:text-indigo-600">
                           {category.name}
                         </PopoverButton>
                       </div>
@@ -455,7 +463,7 @@ export default function Navbar() {
                                         <li key={item.name} className="flex">
                                           <a
                                             href={item.href}
-                                            className="hover:text-gray-800"
+                                            className="hover:text-indigo-500"
                                           >
                                             {item.name}
                                           </a>
@@ -480,20 +488,24 @@ export default function Navbar() {
                         aria-hidden="true"
                         className="size-6 shrink-0 text-gray-400 group-hover:text-gray-500"
                       />
-                      <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
+                      <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-indigo-500">
                         <p>{totalItems}</p>
                       </span>
                       <span className="sr-only">items in cart, view bag</span>
                     </div>
                   </div> */}
                   {navigation.pages.map((page) => (
-                    <a
+                    <Link
                       key={page.name}
                       href={page.href}
-                      className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-800"
+                      className={`flex items-center text-sm  text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                        activeLink.startsWith(page.href)
+                          ? "text-indigo-800 font-bold text-lg"
+                          : "text-gray-700 font-medium"
+                      }`}
                     >
                       {page.name}
-                    </a>
+                    </Link>
                   ))}
                 </div>
               </PopoverGroup>
@@ -504,21 +516,20 @@ export default function Navbar() {
                   {session ? (
                     <>
                       {session.user?.image && (
-                        <img
-                          className="rounded-full mr-2 w-10 h-10 cursor-pointer"
-                          src={session.user?.image}
-                          alt={session.user?.name || "User avatar"}
-                          onClick={() => {
-                            router.push("/profile");
-                          }}
-                        />
+                        <Link href="/profile">
+                          <img
+                            className="rounded-full mr-2 w-10 h-10 cursor-pointer"
+                            src={session.user?.image}
+                            alt={session.user?.name || "User avatar"}
+                          />
+                        </Link>
                       )}
                       <span className="text-sm font-medium text-gray-700">
                         Hallo, {session.user?.name}
                       </span>
                       <button
                         onClick={() => signOut({ callbackUrl: "/" })}
-                        className="text-sm font-medium text-gray-700 hover:text-gray-800 cursor-pointer"
+                        className="text-sm font-medium text-gray-700 hover:text-indigo-500 cursor-pointer"
                       >
                         Sign out
                       </button>
@@ -527,7 +538,12 @@ export default function Navbar() {
                     <>
                       <Link
                         href="/auth/signin"
-                        className="text-sm font-medium text-gray-700 hover:text-gray-800"
+                        className={`flex items-center text-sm  text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out 
+                            ${
+                              "/auth/signin" === activeLink
+                                ? "text-indigo-800 font-bold text-lg"
+                                : "text-gray-700 font-medium"
+                            }`}
                       >
                         Sign in
                       </Link>
@@ -537,7 +553,12 @@ export default function Navbar() {
                       />
                       <Link
                         href="/auth/signup"
-                        className="text-sm font-medium text-gray-700 hover:text-gray-800"
+                        className={`flex items-center text-sm  text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out 
+                            ${
+                              "/auth/signup" === activeLink
+                                ? "text-indigo-800 font-bold text-lg"
+                                : "text-gray-700 font-medium"
+                            }`}
                       >
                         Create account
                       </Link>
@@ -548,7 +569,7 @@ export default function Navbar() {
                 <div className="hidden lg:ml-8 lg:flex">
                   <a
                     href="#"
-                    className="flex items-center text-gray-700 hover:text-gray-800"
+                    className="flex items-center text-gray-700 hover:text-indigo-500"
                   >
                     <img
                       alt=""
@@ -575,11 +596,19 @@ export default function Navbar() {
                 <div className="ml-4 flow-root lg:ml-6">
                   <div
                     onClick={handleCartClick}
-                    className="group -m-2 flex items-center p-2 cursor-pointer relative"
+                    className={`group -m-2 flex items-center p-2 cursor-pointer relative ${
+                      "/cart" === activeLink
+                        ? "text-indigo-800 font-bold text-lg"
+                        : "text-gray-700 font-medium"
+                    }`}
                   >
                     <ShoppingBagIcon
                       aria-hidden="true"
-                      className="size-6 shrink-0 text-gray-400 group-hover:text-gray-500"
+                      className={`size-6 shrink-0 text-gray-400 group-hover:text-gray-500 ${
+                        "/cart" === activeLink
+                          ? "text-indigo-900 "
+                          : "text-gray-400"
+                      }`}
                     />
                     <p className="ml-2 text-[12px] font-light  text-gray-100 group-hover:text-gray-300 absolute right-0 top-2 bg-[#e11d48] rounded-full  w-4.5 h-4.5 flex justify-center items-center cursor-pointer transition-all duration-300 ease-in-out">
                       <span>{totalItems}</span>

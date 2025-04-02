@@ -1,20 +1,20 @@
 "use client";
+import React, { useEffect } from "react";
 import { useCart } from "@/providers/CartContext";
 import Link from "next/link";
 import Button from "@/components/ui/Button/Button";
 import { useState } from "react";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import { useRouter } from "next/navigation";
-
+import { useSession } from "next-auth/react";
 export default function CheckoutPage() {
   const { cart, setCart } = useCart();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const router = useRouter();
-
-  // Состояние для формы (fullName заменён на email)
+  const { data: session, status } = useSession();
   const [formData, setFormData] = useState({
-    email: "", // Теперь email вместо fullName
+    email: "",
     addressLine1: "",
     addressLine2: "",
     city: "",
@@ -25,6 +25,15 @@ export default function CheckoutPage() {
     expirationDate: "",
     cvv: "",
   });
+
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.email) {
+      setFormData((prev) => ({
+        ...prev,
+        email: session.user.email,
+      }));
+    }
+  }, [status, session]);
 
   // Состояние для ошибок валидации
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
@@ -122,7 +131,7 @@ export default function CheckoutPage() {
           cart,
           total: totalPrice,
           shipping: {
-            email: formData.email, // Теперь email вместо fullName
+            email: formData.email,
             addressLine1: formData.addressLine1,
             addressLine2: formData.addressLine2,
             city: formData.city,
