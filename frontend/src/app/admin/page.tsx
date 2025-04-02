@@ -1,17 +1,21 @@
 import { MongoClient } from "mongodb";
-
+import OrdersTable from "@/components/OrdersTable";
+console.log("MONGODB_URI:", process.env.MONGODB_URI);
 const client = new MongoClient(process.env.MONGODB_URI!);
 const db = client.db("shop");
-
 export default async function AdminDashboard() {
   try {
     await client.connect();
+    console.log("Connected to MongoDB");
 
-    // Подгружаем данные из коллекции orders
-    const orders = await db.collection("orders").find().toArray();
-
-    // Подгружаем данные из коллекции products
+    const ordersRaw = await db.collection("orders").find().toArray();
     const products = await db.collection("products").find().toArray();
+
+    const orders = ordersRaw.map((order) => ({
+      ...order,
+      _id: order._id.toString(), // Конвертируем ObjectId в строку
+      createdAt: order.createdAt.toISOString(), // Конвертируем Date в строку
+    }));
 
     // Считаем статистику
     const stats = {
@@ -43,9 +47,9 @@ export default async function AdminDashboard() {
             </p>
           </div>
         </div>
-
+        <OrdersTable orders={orders} />
         {/* Таблица заказов */}
-        <div className="bg-white p-6 rounded-lg shadow">
+        {/* <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -66,13 +70,16 @@ export default async function AdminDashboard() {
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Date
                   </th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {orders.map((order) => (
                   <tr key={order._id.toString()}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {order._id.toString().slice(-6)} {/* Короткий ID */}
+                      {order._id.toString().slice(-6)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {order.email}
@@ -86,12 +93,15 @@ export default async function AdminDashboard() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {order.status.toString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
+        </div> */}
       </div>
     );
   } catch (error) {

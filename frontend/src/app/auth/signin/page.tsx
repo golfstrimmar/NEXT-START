@@ -26,12 +26,12 @@ export default function SignIn() {
           router.push("/auth/set-password");
         }, 1500);
       } else {
-        setError("Password is set, redirecting to products");
+        setError("Password is set, redirecting to profile");
         setShowModal(true);
         setTimeout(() => {
           setShowModal(false);
           setError("");
-          router.push("/products");
+          router.push("/profile");
         }, 1500);
       }
     }

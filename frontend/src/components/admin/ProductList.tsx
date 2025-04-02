@@ -22,7 +22,7 @@ const ProductList: React.FC<ProductListProps> = ({ initialProducts }) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const itemsPerPage = 2;
+  const itemsPerPage = 10;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const filteredProducts = useMemo(() => {
