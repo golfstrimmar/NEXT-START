@@ -62,26 +62,20 @@ export async function POST(request: Request) {
   const db = client.db("shop");
 
   try {
-    console.log("MONGODB_URI:", process.env.MONGODB_URI);
     await client.connect();
-    console.log("Connected to MongoDB");
-
     const { orderId, status } = await request.json();
-
     if (!orderId || !status) {
       return NextResponse.json(
         { error: "Missing orderId or status" },
         { status: 400 }
       );
     }
-
     const order = await db
       .collection("orders")
       .findOne({ _id: new ObjectId(orderId) });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
-
     const validStatuses = ["accepted", "shipped", "delivered", "cancelled"];
     if (!validStatuses.includes(status)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });

@@ -1,12 +1,11 @@
 import { MongoClient } from "mongodb";
 import { getServerSession } from "next-auth/next";
 import { authConfig } from "../api/auth/[...nextauth]/route";
-import { redirect } from "next/navigation";
-import OrdersTable from "@/components/OrdersTable";
-console.log("MONGODB_URI:", process.env.MONGODB_URI);
+import OrdersTable from "@/components/admin/OrdersTable";
+import ModalAdmin from "@/components/admin/ModalAdmin";
+
 const client = new MongoClient(process.env.MONGODB_URI!);
 const db = client.db("shop");
-import ModalAdmin from "@/components/admin/ModalAdmin";
 
 interface Order {
   _id: string;
@@ -16,6 +15,7 @@ interface Order {
   createdAt: string;
   status: string;
 }
+
 interface Product {
   _id: string;
   name: string;
@@ -37,26 +37,45 @@ export default async function AdminDashboard() {
     await client.connect();
     console.log("Connected to MongoDB");
 
-    const ordersRaw = await db.collection("orders").find().toArray();
-    const products = await db.collection("products").find().toArray();
+    // Собираем статистику без загрузки полных данных
+    const totalProducts = await db.collection("products").countDocuments({});
+    const productsInStock = await db
+      .collection("products")
+      .countDocuments({ stock: { $gt: 0 } });
+    const acceptedOrders = await db
+      .collection("orders")
+      .countDocuments({ status: { $ne: "cancelled" } });
+    const revenueResult = await db
+      .collection("orders")
+      .aggregate([
+        { $match: { status: { $ne: "cancelled" } } },
+        { $group: { _id: null, totalRevenue: { $sum: "$total" } } },
+      ])
+      .toArray();
+    const revenue = revenueResult[0]?.totalRevenue || 0;
 
+    // Загружаем заказы только для таблицы
+    const ordersRaw = await db
+      .collection("orders")
+      .find({ status: { $ne: "cancelled" } })
+      .toArray();
     const orders = ordersRaw.map((order) => ({
       ...order,
-      _id: order._id.toString(), // Конвертируем ObjectId в строку
-      createdAt: order.createdAt.toISOString(), // Конвертируем Date в строку
+      _id: order._id.toString(),
+      createdAt: order.createdAt.toISOString(),
     }));
 
-    // Считаем статистику
     const stats = {
-      totalProducts: products.length, // Количество уникальных товаров
-      pendingOrders: orders.length, // Количество заказов
-      revenue: orders.reduce((sum, order) => sum + order.total, 0), // Сумма всех total
+      totalProducts,
+      productsInStock,
+      acceptedOrders,
+      revenue,
     };
 
     return (
       <div className="p-6">
         <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-2">Total Products</h2>
             <p className="text-3xl font-bold text-indigo-600">
@@ -64,13 +83,19 @@ export default async function AdminDashboard() {
             </p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-2">Pending Orders</h2>
+            <h2 className="text-xl font-semibold mb-2">Products In Stock</h2>
             <p className="text-3xl font-bold text-indigo-600">
-              {stats.pendingOrders}
+              {stats.productsInStock}
             </p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-2">Revenue</h2>
+            <h2 className="text-xl font-semibold mb-2">Accepted Orders</h2>
+            <p className="text-3xl font-bold text-indigo-600">
+              {stats.acceptedOrders}
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-2">Total Revenue</h2>
             <p className="text-3xl font-bold text-indigo-600">
               ${stats.revenue.toFixed(2)}
             </p>

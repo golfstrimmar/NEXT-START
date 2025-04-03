@@ -4,14 +4,6 @@ import Select from "@/components/ui/Select/Select";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import Loading from "@/components/Loading/Loading";
 
-// interface Order {
-//   _id: string;
-//   email: string;
-//   total: number;
-//   items: { length: number };
-//   createdAt: string;
-//   status: string;
-// }
 interface Order {
   _id: string;
   email: string;
@@ -81,7 +73,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
       <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
       {error && <ModalMessage message={error} open={showModal} />}
       {loading && <Loading />}
-      <div className="overflow-x-auto">
+      <div className="">
         <table className="w-full text-left">
           <thead className="bg-gray-50">
             <tr>

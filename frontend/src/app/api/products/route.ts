@@ -31,10 +31,18 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const inStock = searchParams.get("inStock");
+  let filter = {};
+  if (inStock === "in Stock") {
+    filter = { stock: { $gt: 0 } };
+  } else if (inStock === "out of Stock") {
+    filter = { stock: 0 };
+  }
   try {
     await dbConnect();
-    const products = await Product.find({});
+    const products = await Product.find(filter);
     return NextResponse.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);

@@ -1,8 +1,10 @@
 // ui/Select.tsx
+
 import React, { useState, useEffect } from "react";
 import "@/scss/common/colors.scss";
 import Shevron from "@/assets/svg/chevron-down.svg";
 import styles from "./Select.module.scss";
+import ModalMessage from "@/components/ModalMessage/ModalMessage";
 
 interface Item {
   name: string;
@@ -27,6 +29,8 @@ const Select: React.FC<SelectProps> = ({
   const [selectedValue, setSelectedValue] = useState<string>(
     initialItem ? initialItem.name : selectItems[0].name
   );
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     const handleClick = (event: MouseEvent): void => {
@@ -49,9 +53,19 @@ const Select: React.FC<SelectProps> = ({
   }, [initialValue, selectItems]);
 
   const handlerClickItem = (item: Item) => {
-    setSelectedValue(item.name);
-    setSortOrder(item.value);
-    setActive(false);
+    if (item.name === selectedValue) {
+      setError(" You have already selected this option");
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+      }, 1500);
+      return;
+    } else {
+      setSelectedValue(item.name);
+      setSortOrder(item.value);
+      setActive(false);
+    }
   };
 
   const getStatusClass = (value: string) => {
@@ -79,6 +93,7 @@ const Select: React.FC<SelectProps> = ({
     <div
       className={`${styles["select"]} ${active ? styles["_is-active"] : ""}`}
     >
+      {error && <ModalMessage message={error} open={showModal} />}
       <button
         className={`${styles["dropdown-button"]} ${buttonClass}`}
         onClick={(event) => {
