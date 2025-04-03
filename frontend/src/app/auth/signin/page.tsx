@@ -3,21 +3,20 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
-import { set } from "mongoose";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
+
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string>("");
   const router = useRouter();
-  const { data: session, status } = useSession(); // Получаем сессию и статус
+  const { data: session, status } = useSession();
   const [showModal, setShowModal] = useState<boolean>(false);
-  // Проверяем сессию после входа
+
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
       console.log("Session on client:", session);
-      // Если пароль не установлен, перенаправляем на страницу установки пароля
-      if (session.user.isPasswordSet === false) {
+      if (!session.user.isPasswordSet) {
         setError("Password not set, redirecting to set-password");
         setShowModal(true);
         setTimeout(() => {
@@ -26,7 +25,7 @@ export default function SignIn() {
           router.push("/auth/set-password");
         }, 1500);
       } else {
-        setError("Password is set, redirecting to profile");
+        setError("Sign-in successful, redirecting to profile");
         setShowModal(true);
         setTimeout(() => {
           setShowModal(false);
@@ -46,13 +45,25 @@ export default function SignIn() {
         redirect: false,
       });
 
+      console.log("Sign-in result:", result); // Добавляем отладку
+
       if (result?.error) {
-        setError("Invalid email or password");
-        setShowModal(true);
-        setTimeout(() => {
-          setShowModal(false);
-          setError("");
-        }, 1500);
+        if (result.error.includes("set a password")) {
+          setError("Please set a password first, redirecting...");
+          setShowModal(true);
+          setTimeout(() => {
+            setShowModal(false);
+            setError("");
+            router.push("/auth/set-password");
+          }, 1500);
+        } else {
+          setError("Invalid email or password");
+          setShowModal(true);
+          setTimeout(() => {
+            setShowModal(false);
+            setError("");
+          }, 1500);
+        }
       } else {
         setError("Sign-in successful, waiting for session...");
         setShowModal(true);
@@ -62,6 +73,7 @@ export default function SignIn() {
         }, 1500);
       }
     } catch (err) {
+      console.error("Sign-in error:", err);
       setError((err as Error).message);
       setShowModal(true);
       setTimeout(() => {
@@ -70,9 +82,10 @@ export default function SignIn() {
       }, 1500);
     }
   };
+
   const handleGoogleSignIn = async () => {
     try {
-      const result = await signIn("google", { redirect: true });
+      const result = await signIn("google", { redirect: false });
       if (result?.error) {
         setError(result.error);
         setShowModal(true);
@@ -96,7 +109,6 @@ export default function SignIn() {
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold mb-4">Sign In</h1>
         {error && <ModalMessage message={error} open={showModal} />}
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -143,7 +155,7 @@ export default function SignIn() {
             onClick={() => {
               router.push("/auth/signup");
             }}
-            className=" px-4 py-2 font-semibold italic  text-gray-600  hover:text-gray-900 cursor-pointer transition-colors duration-300 ease-in-out"
+            className=" px-4 py-2 font-semibold italic text-gray-600 hover:text-gray-900 cursor-pointer transition-colors duration-300 ease-in-out"
           >
             signup
           </button>

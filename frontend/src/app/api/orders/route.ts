@@ -19,7 +19,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Обработка GET-запроса для получения заказов по email
 export async function GET(request: Request) {
   const client = new MongoClient(process.env.MONGODB_URI!);
   const db = client.db("shop");
@@ -58,10 +57,10 @@ export async function GET(request: Request) {
   }
 }
 
-// Обработка POST-запроса для обновления статуса
 export async function POST(request: Request) {
   const client = new MongoClient(process.env.MONGODB_URI!);
   const db = client.db("shop");
+
   try {
     console.log("MONGODB_URI:", process.env.MONGODB_URI);
     await client.connect();
@@ -86,6 +85,64 @@ export async function POST(request: Request) {
     const validStatuses = ["accepted", "shipped", "delivered", "cancelled"];
     if (!validStatuses.includes(status)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+    }
+
+    // Если статус меняется на "cancelled" и раньше не был "cancelled", увеличиваем stock
+    if (status === "cancelled" && order.status !== "cancelled") {
+      for (const item of order.items) {
+        const product = await db.collection("products").findOne({
+          _id: new ObjectId(item.productId),
+        });
+
+        if (product) {
+          const newStock = product.stock + item.quantity;
+          await db
+            .collection("products")
+            .updateOne(
+              { _id: new ObjectId(item.productId) },
+              { $set: { stock: newStock } }
+            );
+          console.log(
+            `Stock increased for product ${item.productId}: ${newStock}`
+          );
+        } else {
+          console.warn(
+            `Product ${item.productId} not found in products collection`
+          );
+        }
+      }
+    }
+
+    // Если статус меняется с "cancelled" на активный ("accepted", "shipped", "delivered"), уменьшаем stock
+    if (order.status === "cancelled" && status !== "cancelled") {
+      for (const item of order.items) {
+        const product = await db.collection("products").findOne({
+          _id: new ObjectId(item.productId),
+        });
+
+        if (product) {
+          const newStock = product.stock - item.quantity;
+          if (newStock < 0) {
+            throw new Error(
+              `Not enough stock for product ${item.productId}. Required: ${item.quantity}, Available: ${product.stock}`
+            ); // Прерываем, если stock недостаточно
+          }
+
+          await db
+            .collection("products")
+            .updateOne(
+              { _id: new ObjectId(item.productId) },
+              { $set: { stock: newStock } }
+            );
+          console.log(
+            `Stock decreased for product ${item.productId}: ${newStock}`
+          );
+        } else {
+          console.warn(
+            `Product ${item.productId} not found in products collection`
+          );
+        }
+      }
     }
 
     const result = await db
@@ -124,7 +181,9 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error updating status:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
       { status: 500 }
     );
   } finally {

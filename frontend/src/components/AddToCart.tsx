@@ -3,15 +3,27 @@ import React, { useState, useEffect } from "react";
 import Button from "@/components/ui/Button/Button";
 import { useCart } from "@/providers/CartContext";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
+import { useSession, signOut } from "next-auth/react";
+
 // =================================
 
 // =================================
 const AddToCart = ({ product }: { product: any }) => {
+  const { data: session, status } = useSession();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const { cart, setCart } = useCart();
   // ==============================
   const handleAddToCart = async () => {
+    if (!session) {
+      setError("To add a product, please log in.");
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+      }, 2000);
+      return;
+    }
     const initialQuantity = 1;
     const currentItem = cart.find((item) => item.id === product._id);
     const currentQuantity = currentItem ? currentItem.quantity : 0;
@@ -21,6 +33,15 @@ const AddToCart = ({ product }: { product: any }) => {
       setError(
         `Cannot add more. Only ${product.stock} items available, you already have ${currentQuantity} in cart`
       );
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+      }, 2000);
+      return;
+    }
+    if (product.stock === 0) {
+      setError(`Cannot add product now. Out of stock.`);
       setShowModal(true);
       setTimeout(() => {
         setShowModal(false);

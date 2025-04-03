@@ -14,7 +14,7 @@ interface SelectProps {
     order: "accepted" | "shipped" | "delivered" | "cancelled"
   ) => void;
   selectItems: Item[];
-  initialValue?: string; // Теперь это value, например "shipped"
+  initialValue?: string;
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -23,8 +23,6 @@ const Select: React.FC<SelectProps> = ({
   initialValue,
 }) => {
   const [active, setActive] = useState<boolean>(false);
-
-  // Находим начальное имя по значению из initialValue
   const initialItem = selectItems.find((item) => item.value === initialValue);
   const [selectedValue, setSelectedValue] = useState<string>(
     initialItem ? initialItem.name : selectItems[0].name
@@ -44,7 +42,6 @@ const Select: React.FC<SelectProps> = ({
   }, []);
 
   useEffect(() => {
-    // Синхронизируем при изменении initialValue
     const item = selectItems.find((item) => item.value === initialValue);
     if (item && item.name !== selectedValue) {
       setSelectedValue(item.name);
@@ -60,19 +57,20 @@ const Select: React.FC<SelectProps> = ({
   const getStatusClass = (value: string) => {
     switch (value) {
       case "accepted":
-        return "bg-yellow-500 text-white";
+        return "bg-yellow-400 text-white border-yellow-500 border-2 hover:border-yellow-700";
       case "shipped":
-        return "bg-green-500 text-white";
+        return "bg-green-400 text-white border-green-500 border-2 hover:border-green-700";
       case "delivered":
-        return "bg-blue-500 text-white";
+        return "bg-blue-400 text-white border-blue-500 border-2 hover:border-blue-700";
       case "cancelled":
-        return "bg-red-500 text-white";
+        return "bg-red-400 text-white border-red-500 border-2   hover:border-red-700";
       default:
         return "";
     }
   };
 
   const selectedItem = selectItems.find((item) => item.name === selectedValue);
+
   const buttonClass = selectedItem
     ? getStatusClass(selectedItem.value)
     : getStatusClass(selectItems[0].value);

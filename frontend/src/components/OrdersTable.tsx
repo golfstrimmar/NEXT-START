@@ -4,15 +4,31 @@ import Select from "@/components/ui/Select/Select";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import Loading from "@/components/Loading/Loading";
 
+// interface Order {
+//   _id: string;
+//   email: string;
+//   total: number;
+//   items: { length: number };
+//   createdAt: string;
+//   status: string;
+// }
 interface Order {
-  _id: string; // Теперь строка, а не объект
+  _id: string;
   email: string;
   total: number;
-  items: { length: number };
-  createdAt: string; // Теперь строка ISO
+  items: Product[];
+  createdAt: string;
   status: string;
 }
-
+interface Product {
+  _id: string;
+  name: string;
+  price: string;
+  quantity: number;
+  imageSrc: string;
+  imageAlt: string;
+  color?: string;
+}
 interface OrdersTableProps {
   orders: Order[];
 }
@@ -98,7 +114,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {order.email}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm  text-gray-900">
                   ${order.total.toFixed(2)}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">

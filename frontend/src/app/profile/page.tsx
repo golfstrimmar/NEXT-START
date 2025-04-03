@@ -72,6 +72,7 @@ const Profile: React.FC = () => {
                     {session.user?.name}
                   </h3>
                   <p className="text-gray-600">{session.user?.email}</p>
+                  <p className="text-gray-600">{session.user?.role}</p>
                 </div>
               </div>
             </div>

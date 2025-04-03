@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb"; // Добавляем ObjectId
 import nodemailer from "nodemailer";
 
 const client = new MongoClient(process.env.MONGODB_URI!);
 const db = client.db("shop");
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -11,13 +12,13 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
 });
+
 export async function POST(request: Request) {
   try {
-    await client.connect(); // Подключаемся к базе
+    await client.connect();
 
     const { cart, total, shipping, payment } = await request.json();
 
-    // Проверка на наличие данных
     if (!cart || !total || !shipping || !payment) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -25,7 +26,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Формируем документ заказа
     const order = {
       email: shipping.email,
       total,
@@ -55,11 +55,40 @@ export async function POST(request: Request) {
       createdAt: new Date(),
     };
 
-    // Сохраняем заказ в коллекцию "orders"
+    // Уменьшаем stock для каждого продукта в корзине
+    for (const item of order.items) {
+      const product = await db.collection("products").findOne({
+        _id: new ObjectId(item.productId),
+      });
+
+      if (product) {
+        const newStock = product.stock - item.quantity;
+        if (newStock < 0) {
+          throw new Error(
+            `Not enough stock for product ${item.productId}. Required: ${item.quantity}, Available: ${product.stock}`
+          ); // Прерываем, если stock недостаточно
+        }
+
+        await db
+          .collection("products")
+          .updateOne(
+            { _id: new ObjectId(item.productId) },
+            { $set: { stock: newStock } }
+          );
+        console.log(`Stock updated for product ${item.productId}: ${newStock}`);
+      } else {
+        console.warn(
+          `Product ${item.productId} not found in products collection`
+        );
+      }
+    }
+
+    // Сохраняем заказ после успешного обновления stock
     const result = await db.collection("orders").insertOne(order);
     const orderId = result.insertedId.toString();
 
-    // Отправка письма клиенту
+    console.log("Order saved to DB:", { ...order, _id: orderId });
+
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: shipping.email,
@@ -83,8 +112,12 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error saving order:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
       { status: 500 }
     );
+  } finally {
+    await client.close();
   }
 }

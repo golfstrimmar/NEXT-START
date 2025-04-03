@@ -1,5 +1,6 @@
 import React from "react";
 import "./ModalMessage.scss";
+
 interface ModalMessageProps {
   message: string;
   open: boolean;

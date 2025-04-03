@@ -1,9 +1,38 @@
 import { MongoClient } from "mongodb";
+import { getServerSession } from "next-auth/next";
+import { authConfig } from "../api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
 import OrdersTable from "@/components/OrdersTable";
 console.log("MONGODB_URI:", process.env.MONGODB_URI);
 const client = new MongoClient(process.env.MONGODB_URI!);
 const db = client.db("shop");
+import ModalAdmin from "@/components/admin/ModalAdmin";
+
+interface Order {
+  _id: string;
+  email: string;
+  total: number;
+  items: Product[];
+  createdAt: string;
+  status: string;
+}
+interface Product {
+  _id: string;
+  name: string;
+  price: string;
+  quantity: number;
+  imageSrc: string;
+  imageAlt: string;
+  color?: string;
+}
+
 export default async function AdminDashboard() {
+  const session = await getServerSession(authConfig);
+
+  if (!session || !session.user || session.user.role !== "admin") {
+    return <ModalAdmin />;
+  }
+
   try {
     await client.connect();
     console.log("Connected to MongoDB");
@@ -48,60 +77,6 @@ export default async function AdminDashboard() {
           </div>
         </div>
         <OrdersTable orders={orders} />
-        {/* Таблица заказов */}
-        {/* <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Order ID
-                  </th>
-                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
-                  </th>
-                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Items
-                  </th>
-                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {orders.map((order) => (
-                  <tr key={order._id.toString()}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {order._id.toString().slice(-6)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {order.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${order.total.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      {order.items.length} item(s)
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {order.status.toString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div> */}
       </div>
     );
   } catch (error) {

@@ -7,13 +7,8 @@ export async function POST(req: NextRequest) {
   try {
     await dbConnect();
 
-    const {
-      name,
-      email,
-      password,
-    }: { name: string; email: string; password: string } = await req.json();
+    const { name, email, password } = await req.json();
 
-    // Валидация входных данных
     if (!name || !email || !password) {
       return NextResponse.json(
         { error: "All fields are required" },
@@ -21,7 +16,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Проверка существования пользователя
     const existingUser = await User.findOne({ $or: [{ email }, { name }] });
     if (existingUser) {
       return NextResponse.json(
@@ -30,17 +24,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Хеширование пароля
+    const userCount = await User.countDocuments();
+    const role = userCount === 0 ? "admin" : "user";
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Создание нового пользователя
     const user: IUser = new User({
       name,
       email,
       password: hashedPassword,
+      isPasswordSet: true, // Явно указываем
+      role,
     });
 
     await user.save();
+
+    console.log("New user created with role:", { name, email, role });
 
     return NextResponse.json(
       { message: "Registration successful" },

@@ -3,8 +3,12 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IUser extends Document {
   name: string;
   email: string;
-  password: string;
+  password?: string;
   createdAt: Date;
+  role: string;
+  googleId?: string;
+  image?: string;
+  isPasswordSet: boolean;
 }
 
 const userSchema: Schema = new Schema({
@@ -23,12 +27,30 @@ const userSchema: Schema = new Schema({
   },
   password: {
     type: String,
-    required: [true, "Password is required"],
+    required: false, // Необязательно
     minlength: [6, "Password must be at least 6 characters"],
   },
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  role: {
+    type: String,
+    required: [true, "Role is required"],
+    enum: ["user", "admin"],
+    default: "user",
+  },
+  googleId: {
+    type: String,
+    required: false,
+  },
+  image: {
+    type: String,
+    required: false,
+  },
+  isPasswordSet: {
+    type: Boolean,
+    default: false,
   },
 });
 

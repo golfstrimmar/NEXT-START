@@ -479,28 +479,14 @@ export default function Navbar() {
                       </PopoverPanel>
                     </Popover>
                   ))}
-                  {/* <div className=" flow-root ml-6">
-                    <div
-                      onClick={handleCartClick}
-                      className="group -m-2 flex items-center p-2 cursor-pointer"
-                    >
-                      <ShoppingBagIcon
-                        aria-hidden="true"
-                        className="size-6 shrink-0 text-gray-400 group-hover:text-gray-500"
-                      />
-                      <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-indigo-500">
-                        <p>{totalItems}</p>
-                      </span>
-                      <span className="sr-only">items in cart, view bag</span>
-                    </div>
-                  </div> */}
+
                   {navigation.pages.map((page) => (
                     <Link
                       key={page.name}
                       href={page.href}
-                      className={`flex items-center text-sm  text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                      className={`flex items-center text-sm  border-bottom border-indigo-600 text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
                         activeLink.startsWith(page.href)
-                          ? "text-indigo-800 font-bold text-lg"
+                          ? " border-b-2 border-indigo-600 text-indigo-600"
                           : "text-gray-700 font-medium"
                       }`}
                     >
@@ -510,15 +496,15 @@ export default function Navbar() {
                 </div>
               </PopoverGroup>
 
-              <div className="ml-auto flex items-center">
-                <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
+              <div className="ml-auto flex items-center h-[100%]">
+                <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6 h-[100%]">
                   {/* Десктопное меню */}
                   {session ? (
                     <>
                       {session.user?.image && (
                         <Link href="/profile">
                           <img
-                            className="rounded-full mr-2 w-10 h-10 cursor-pointer"
+                            className="rounded-full mr-2 w-10 h-10 cursor-pointer "
                             src={session.user?.image}
                             alt={session.user?.name || "User avatar"}
                           />
@@ -538,10 +524,10 @@ export default function Navbar() {
                     <>
                       <Link
                         href="/auth/signin"
-                        className={`flex items-center text-sm  text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out 
+                        className={`flex items-center text-sm h-[100%]  text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out 
                             ${
                               "/auth/signin" === activeLink
-                                ? "text-indigo-800 font-bold text-lg"
+                                ? " border-b-2 border-indigo-600 text-indigo-600"
                                 : "text-gray-700 font-medium"
                             }`}
                       >
@@ -553,10 +539,10 @@ export default function Navbar() {
                       />
                       <Link
                         href="/auth/signup"
-                        className={`flex items-center text-sm  text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out 
+                        className={`flex items-center text-sm h-[100%] text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out 
                             ${
                               "/auth/signup" === activeLink
-                                ? "text-indigo-800 font-bold text-lg"
+                                ? " border-b-2 border-indigo-600 text-indigo-600"
                                 : "text-gray-700 font-medium"
                             }`}
                       >

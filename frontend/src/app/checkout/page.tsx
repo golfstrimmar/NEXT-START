@@ -15,15 +15,15 @@ export default function CheckoutPage() {
   const { data: session, status } = useSession();
   const [formData, setFormData] = useState({
     email: "",
-    addressLine1: "",
-    addressLine2: "",
-    city: "",
-    state: "",
-    postalCode: "",
-    country: "",
-    cardNumber: "",
-    expirationDate: "",
-    cvv: "",
+    addressLine1: "123 Main St",
+    addressLine2: "Apartment, suite, etc.",
+    city: "New York",
+    state: "NY",
+    postalCode: "12345",
+    country: "United States",
+    cardNumber: "1234 5678 9012 3456",
+    expirationDate: "12/24",
+    cvv: "123",
   });
 
   useEffect(() => {
