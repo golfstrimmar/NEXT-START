@@ -8,7 +8,7 @@ const ModalConfirmDelete: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="fixed inset-0  z-200 flex  items-center justify-center bg-[#000000e6] ">
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
         <p className="text-lg ">{message}</p>
         {error && <p className="text-red-500 mt-4">{error}</p>}
