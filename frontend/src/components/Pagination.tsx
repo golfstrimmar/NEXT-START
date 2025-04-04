@@ -3,19 +3,19 @@ import ShevronLeft from "@/assets/svg/chevron-left.svg";
 import ShevronRight from "@/assets/svg/chevron-right.svg";
 
 interface PaginationProps<T> {
-  items: T[];
+  totalItems: number;
   itemsPerPage: number;
   currentPage: number;
   setCurrentPage: (page: number) => void;
 }
 
 const Pagination = <T,>({
-  items,
+  totalItems,
   itemsPerPage,
   currentPage,
   setCurrentPage,
 }: PaginationProps<T>) => {
-  const totalPages = Math.ceil(items.length / itemsPerPage);
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const prevPage = () => {
     if (currentPage > 1) {

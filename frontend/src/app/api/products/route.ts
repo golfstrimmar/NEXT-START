@@ -34,16 +34,34 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const inStock = searchParams.get("inStock");
+  const minPrice = searchParams.get("minPrice");
+  const maxPrice = searchParams.get("maxPrice");
+  const name = searchParams.get("name");
+  const page = Number(searchParams.get("page")) || 1;
+  const limit = Number(searchParams.get("limit")) || 4;
+
   let filter = {};
   if (inStock === "in Stock") {
     filter = { stock: { $gt: 0 } };
   } else if (inStock === "out of Stock") {
     filter = { stock: 0 };
   }
+  if (minPrice || maxPrice) {
+    filter.price = {};
+    if (minPrice) filter.price.$gte = Number(minPrice);
+    if (maxPrice) filter.price.$lte = Number(maxPrice);
+  }
+  if (name) {
+    filter.name = { $regex: name, $options: "i" };
+  }
+
   try {
     await dbConnect();
-    const products = await Product.find(filter);
-    return NextResponse.json(products);
+    const skip = (page - 1) * limit;
+    const products = await Product.find(filter).skip(skip).limit(limit);
+    const total = await Product.countDocuments(filter);
+
+    return NextResponse.json({ products, total });
   } catch (error) {
     console.error("Error fetching products:", error);
     return NextResponse.json(
@@ -52,6 +70,8 @@ export async function GET(request: Request) {
     );
   }
 }
+
+// ======Update======
 export async function PUT(request: Request) {
   try {
     await dbConnect();

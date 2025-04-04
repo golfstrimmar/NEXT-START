@@ -36,7 +36,7 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
 
       <div className="mt-4">
         <h3 className="text-sm text-gray-700">Name: {product.name}</h3>
-        <p className="mt-1 text-sm text-gray-500">Price: {product.price}</p>
+        <p className="mt-1 text-sm text-gray-500">Price: ${product.price}</p>
         {product.color && (
           <p className="mt-1 text-sm text-gray-500">Color: {product.color}</p>
         )}

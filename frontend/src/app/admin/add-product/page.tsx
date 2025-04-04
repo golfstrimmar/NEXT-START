@@ -5,25 +5,25 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import ImagesIcon from "@/assets/svg/images.svg";
-
+import Button from "@/components/ui/Button/Button";
 interface ProductForm {
   name: string;
-  price: string;
+  price: number;
   imageSrc: string;
   imageAlt: string;
   color?: string;
-  stock: number; // Добавили stock
+  stock: number;
 }
 
 const AddProductPage: React.FC = () => {
   const router = useRouter();
   const [formData, setFormData] = useState<ProductForm>({
     name: "",
-    price: "",
+    price: 0,
     imageSrc: "",
     imageAlt: "",
     color: "",
-    stock: 1, // Дефолтное значение
+    stock: 1,
   });
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
@@ -42,8 +42,8 @@ const AddProductPage: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    // Для stock преобразуем в число
-    const newValue = name === "stock" ? parseInt(value) || 0 : value;
+    const newValue =
+      name === "stock" || name === "price" ? parseInt(value) || 0 : value;
     setFormData((prev) => ({ ...prev, [name]: newValue }));
   };
 
@@ -74,9 +74,8 @@ const AddProductPage: React.FC = () => {
     e.preventDefault();
     setError("");
     setLoading(true);
-
+    console.log("<====formData====>", formData);
     try {
-      // Валидация обязательных полей
       const requiredFields = [
         { name: "name", value: formData.name, message: "Name is required" },
         { name: "price", value: formData.price, message: "Price is required" },
@@ -105,7 +104,8 @@ const AddProductPage: React.FC = () => {
       }
 
       // Валидация цены
-      const priceValue = parseFloat(formData.price);
+      // const priceValue = parseFloat(formData.price);
+      const priceValue = formData.price;
       if (isNaN(priceValue)) throw new Error("Invalid price format");
       if (priceValue <= 0) throw new Error("Price must be greater than 0");
 
@@ -136,7 +136,7 @@ const AddProductPage: React.FC = () => {
           ...formData,
           price: priceValue,
           imageSrc: imageUrl,
-          stock: formData.stock, // Добавили stock
+          stock: formData.stock,
         }),
       });
 
@@ -153,7 +153,7 @@ const AddProductPage: React.FC = () => {
         router.push("/products");
         setFormData({
           name: "",
-          price: "",
+          price: 0,
           imageSrc: "",
           imageAlt: "",
           color: "",
@@ -188,21 +188,15 @@ const AddProductPage: React.FC = () => {
 
           <Input
             id="price"
-            typeInput="text"
+            typeInput="number"
             data="Price * (e.g., 49.99)"
             name="price"
-            value={formData.price}
-            onChange={(e) => {
-              const value = e.target.value
-                .replace(/[^0-9.]/g, "")
-                .replace(/(\..*)\./g, "$1");
-              setFormData((prev) => ({ ...prev, price: value }));
-            }}
+            value={formData.price.toString()}
+            onChange={handleChange}
             required
-            pattern="^\d+(\.\d{1,2})?$"
-            aria-invalid={!!error && !formData.price.trim()}
+            min="0"
+            aria-invalid={!!error && formData.price <= 0}
           />
-
           <div>
             <Input
               id="imageSrc"
@@ -284,7 +278,7 @@ const AddProductPage: React.FC = () => {
             typeInput="number"
             data="Stock *"
             name="stock"
-            value={formData.stock.toString()} // Преобразуем в строку для input
+            value={formData.stock.toString()}
             onChange={handleChange}
             required
             min="1" // Минимальное значение
@@ -297,13 +291,9 @@ const AddProductPage: React.FC = () => {
             </p>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-gray-400"
-          >
+          <Button type="submit" disabled={loading}>
             {loading ? "Adding..." : "Add Product"}
-          </button>
+          </Button>
         </form>
       </div>
     </div>
