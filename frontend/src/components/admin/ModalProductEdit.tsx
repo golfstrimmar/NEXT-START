@@ -1,19 +1,21 @@
 "use client";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Button from "../ui/Button/Button";
 interface Product {
   _id: string;
   name: string;
   price: string;
+  category?: string;
+  color?: string;
   imageSrc: string;
   imageAlt: string;
-  color?: string;
 }
 
 interface ModalProductEditProps {
-  product: Product; // Продукт для редактирования
-  onSave: (updatedProduct: Product) => void; // Callback для сохранения
-  onCancel: () => void; // Callback для закрытия
+  product: Product;
+  onSave: (updatedProduct: Product) => void;
+  onCancel: () => void;
 }
 
 const ModalProductEdit: React.FC<ModalProductEditProps> = ({
@@ -91,12 +93,8 @@ const ModalProductEdit: React.FC<ModalProductEditProps> = ({
             >
               Cancel
             </button>
-            <button
-              onClick={handleSubmit}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md"
-            >
-              Save
-            </button>
+
+            <Button onClick={handleSubmit}>Save</Button>
           </div>
         </div>
       </motion.div>

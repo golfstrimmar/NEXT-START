@@ -6,18 +6,17 @@ export async function POST(request: Request) {
   try {
     await dbConnect();
     const data = await request.json();
-
     const product = new Product({
       name: data.name,
       price: data.price,
       imageSrc: data.imageSrc,
       imageAlt: data.imageAlt,
+      category: data.category,
       color: data.color || undefined,
       stock: data.stock,
     });
 
     await product.save();
-
     return NextResponse.json(
       { message: "Product added successfully", product },
       { status: 201 }
@@ -37,10 +36,10 @@ export async function GET(request: Request) {
   const minPrice = searchParams.get("minPrice");
   const maxPrice = searchParams.get("maxPrice");
   const name = searchParams.get("name");
+  const category = searchParams.get("category");
   const color = searchParams.get("color");
   const page = Number(searchParams.get("page")) || 1;
   const limit = Number(searchParams.get("limit")) || 4;
-
   let filter: any = {};
   if (inStock === "in Stock") {
     filter.stock = { $gt: 0 };
@@ -56,15 +55,20 @@ export async function GET(request: Request) {
     filter.name = { $regex: name, $options: "i" };
   }
   if (color) {
-    filter.color = color; // Фильтр по цвету (точное совпадение)
+    filter.color = color;
   }
-
+  if (category) {
+    category === "all" ? null : (filter.category = category);
+  }
   try {
     await dbConnect();
     const skip = (page - 1) * limit;
     const products = await Product.find(filter).skip(skip).limit(limit);
     const total = await Product.countDocuments(filter);
-
+    console.log("API response:", {
+      products,
+      total,
+    });
     return NextResponse.json({ products, total });
   } catch (error) {
     console.error("Error fetching products:", error);

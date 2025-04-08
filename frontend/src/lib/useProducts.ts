@@ -1,15 +1,18 @@
+"use client";
 import { useState, useEffect } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 interface Product {
   _id: string;
   name: string;
-  price: string;
+  price: number;
   imageSrc: string;
   imageAlt: string;
   color?: string;
-  createdAt: string;
-  stock: number;
-  __v: number;
+  category?: string;
+  stock?: number;
+  createdAt?: string;
+  __v?: number;
 }
 
 export const useProducts = (
@@ -17,15 +20,37 @@ export const useProducts = (
   initialProducts: Product[] = [],
   initialTotal: number = 0
 ) => {
-  const [nameFilter, setNameFilter] = useState<string>("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const [nameFilter, setNameFilter] = useState<string>(
+    searchParams.get("name") || ""
+  );
+  const [priceRange, setPriceRange] = useState<[number, number]>([
+    parseInt(searchParams.get("minPrice") || "0"),
+    parseInt(searchParams.get("maxPrice") || "1000"),
+  ]);
+  const [currentPage, setCurrentPage] = useState<number>(
+    parseInt(searchParams.get("page") || "1")
+  );
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [totalItems, setTotalItems] = useState<number>(initialTotal);
-  const [inStockFilter, setInStockFilter] = useState<string | null>("all");
-  const [colorFilter, setColorFilter] = useState<string | null>(null); // Новый фильтр по цвету
+  const [inStockFilter, setInStockFilter] = useState<string | null>(
+    searchParams.get("inStock") || "all"
+  );
+  const [colorFilter, setColorFilter] = useState<string | null>(
+    searchParams.get("color") || null
+  );
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(
+    searchParams.get("category") || null
+  );
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  // ======================================
+  // ======================================
+  // ======================================
 
   const handleGetProducts = async () => {
     setLoading(true);
@@ -38,8 +63,11 @@ export const useProducts = (
       page: currentPage.toString(),
       limit: itemsPerPage.toString(),
       inStock: inStockFilter?.toString() || "all",
-      ...(colorFilter && { color: colorFilter }), // Добавляем цвет, если он выбран
+      ...(colorFilter && { color: colorFilter }),
+      ...(categoryFilter && { category: categoryFilter }),
     });
+
+    console.log("Fetching products with params:", params.toString());
 
     try {
       const response = await fetch(
@@ -56,8 +84,27 @@ export const useProducts = (
         );
       }
       const data = await response.json();
+      console.log("Received data:", {
+        products: data.products.length,
+        total: data.total,
+      });
       setProducts(data.products);
       setTotalItems(data.total);
+
+      const maxPages = Math.ceil(data.total / itemsPerPage);
+      console.log(
+        "Calculated maxPages:",
+        maxPages,
+        "currentPage:",
+        currentPage
+      );
+      if (currentPage > maxPages && maxPages > 0) {
+        setCurrentPage(maxPages);
+      } else if (data.total === 0) {
+        setCurrentPage(1);
+      }
+
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
     } catch (error) {
       console.error("Error fetching products:", error);
       setError(error instanceof Error ? error.message : "Something went wrong");
@@ -73,7 +120,14 @@ export const useProducts = (
       handleGetProducts();
     }, 300);
     return () => clearTimeout(timer);
-  }, [nameFilter, priceRange, currentPage, inStockFilter, colorFilter]);
+  }, [
+    nameFilter,
+    priceRange,
+    inStockFilter,
+    colorFilter,
+    categoryFilter,
+    currentPage,
+  ]);
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
@@ -91,11 +145,27 @@ export const useProducts = (
     setCurrentPage(1);
   };
 
+  const handleInStockChange = (value: string) => {
+    setInStockFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleColorChange = (value: string | null) => {
+    setColorFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleCategoryChange = (value: string | null) => {
+    setCategoryFilter(value);
+    setCurrentPage(1);
+  };
+
   const resetFilters = () => {
     setNameFilter("");
     setPriceRange([0, 1000]);
     setInStockFilter("all");
-    setColorFilter(null); // Сбрасываем цвет
+    setColorFilter(null);
+    setCategoryFilter(null);
     setCurrentPage(1);
     handleGetProducts();
   };
@@ -110,9 +180,11 @@ export const useProducts = (
     priceRange,
     setPriceRange,
     inStockFilter,
-    setInStockFilter,
-    colorFilter, // Возвращаем новый фильтр
-    setColorFilter,
+    setInStockFilter: handleInStockChange,
+    colorFilter,
+    setColorFilter: handleColorChange,
+    categoryFilter,
+    setCategoryFilter: handleCategoryChange,
     currentPage,
     setCurrentPage,
     handlePriceChange,

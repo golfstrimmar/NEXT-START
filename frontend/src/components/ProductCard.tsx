@@ -1,5 +1,3 @@
-// "use client";
-// import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import AddToCart from "./AddToCart";
 
@@ -9,6 +7,7 @@ interface ProductProps {
   imageSrc: string;
   imageAlt: string;
   price: string;
+  category?: string;
   color?: string;
   stock?: number;
 }
@@ -39,6 +38,11 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
         <p className="mt-1 text-sm text-gray-500">Price: ${product.price}</p>
         {product.color && (
           <p className="mt-1 text-sm text-gray-500">Color: {product.color}</p>
+        )}
+        {product.category && (
+          <p className="mt-1 text-sm text-gray-500">
+            Category: {product.category}
+          </p>
         )}
 
         <p

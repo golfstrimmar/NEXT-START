@@ -139,7 +139,7 @@ export const authConfig: AuthOptions = {
         token.isPasswordSet = user.isPasswordSet;
         token.role = user.role;
       }
-      console.log("JWT token:", token);
+
       return token;
     },
     async session({ session, token }) {
@@ -151,7 +151,7 @@ export const authConfig: AuthOptions = {
         session.user.isPasswordSet = token.isPasswordSet;
         session.user.role = token.role;
       }
-      console.log("Session after update:", session);
+
       return session;
     },
   },

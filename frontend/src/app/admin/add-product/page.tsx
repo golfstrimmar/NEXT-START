@@ -12,6 +12,7 @@ interface ProductForm {
   imageSrc: string;
   imageAlt: string;
   color?: string;
+  category?: string;
   stock: number;
 }
 
@@ -23,6 +24,7 @@ const AddProductPage: React.FC = () => {
     imageSrc: "",
     imageAlt: "",
     color: "",
+    category: "",
     stock: 1,
   });
   const [error, setError] = useState<string>("");
@@ -85,6 +87,11 @@ const AddProductPage: React.FC = () => {
           message: "Image description is required",
         },
         {
+          name: "category",
+          value: formData.category,
+          message: "Category is required",
+        },
+        {
           name: "stock",
           value: formData.stock,
           message: "Stock is required",
@@ -128,6 +135,8 @@ const AddProductPage: React.FC = () => {
         imageUrl = response.data.secure_url;
       }
 
+      console.log("<====formData.category====>", formData.category);
+
       // Отправка данных
       const res = await fetch("/api/products", {
         method: "POST",
@@ -136,6 +145,7 @@ const AddProductPage: React.FC = () => {
           ...formData,
           price: priceValue,
           imageSrc: imageUrl,
+          category: formData.category,
           stock: formData.stock,
         }),
       });
@@ -156,6 +166,7 @@ const AddProductPage: React.FC = () => {
           price: 0,
           imageSrc: "",
           imageAlt: "",
+          category: "",
           color: "",
           stock: 1,
         });
@@ -272,6 +283,14 @@ const AddProductPage: React.FC = () => {
             value={formData.color}
             onChange={handleChange}
           />
+          <Input
+            id="category"
+            typeInput="text"
+            data="Category"
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+          />
 
           <Input
             id="stock"
@@ -281,7 +300,7 @@ const AddProductPage: React.FC = () => {
             value={formData.stock.toString()}
             onChange={handleChange}
             required
-            min="1" // Минимальное значение
+            min="1"
             aria-invalid={!!error && formData.stock <= 0}
           />
 

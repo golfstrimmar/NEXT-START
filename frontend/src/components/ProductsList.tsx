@@ -4,6 +4,7 @@ import ProductCard from "@/components/ProductCard";
 import Pagination from "@/components/Pagination";
 import Filters from "@/components/Filters";
 import { useProducts } from "@/lib/useProducts";
+import Loading from "./Loading/Loading";
 
 interface Product {
   _id: string;
@@ -12,6 +13,7 @@ interface Product {
   imageSrc: string;
   imageAlt: string;
   color?: string;
+  category?: string;
   createdAt: string;
   stock: number;
   __v: number;
@@ -36,7 +38,9 @@ const ProductsList: React.FC<ProductsListProps> = ({
     inStockFilter,
     setInStockFilter,
     colorFilter,
+    categoryFilter,
     setColorFilter,
+    setCategoryFilter,
     currentPage,
     setCurrentPage,
     handlePriceChange,
@@ -59,7 +63,9 @@ const ProductsList: React.FC<ProductsListProps> = ({
               inStockFilter={inStockFilter}
               setInStockFilter={setInStockFilter}
               colorFilter={colorFilter}
+              categoryFilter={categoryFilter}
               setColorFilter={setColorFilter}
+              setCategoryFilter={setCategoryFilter}
               handlePriceChange={handlePriceChange}
               handleNameChange={handleNameChange}
               resetFilters={resetFilters}
@@ -68,7 +74,7 @@ const ProductsList: React.FC<ProductsListProps> = ({
 
           <div>
             {loading ? (
-              <div className="text-center mt-6">Loading...</div>
+              <Loading />
             ) : error ? (
               <p className="text-red-500 text-center mt-6">{error}</p>
             ) : products.length === 0 ? (

@@ -7,6 +7,7 @@ interface Product {
   price: string;
   imageSrc: string;
   imageAlt: string;
+  category?: string;
   color?: string;
   createdAt: string;
   stock: number;
@@ -16,7 +17,7 @@ interface Product {
 async function getInitialProducts() {
   const params = new URLSearchParams({
     page: "1",
-    limit: "4",
+    limit: "40000",
     inStock: "all",
   });
   const response = await fetch(
