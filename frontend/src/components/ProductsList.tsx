@@ -5,7 +5,7 @@ import Pagination from "@/components/Pagination";
 import Loading from "@/components/Loading/Loading";
 import InputRadio from "./ui/InputRadio/InputRadio";
 import { useProducts } from "@/lib/useProducts";
-
+import Input from "./ui/Input/Input";
 interface Product {
   _id: string;
   name: string;
@@ -33,24 +33,22 @@ const ProductsList: React.FC = () => {
     handlePriceChange,
     handleNameChange,
     resetFilters,
-  } = useProducts(4); // 4 продукта на страницу
+  } = useProducts(4);
 
   return (
     <div className="bg-white">
       <div className="mx-auto my-4 max-w-2xl px-4 sm:px-6 sm:py-4 lg:max-w-7xl lg:px-8">
         <h1 className="text-2xl font-bold mb-6">Products</h1>
-
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Filter by name
             </label>
-            <input
-              type="text"
-              placeholder="Enter part of the name"
+            <Input
+              typeInput="text"
+              data="Enter part of the name"
               value={nameFilter}
               onChange={handleNameChange}
-              className="mt-1 px-4 py-2 border rounded-md w-full"
             />
           </div>
           <div>
@@ -92,7 +90,6 @@ const ProductsList: React.FC = () => {
             Reset Filters
           </button>
         </div>
-
         {products.length === 0 ? (
           <p className="text-center mt-6">There are no products</p>
         ) : (
@@ -102,7 +99,6 @@ const ProductsList: React.FC = () => {
             ))}
           </div>
         )}
-
         {totalItems > 0 && (
           <Pagination
             totalItems={totalItems}
