@@ -87,7 +87,7 @@ const AddToCart = ({ product }: { product: any }) => {
   // ==============================
   // ==============================
   return (
-    <div className=" w-full flex justify-center ">
+    <div className="">
       {error && <ModalMessage message={error} open={showModal} />}
       <Button onClick={handleAddToCart} buttonText="Add to Cart" />
     </div>

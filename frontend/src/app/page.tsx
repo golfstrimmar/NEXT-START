@@ -1,12 +1,7 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import HomeImg from "@/assets/svg/home.svg";
-import Image from "next/image";
-import IMG10 from "@/assets/images/15.jpg";
-import Slider from "@/components/Slider";
-import Button from "@/components/ui/Button/Button";
 import SwiperSlider from "@/components/SwiperSlider";
-import { useSession, signOut } from "next-auth/react";
+import ProductCard from "@/components/ProductCard";
+import { fetchPopularProducts } from "@/lib/fetchPopularProducts";
+
 type Slide = {
   src: string;
   title: string;
@@ -15,7 +10,7 @@ type Slide = {
   buttonLink: string;
 };
 
-export default function Home() {
+export default async function Home() {
   const slides: Slide[] = [
     {
       src: "/images/i-3.jpg",
@@ -37,16 +32,28 @@ export default function Home() {
       buttonLink: "/about",
     },
   ];
-  const { data: session, status } = useSession();
-  useEffect(() => {
-    console.log("Session:", session);
-  }, [session]);
+  const popularProducts = await fetchPopularProducts();
 
   return (
     <div>
-      {/* <HomeImg className="inline-block mr-2 w-8 h-8"></HomeImg> */}
-      {/* <Slider slides={slides} /> */}
       <SwiperSlider slides={slides} />
+      <h2 className="text-2xl md:text-4xl font-bold text-gray-900 text-center mt-4">
+        Most Popular Products
+      </h2>
+
+      <div className="p-4 max-w-[1600px] mx-auto">
+        <section className="mb-12">
+          {popularProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {popularProducts.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <p>No popular products available.</p>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
