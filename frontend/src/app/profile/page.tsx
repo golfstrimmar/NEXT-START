@@ -52,7 +52,7 @@ const Profile: React.FC = () => {
 
   return (
     <div className="profile">
-      <div className="mx-auto max-w-7xl my-4">
+      <div className="mx-auto max-w-[1600px] my-4">
         {session ? (
           <>
             <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-[0_0_8px_rgba(0,0,0,0.1)]">

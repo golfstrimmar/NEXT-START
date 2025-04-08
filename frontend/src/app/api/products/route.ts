@@ -37,14 +37,15 @@ export async function GET(request: Request) {
   const minPrice = searchParams.get("minPrice");
   const maxPrice = searchParams.get("maxPrice");
   const name = searchParams.get("name");
+  const color = searchParams.get("color");
   const page = Number(searchParams.get("page")) || 1;
   const limit = Number(searchParams.get("limit")) || 4;
 
-  let filter = {};
+  let filter: any = {};
   if (inStock === "in Stock") {
-    filter = { stock: { $gt: 0 } };
+    filter.stock = { $gt: 0 };
   } else if (inStock === "out of Stock") {
-    filter = { stock: 0 };
+    filter.stock = 0;
   }
   if (minPrice || maxPrice) {
     filter.price = {};
@@ -53,6 +54,9 @@ export async function GET(request: Request) {
   }
   if (name) {
     filter.name = { $regex: name, $options: "i" };
+  }
+  if (color) {
+    filter.color = color; // Фильтр по цвету (точное совпадение)
   }
 
   try {

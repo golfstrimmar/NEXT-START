@@ -7,6 +7,8 @@ import { useState } from "react";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Loading from "@/components/Loading/Loading";
+
 export default function CheckoutPage() {
   const { cart, setCart } = useCart();
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -25,6 +27,7 @@ export default function CheckoutPage() {
     expirationDate: "12/24",
     cvv: "123",
   });
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (status === "authenticated" && session?.user?.email) {
@@ -40,7 +43,7 @@ export default function CheckoutPage() {
 
   // Считаем итоговую сумму
   const totalPrice = cart.reduce((sum, item) => {
-    const price = parseFloat(item.price.replace("$", "")) || 0;
+    const price = parseFloat(item.price) || 0;
     return sum + price * item.quantity;
   }, 0);
 
@@ -120,7 +123,7 @@ export default function CheckoutPage() {
       }, 1500);
       return;
     }
-
+    setLoading(true);
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -153,11 +156,13 @@ export default function CheckoutPage() {
 
       const data = await response.json();
       setCart([]);
+      setLoading(false);
       setError(data.message);
       setShowModal(true);
       setTimeout(() => {
         setShowModal(false);
         setError("");
+
         router.push("/products");
       }, 1500);
     } catch (error) {
@@ -176,11 +181,12 @@ export default function CheckoutPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Checkout</h1>
         {error && <ModalMessage message={error} open={showModal} />}
+        {loading && <Loading />}
         {cart.length === 0 ? (
           <div className="text-center">
             <p className="text-lg text-gray-600 mb-4">Your cart is empty</p>
             <Link
-              href="/shop"
+              href="/products"
               className="inline-block bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition"
             >
               Continue Shopping
@@ -209,8 +215,7 @@ export default function CheckoutPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {cart.map((item) => {
-                    const itemPrice =
-                      parseFloat(item.price.replace("$", "")) || 0;
+                    const itemPrice = parseFloat(item.price) || 0;
                     const itemTotal = itemPrice * item.quantity;
                     return (
                       <tr key={item.id}>

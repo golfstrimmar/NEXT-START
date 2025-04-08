@@ -1,4 +1,5 @@
 @import '@/scss/common/colors';
+
 .fildset-radio {
   .form-check {
     position: relative;
@@ -21,7 +22,7 @@
     line-height: 26px;
     line-height: 26px;
     padding: 0 0 0 46px;
-  transition: all 0.2s;
+    transition: all 0.2s;
 
     &:hover {
       color: lighten(green, 25%);
@@ -62,16 +63,16 @@
 
   input[type="radio"]:not(:checked)+label::before {
     border-radius: 50%;
-    width: 26px;
-    height: 26px;
+    width: 20px;
+    height: 20px;
     border: solid 2.4px #bababa;
     background: transparent;
   }
 
   input[type="radio"]:checked+label::before {
     border-radius: 50%;
-    width: 26px;
-    height: 26px;
+    width: 20px;
+    height: 20px;
     background: transparent;
     border: solid 2px green;
   }
@@ -83,7 +84,7 @@
     border-radius: 100%;
     top: 0;
     left: 0;
-    transform: translate(6px, 6px);
+    transform: translate(3px, 3px);
     border: solid 2px green;
     background-color: green;
   }
@@ -100,6 +101,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
     input[type="radio"]:checked+label {
       color: lighten(green, 25%);
       transition: all 0.2s;
@@ -123,8 +125,8 @@
       font-size: 15px;
     }
 
-         display: flex;
-         align-items: center;
+    display: flex;
+    align-items: center;
     column-gap: 5px;
   }
 

@@ -118,7 +118,7 @@ const Slider = ({ slides }: { slides: Slide[] }) => {
       >
         {extendedSlides.map((slide, index) => (
           <div key={index} className="relative w-full h-full flex-shrink-0">
-            <div className="mx-auto max-w-7xl py-[15%] px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-[1600px] py-[15%] px-4 sm:px-6 lg:px-8">
               <h2 className="text-2xl md:text-4xl font-bold text-white relative z-10">
                 {slide.title}
               </h2>

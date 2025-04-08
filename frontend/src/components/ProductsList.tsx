@@ -2,10 +2,9 @@
 import React from "react";
 import ProductCard from "@/components/ProductCard";
 import Pagination from "@/components/Pagination";
-import Loading from "@/components/Loading/Loading";
-import InputRadio from "./ui/InputRadio/InputRadio";
+import Filters from "@/components/Filters";
 import { useProducts } from "@/lib/useProducts";
-import Input from "./ui/Input/Input";
+
 interface Product {
   _id: string;
   name: string;
@@ -18,7 +17,15 @@ interface Product {
   __v: number;
 }
 
-const ProductsList: React.FC = () => {
+interface ProductsListProps {
+  initialProducts: Product[];
+  initialTotal: number;
+}
+
+const ProductsList: React.FC<ProductsListProps> = ({
+  initialProducts,
+  initialTotal,
+}) => {
   const {
     products,
     totalItems,
@@ -28,85 +35,64 @@ const ProductsList: React.FC = () => {
     setPriceRange,
     inStockFilter,
     setInStockFilter,
+    colorFilter,
+    setColorFilter,
     currentPage,
     setCurrentPage,
     handlePriceChange,
     handleNameChange,
     resetFilters,
-  } = useProducts(4);
+    loading,
+    error,
+  } = useProducts(4, initialProducts, initialTotal);
 
   return (
-    <div className="bg-white">
-      <div className="mx-auto my-4 max-w-2xl px-4 sm:px-6 sm:py-4 lg:max-w-7xl lg:px-8">
-        <h1 className="text-2xl font-bold mb-6">Products</h1>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Filter by name
-            </label>
-            <Input
-              typeInput="text"
-              data="Enter part of the name"
-              value={nameFilter}
-              onChange={handleNameChange}
+    <div className="">
+      <div className="mx-auto my-4 px-4 sm:px-6 sm:py-4  lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6">
+          <div className=" p-4 rounded-lg  bg-white">
+            <Filters
+              nameFilter={nameFilter}
+              setNameFilter={setNameFilter}
+              priceRange={priceRange}
+              setPriceRange={setPriceRange}
+              inStockFilter={inStockFilter}
+              setInStockFilter={setInStockFilter}
+              colorFilter={colorFilter}
+              setColorFilter={setColorFilter}
+              handlePriceChange={handlePriceChange}
+              handleNameChange={handleNameChange}
+              resetFilters={resetFilters}
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Price Range: ${priceRange[0]} - ${priceRange[1]}
-            </label>
-            <div className="flex space-x-4 mt-1">
-              <input
-                type="range"
-                name="minPrice"
-                min="0"
-                max="1000"
-                value={priceRange[0]}
-                onChange={handlePriceChange}
-                className="w-full"
-              />
-              <input
-                type="range"
-                name="maxPrice"
-                min="0"
-                max="1000"
-                value={priceRange[1]}
-                onChange={handlePriceChange}
-                className="w-full"
-              />
-            </div>
+            {loading ? (
+              <div className="text-center mt-6">Loading...</div>
+            ) : error ? (
+              <p className="text-red-500 text-center mt-6">{error}</p>
+            ) : products.length === 0 ? (
+              <p className="text-center mt-6">There are no products</p>
+            ) : (
+              <div className=" grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-x-6 gap-y-10">
+                {products.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
+              </div>
+            )}
+
+            {totalItems > 0 && (
+              <div className="mt-6">
+                <Pagination
+                  totalItems={totalItems}
+                  itemsPerPage={4}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                />
+              </div>
+            )}
           </div>
-          <InputRadio
-            type="radio"
-            data="inStock"
-            value={inStockFilter || "all"}
-            options={["in Stock", "out of Stock", "all"]}
-            onChange={(e) => setInStockFilter(e.target.value)}
-          />
-          <button
-            onClick={resetFilters}
-            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-          >
-            Reset Filters
-          </button>
         </div>
-        {products.length === 0 ? (
-          <p className="text-center mt-6">There are no products</p>
-        ) : (
-          <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-            {products.map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
-          </div>
-        )}
-        {totalItems > 0 && (
-          <Pagination
-            totalItems={totalItems}
-            itemsPerPage={4}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-          />
-        )}
       </div>
     </div>
   );

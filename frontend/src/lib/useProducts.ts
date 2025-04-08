@@ -1,24 +1,36 @@
-// lib/useProducts.ts
 import { useState, useEffect } from "react";
 
 interface Product {
   _id: string;
   name: string;
-  price: number;
+  price: string;
   imageSrc: string;
   imageAlt: string;
   color?: string;
+  createdAt: string;
+  stock: number;
+  __v: number;
 }
 
-export const useProducts = (itemsPerPage: number) => {
+export const useProducts = (
+  itemsPerPage: number,
+  initialProducts: Product[] = [],
+  initialTotal: number = 0
+) => {
   const [nameFilter, setNameFilter] = useState<string>("");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [totalItems, setTotalItems] = useState<number>(0);
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [totalItems, setTotalItems] = useState<number>(initialTotal);
   const [inStockFilter, setInStockFilter] = useState<string | null>("all");
+  const [colorFilter, setColorFilter] = useState<string | null>(null); // Новый фильтр по цвету
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleGetProducts = async () => {
+    setLoading(true);
+    setError(null);
+
     const params = new URLSearchParams({
       name: nameFilter,
       minPrice: priceRange[0].toString(),
@@ -26,6 +38,7 @@ export const useProducts = (itemsPerPage: number) => {
       page: currentPage.toString(),
       limit: itemsPerPage.toString(),
       inStock: inStockFilter?.toString() || "all",
+      ...(colorFilter && { color: colorFilter }), // Добавляем цвет, если он выбран
     });
 
     try {
@@ -47,8 +60,11 @@ export const useProducts = (itemsPerPage: number) => {
       setTotalItems(data.total);
     } catch (error) {
       console.error("Error fetching products:", error);
+      setError(error instanceof Error ? error.message : "Something went wrong");
       setProducts([]);
       setTotalItems(0);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,7 +73,7 @@ export const useProducts = (itemsPerPage: number) => {
       handleGetProducts();
     }, 300);
     return () => clearTimeout(timer);
-  }, [nameFilter, priceRange, currentPage, inStockFilter]);
+  }, [nameFilter, priceRange, currentPage, inStockFilter, colorFilter]);
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
@@ -79,7 +95,9 @@ export const useProducts = (itemsPerPage: number) => {
     setNameFilter("");
     setPriceRange([0, 1000]);
     setInStockFilter("all");
+    setColorFilter(null); // Сбрасываем цвет
     setCurrentPage(1);
+    handleGetProducts();
   };
 
   return {
@@ -93,10 +111,14 @@ export const useProducts = (itemsPerPage: number) => {
     setPriceRange,
     inStockFilter,
     setInStockFilter,
+    colorFilter, // Возвращаем новый фильтр
+    setColorFilter,
     currentPage,
     setCurrentPage,
     handlePriceChange,
     handleNameChange,
     resetFilters,
+    loading,
+    error,
   };
 };

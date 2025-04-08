@@ -15,7 +15,7 @@ interface ProductProps {
 
 const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
   return (
-    <div className={`group relative `}>
+    <div className="group relative shadow-lg rounded-lg grid grid-rows-[1fr_auto] overflow-hidden">
       <Link href={`/products/${product._id}`} className="relative block">
         <img
           alt={product.imageAlt}
@@ -34,7 +34,7 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
         </span>
       </Link>
 
-      <div className="mt-4">
+      <div className=" flex flex-col p-4 ">
         <h3 className="text-sm text-gray-700">Name: {product.name}</h3>
         <p className="mt-1 text-sm text-gray-500">Price: ${product.price}</p>
         {product.color && (
@@ -42,14 +42,15 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
         )}
 
         <p
-          className={`mt-1 text-sm text-gray-500 ${
+          className={`mt-1 mb-4 text-sm text-gray-500 ${
             product.stock === 0 ? "text-transparent" : ""
           }`}
         >
           Stock: {product.stock}
         </p>
-
-        <AddToCart product={product} />
+        <div className="mt-auto">
+          <AddToCart product={product} />
+        </div>
       </div>
     </div>
   );

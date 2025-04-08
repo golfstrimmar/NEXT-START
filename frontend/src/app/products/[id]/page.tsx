@@ -44,21 +44,19 @@ export default async function ProductPage({
 
   return (
     <Suspense fallback={<Loader />}>
-      <div className="mx-auto max-w-2xl px-4 py-8 flex flex-col items-center">
+      <div className="mx-auto max-w-2xl px-4 py-8 flex flex-col items-center space-y-2">
         <h1 className="text-3xl font-bold"> {product.name}</h1>
         <img
           src={product.imageSrc}
           alt={product.imageAlt}
-          className="aspect-square my-4 rounded-md bg-gray-200 object-cover lg:aspect-auto h-80 cursor-pointer"
+          className="aspect-square  rounded-md bg-gray-200 object-cover lg:aspect-auto h-80 cursor-pointer"
         />
-        <p className="mt-2 text-xl font-medium">
-          Product price: {product.price}
-        </p>
+        <p className=" text-xl font-medium">Product price: {product.price}</p>
         {product.color && (
-          <p className="mt-2 text-gray-500"> Product color: {product.color}</p>
+          <p className=" text-gray-500"> Product color: {product.color}</p>
         )}
         {product.stock && (
-          <p className="mt-2 text-gray-500"> Product stock: {product.stock}</p>
+          <p className=" text-gray-500"> Product stock: {product.stock}</p>
         )}
         <AddToCart product={product} />
       </div>

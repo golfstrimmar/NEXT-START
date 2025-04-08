@@ -191,7 +191,7 @@ export default function Navbar() {
     }
   };
   return (
-    <div className="bg-white">
+    <div>
       {error && <ModalMessage message={error} open={showModal} />}
       {/* Mobile menu */}
       <Dialog open={open} onClose={setOpen} className="relative z-40 lg:hidden">
@@ -368,7 +368,7 @@ export default function Navbar() {
         <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
           Get free delivery on orders over $100
         </p>
-        <nav aria-label="Top" className="mx-auto max-w-7xl  px-4">
+        <nav aria-label="Top" className="mx-auto max-w-[1600px]  px-4">
           <div className="border-b border-gray-200">
             <div className="flex h-16 items-center">
               <button
@@ -416,7 +416,7 @@ export default function Navbar() {
                           className="absolute inset-0 top-1/2 bg-white shadow-sm"
                         />
                         <div className="relative bg-white">
-                          <div className="mx-auto max-w-7xl px-8">
+                          <div className="mx-auto max-w-[1600px] px-8">
                             <div className="grid grid-cols-2 gap-x-8 gap-y-10 py-16">
                               <div className="col-start-2 grid grid-cols-2 gap-x-8">
                                 {category.featured.map((item) => (

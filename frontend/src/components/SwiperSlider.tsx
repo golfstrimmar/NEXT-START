@@ -54,7 +54,7 @@ const SwiperSlider = ({ slides }: { slides: Slide[] }) => {
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={index} className="relative">
-            <div className="absolute inset-0 z-10 flex flex-col  pt-[20%] pl-[10%] mx-auto max-w-7xl">
+            <div className="absolute inset-0 z-10 flex flex-col  pt-[20%] pl-[10%] mx-auto max-w-[1600px]">
               <h2 className="text-2xl md:text-4xl font-bold text-white relative z-10">
                 {slide.title}
               </h2>

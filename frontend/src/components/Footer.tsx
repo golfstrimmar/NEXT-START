@@ -7,7 +7,7 @@ import {
 export default function Footer() {
   return (
     <footer className="bg-white  px-4 mt-auto">
-      <div className="mx-auto max-w-7xl ">
+      <div className="mx-auto max-w-[1600px] ">
         {/* Верхняя часть с колонками */}
         <div className="border-t border-gray-200 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
