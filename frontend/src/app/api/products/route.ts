@@ -39,7 +39,7 @@ export async function GET(request: Request) {
   const category = searchParams.get("category");
   const color = searchParams.get("color");
   const page = Number(searchParams.get("page")) || 1;
-  const limit = Number(searchParams.get("limit")) || 4;
+  const limit = Number(searchParams.get("limit")) || 5;
   let filter: any = {};
   if (inStock === "in Stock") {
     filter.stock = { $gt: 0 };
