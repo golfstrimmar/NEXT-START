@@ -8,6 +8,7 @@ interface Product {
   imageSrc: string;
   imageAlt: string;
   category?: string;
+  details?: string[];
   color?: string;
   createdAt: string;
   stock: number;

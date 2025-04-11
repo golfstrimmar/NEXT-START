@@ -24,7 +24,7 @@
     transition: all 0.2s;
 
     &:hover {
-      color: lighten(green, 25%);
+      color: rgba(0, 128, 0, 0.774)
     }
   }
 
@@ -102,7 +102,7 @@
     align-items: center;
 
     input[type="radio"]:checked+label {
-      color: lighten(green, 25%);
+      color: rgba(0, 128, 0, 0.774);
       transition: all 0.2s;
       padding: 0 0 0 0;
     }

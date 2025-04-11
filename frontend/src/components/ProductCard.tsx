@@ -1,31 +1,38 @@
 import Link from "next/link";
 import AddToCart from "./AddToCart";
 
+interface Detail {
+  key: string;
+  value: string;
+}
+
 interface ProductProps {
   _id: string;
   name: string;
-  imageSrc: string;
+  images: string[];
   imageAlt: string;
   price: string;
   category?: string;
+  subcategory?: string;
+  details?: Detail[]; // Исправлено с string[] на Detail[]
   color?: string;
   stock?: number;
 }
 
 const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
+  console.log("<====product====>", product);
   return (
     <div className="group relative shadow-lg rounded-lg grid grid-rows-[1fr_auto] overflow-hidden">
       <Link href={`/products/${product._id}`} className="relative block">
         <img
           alt={product.imageAlt}
-          src={product.imageSrc}
+          src={product.images[0]}
           className={`aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:transform group-hover:scale-105 transition duration-300 ease-in-out lg:aspect-auto lg:h-80 cursor-pointer ${
-            product.stock === 0 ? "blur-xs" : ""
+            product.stock === 0 ? "blur-sm" : "" // Заменил blur-xs на blur-sm (Tailwind)
           }`}
         />
-
         <span
-          className={`cursor-pointer block absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-12 bg-[#fcfdfda8] text-grey-200 text-600 px-8 py-4 rounded-md whitespace-nowrap ${
+          className={`cursor-pointer block absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -rotate-12 bg-[#fcfdfda8] text-gray-600 text-lg px-8 py-4 rounded-md whitespace-nowrap ${
             product.stock === 0 ? "" : "hidden"
           }`}
         >
@@ -33,7 +40,7 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
         </span>
       </Link>
 
-      <div className=" flex flex-col p-4 ">
+      <div className="flex flex-col p-4">
         <h3 className="text-sm text-gray-700">Name: {product.name}</h3>
         <p className="mt-1 text-sm text-gray-500">Price: ${product.price}</p>
         {product.color && (
@@ -44,13 +51,23 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
             Category: {product.category}
           </p>
         )}
-
-        <p
-          className={`mt-1 mb-4 text-sm text-gray-500 ${
-            product.stock === 0 ? "text-transparent" : ""
-          }`}
-        >
-          Stock: {product.stock}
+        {product.subcategory && (
+          <p className="mt-1 text-sm text-gray-500">
+            Subcategory: {product.subcategory}
+          </p>
+        )}
+        {/* {product.details && product.details.length > 0 && (
+          <div className="mt-1">
+            <p className="text-sm text-gray-500 font-medium">Details:</p>
+            {product.details.map((detail, index) => (
+              <p key={index} className="mt-1 text-sm text-gray-500">
+                {detail.key}: {detail.value}
+              </p>
+            ))}
+          </div>
+        )} */}
+        <p className="mt-1 mb-4 text-sm text-gray-500">
+          Stock: {product.stock !== undefined ? product.stock : "N/A"}
         </p>
         <div className="mt-auto">
           <AddToCart product={product} />

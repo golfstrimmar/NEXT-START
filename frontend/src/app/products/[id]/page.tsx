@@ -3,14 +3,24 @@ import { Suspense } from "react";
 import AddToCart from "@/components/AddToCart";
 import Loader from "@/components/Loading/Loading";
 import ProductCard from "@/components/ProductCard";
+import Tab from "@/components/ui/Tab/Tab";
+import ProductGalery from "@/components/ProductGalery/ProductGalery";
+
+interface Detail {
+  key: string;
+  value: string;
+}
+
 interface Product {
   _id: string;
   name: string;
   price: string;
-  imageSrc: string;
+  images: string[];
   imageAlt: string;
-  color?: string;
+  colors?: string[];
   category?: string;
+  subcategory?: string;
+  details?: Detail[];
   createdAt: string;
   stock: number;
   __v: number;
@@ -20,9 +30,7 @@ async function fetchProduct(id: string): Promise<Product | null> {
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`,
-      {
-        cache: "no-store",
-      }
+      { cache: "no-store" }
     );
     if (!response.ok) return null;
     return await response.json();
@@ -31,18 +39,20 @@ async function fetchProduct(id: string): Promise<Product | null> {
     return null;
   }
 }
+
 export async function fetchSimilarProducts(
   category: string,
+  subcategory: string | undefined,
   id: string,
   limit: number = 40000
 ): Promise<Product[]> {
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/products?category=${category}&limit=${limit}`,
-      {
-        cache: "no-store",
-      }
-    );
+    const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/api/products`);
+    url.searchParams.append("category", category);
+    if (subcategory) url.searchParams.append("subcategory", subcategory);
+    url.searchParams.append("limit", limit.toString());
+
+    const response = await fetch(url.toString(), { cache: "no-store" });
     if (!response.ok) return [];
     const data = await response.json();
     return data.products.filter((product: Product) => product._id !== id);
@@ -59,40 +69,61 @@ export default async function ProductPage({
 }) {
   const resolvedParams = await params;
   const product = await fetchProduct(resolvedParams.id);
-  const productCategory = product?.category;
-  const similarProducts = await fetchSimilarProducts(
-    productCategory || "",
-    resolvedParams.id
-  );
+
   if (!product) {
     notFound();
   }
 
+  const similarProducts = await fetchSimilarProducts(
+    product.category || "",
+    product.subcategory,
+    resolvedParams.id
+  );
+  console.log("<====product====>", product);
   return (
     <Suspense fallback={<Loader />}>
-      <h1 className="text-3xl font-bold mt-4 text-center"> {product.name}</h1>
-      <div className="mx-auto  px-4 py-8 grid grid-cols-[40%_1fr] gap-4  ">
-        <img
-          src={product.imageSrc}
-          alt={product.imageAlt}
-          className="aspect-[3/4] rounded-md bg-gray-200 object-cover lg:aspect-auto h-auto cursor-pointer"
-        />
+      <h1 className="text-3xl font-bold mt-4 text-center">{product.name}</h1>
+      <div className="mx-auto px-4 py-8 grid grid-cols-[50%_1fr] gap-4">
+        <div>
+          <ProductGalery images={product.images} />
+        </div>
+        {/* <div className="overflow-hidden border-gray-500  max-w-[300px]  rounded-md ml-auto">
+          <InteractiveImage src={product.images[0]} alt={product.imageAlt} />
+        </div> */}
         <div className="flex flex-col space-y-2">
-          <p className="text-gray-500">Product category: {product.category}</p>
-          <p className="text-gray-500">Product price: ${product.price}</p>
-          {product.color && (
-            <p className=" text-gray-500"> Product color: {product.color}</p>
+          <p className="text-gray-500">Category: {product.category}</p>
+          {product.subcategory && (
+            <p className="text-gray-500">Subcategory: {product.subcategory}</p>
           )}
-          {product.stock && (
-            <p className=" text-gray-500"> Product stock: {product.stock}</p>
+          <p className="text-gray-500">Price: ${product.price}</p>
+          <p className="text-gray-500">Colors: </p>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {product.colors &&
+              product.colors.map((color, index) => (
+                <div key={index} className="flex items-center">
+                  <div
+                    className="w-8 h-8 rounded-full mr-1 border border-gray-300"
+                    style={{ backgroundColor: color.toLowerCase() }}
+                  />
+                  {/* <span className="text-gray-500">{color}</span> */}
+                </div>
+              ))}
+          </div>
+          <p className="text-gray-500">
+            Stock: {product.stock !== undefined ? product.stock : "N/A"}
+          </p>
+          {product.details && product.details.length > 0 && (
+            <Tab details={product.details} />
           )}
-          <AddToCart product={product} />
+          <div className="mt-auto">
+            <AddToCart product={product} />
+          </div>
         </div>
       </div>
-      <h2 className="text-2xl font-bold text-center">Similar products</h2>
-      <div className="mx-auto  px-4 py-8 ">
+      <h2 className="text-2xl font-bold text-center">Similar Products</h2>
+      <div className="mx-auto px-4 py-8">
         {similarProducts.length > 0 ? (
-          <div className="grid  grid-cols-[repeat(auto-fill,300px)] gap-4 mt-4">
+          <div className="grid grid-cols-[repeat(auto-fill,300px)] gap-4 mt-4">
             {similarProducts.map((similarProduct) => (
               <ProductCard key={similarProduct._id} product={similarProduct} />
             ))}

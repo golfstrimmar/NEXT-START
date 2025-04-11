@@ -14,6 +14,7 @@ interface InputProps {
     | "password"
     | "search"
     | "time";
+  id: string;
   data: string;
   name: string;
   value: string;
@@ -28,6 +29,7 @@ interface InputProps {
 }
 
 const Input: React.FC<InputProps> = ({
+  id,
   typeInput,
   data,
   name,
@@ -42,7 +44,7 @@ const Input: React.FC<InputProps> = ({
       {typeInput === "textarea" ? (
         <textarea
           rows="5"
-          id={data}
+          id={id}
           name={name}
           value={value}
           ref={inputRef as RefObject<HTMLTextAreaElement>}
@@ -55,7 +57,7 @@ const Input: React.FC<InputProps> = ({
         />
       ) : (
         <input
-          id={data}
+          id={id}
           ref={inputRef as RefObject<HTMLInputElement>}
           name={name}
           type={typeInput}

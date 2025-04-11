@@ -23,7 +23,7 @@ export async function GET(
 
     const allColors: string[] = await mongoose.connection
       .collection("products")
-      .distinct("color");
+      .distinct("colors");
     let allStocks: string[] = await mongoose.connection
       .collection("products")
       .distinct("stock");
