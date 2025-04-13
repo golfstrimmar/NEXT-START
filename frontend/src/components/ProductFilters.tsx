@@ -13,6 +13,7 @@ interface Product {
   imageAlt: string;
   color?: string;
   category?: string;
+  subcategory?: string;
   createdAt: string;
   stock: number;
 
@@ -38,6 +39,7 @@ interface ProductFiltersProps {
   currentPage: number;
   setCurrentPage: (page: number) => void;
   category?: string;
+  subcategory?: string;
   disableAutoRequests?: boolean;
 }
 
@@ -54,6 +56,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
   currentPage,
   setCurrentPage,
   category,
+  subcategory,
 }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -79,6 +82,9 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
       ? category.toString()
       : searchParams.get("category") || null
   );
+  const [subCategoryFilter, setSubCategoryFilter] = useState<string | null>(
+    subcategory?.toString() || searchParams.get("subcategory") || null
+  );
 
   // Логика получения продуктов
   const handleGetProducts = async () => {
@@ -93,6 +99,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
       inStock: inStockFilter,
       ...(colorFilter && { color: colorFilter }),
       ...(categoryFilter && { category: categoryFilter }),
+      ...(subCategoryFilter && { subcategory: subCategoryFilter }),
     });
 
     try {
@@ -131,6 +138,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
     setInStockFilter("all");
     setColorFilter(null);
     setCategoryFilter(null);
+    setsubCategoryFilter(null);
     setCurrentPage(1);
     handleGetProducts();
   };
@@ -144,6 +152,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
     inStockFilter,
     colorFilter,
     categoryFilter,
+    subCategoryFilter,
     currentPage,
     category,
   ]);

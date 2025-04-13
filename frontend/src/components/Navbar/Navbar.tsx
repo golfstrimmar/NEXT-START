@@ -211,11 +211,9 @@ export default function Navbar() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (Object.keys(categories).length > 0) {
-      console.log("Categories state updated:", categories);
-    }
-  }, [categories]);
+  // ---------------------------
+  // ---------------------------
+
   // ---------------------------
 
   return (
@@ -434,22 +432,46 @@ export default function Navbar() {
                   {memoizedCategories &&
                     memoizedCategories.map((category) => {
                       const categorySlug = category.category;
+                      const subCategories = category.subcategories;
                       // .toLowerCase();
                       // .replace(/\s+/g, "-") // Заменяем пробелы на дефисы
                       // .replace(/[^\w-]+/g, ""); // Удаляем спецсимволы
-
+                      // console.log("<====category====>", category);
+                      // console.log(
+                      //   "<====subCategories memo====>",
+                      //   subCategories
+                      // );
+                      // console.log(
+                      //   "<====subCategories memo typeof====>",
+                      //   subCategories.map((foo) => typeof foo)
+                      // );
                       return (
-                        <Link
-                          key={category.category}
-                          href={`/shop/${categorySlug}`}
-                          className={`flex items-center text-sm border-bottom text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
-                            activeLink.startsWith(`/shop/${categorySlug}`)
-                              ? "border-b-2 border-indigo-600 text-indigo-600"
-                              : "text-gray-700 font-medium"
-                          }`}
-                        >
-                          {category.category}
-                        </Link>
+                        <div key={category.category}>
+                          <Link
+                            href={`/shop/${categorySlug}`}
+                            className={`flex items-center text-sm border-bottom text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                              activeLink.startsWith(`/shop/${categorySlug}`)
+                                ? "border-b-2 border-indigo-600 text-indigo-600"
+                                : "text-gray-700 font-medium"
+                            }`}
+                          >
+                            {category.category}
+                          </Link>
+                          {subCategories &&
+                            subCategories.map((foo) => (
+                              <Link
+                                key={foo}
+                                href={`/shop/${categorySlug}/${foo}`}
+                                className={`flex items-center text-sm border-bottom text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                                  activeLink.startsWith(`/shop/${categorySlug}`)
+                                    ? "border-b-2 border-indigo-600 text-indigo-600"
+                                    : "text-gray-700 font-medium"
+                                }`}
+                              >
+                                {foo}
+                              </Link>
+                            ))}
+                        </div>
                       );
                     })}
                   {pages.map((page: { name: string; href: string }) => (

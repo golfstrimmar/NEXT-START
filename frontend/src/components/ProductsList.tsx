@@ -13,6 +13,7 @@ interface Product {
   imageAlt: string;
   colors?: string[];
   category?: string;
+  subcategory?: string;
   createdAt: string;
   stock: number;
   __v: number;
@@ -24,6 +25,7 @@ interface ProductsListProps {
   categories: string[];
   colors: string[];
   category?: string;
+  subcategory?: string;
   stocks?: string[];
 }
 
@@ -33,6 +35,7 @@ const ProductsList: React.FC<ProductsListProps> = ({
   categories,
   colors,
   category,
+  subcategory,
   stocks,
 }) => {
   const [displayProducts, setDisplayProducts] =
@@ -67,6 +70,7 @@ const ProductsList: React.FC<ProductsListProps> = ({
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           category={category}
+          subcategory={subcategory}
         />
         <div>
           {isInitialLoading ? (
