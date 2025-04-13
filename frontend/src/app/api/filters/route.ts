@@ -17,37 +17,48 @@ export async function GET(
 ): Promise<NextResponse<FiltersResponse | ErrorResponse>> {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get("category");
-  const baseFilter = category && category !== "all" ? { category } : {};
+  const subcategory = searchParams.get("subcategory");
 
   try {
     await dbConnect();
 
-    // Базовый фильтр для всех запросов
-    const baseFilter = category && category !== "all" ? { category } : {};
+    // Формируем фильтр
+    const filter: any = {};
 
-    // Получаем категории (всегда все)
-    const allCategories: string[] = await mongoose.connection
-      .collection("products")
-      .distinct("category");
+    if (category && category !== "all") {
+      filter.category = category;
+    }
+    if (subcategory && subcategory !== "all") {
+      filter.subcategory = subcategory;
+    }
 
-    // Получаем цвета с учетом фильтра по категории
+    let categories: string[] = [];
+    if (category && category !== "all") {
+      categories = [category];
+    } else {
+      categories = await mongoose.connection
+        .collection("products")
+        .distinct("category");
+    }
+
+    // Получаем цвета с учетом фильтра
     const colors: string[] = await mongoose.connection
       .collection("products")
-      .distinct("colors.color", baseFilter);
+      .distinct("colors.color", filter);
 
-    // Получаем stock статусы с учетом фильтра по категории
+    // Получаем stock статусы с учетом фильтра
     const stocks: number[] = await mongoose.connection
       .collection("products")
-      .distinct("stock", baseFilter);
+      .distinct("stock", filter);
 
     const uniqueStocks = Array.from(
       new Set(stocks.map((stock) => (stock > 0 ? "inStock" : "out of Stock")))
     );
 
     return NextResponse.json({
-      categories: allCategories, // Всегда все категории
-      colors, // Только цвета для выбранной категории
-      stocks: uniqueStocks, // Только статусы для выбранной категории
+      categories,
+      colors,
+      stocks: uniqueStocks,
     });
   } catch (error) {
     console.error("Error fetching filters:", error);

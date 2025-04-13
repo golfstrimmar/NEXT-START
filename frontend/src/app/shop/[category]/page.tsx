@@ -1,5 +1,5 @@
 import ProductsList from "@/components/ProductsList";
-
+import Breadcrumbs from "@/components/Breadcrumbs";
 interface Product {
   _id: string;
   name: string;
@@ -69,6 +69,7 @@ export default async function CategoryPage({
   return (
     <div>
       <div className="mx-auto max-w-[1600px] my-4">
+        <Breadcrumbs category={resolvedParams?.category} />
         <h2 className="text-2xl md:text-4xl font-bold text-gray-900 text-center relative z-10">
           {resolvedParams?.category}
         </h2>

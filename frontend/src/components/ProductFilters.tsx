@@ -138,7 +138,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
     setInStockFilter("all");
     setColorFilter(null);
     setCategoryFilter(null);
-    setsubCategoryFilter(null);
+    setSubCategoryFilter(null);
     setCurrentPage(1);
     handleGetProducts();
   };

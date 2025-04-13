@@ -1,23 +1,15 @@
 "use client";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
+import Shevron from "@/assets/svg/chevron-down.svg";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
-import getCategories from "@/components/Navbar/GetCategories";
 import {
   Dialog,
   DialogBackdrop,
   DialogPanel,
-  Popover,
-  PopoverButton,
   PopoverGroup,
-  PopoverPanel,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
 } from "@headlessui/react";
 import {
   Bars3Icon,
@@ -27,151 +19,33 @@ import {
 } from "@heroicons/react/24/outline";
 import { useSession, signOut } from "next-auth/react";
 import { useCart } from "@/providers/CartContext";
-import { useRouter, useParams, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
-// const navigation = {
-//   categories: [
-//     {
-//       id: "women",
-//       name: "Women",
-//       featured: [
-//         {
-//           name: "New Arrivals",
-//           href: "#",
-//           imageSrc:
-//             "https://tailwindcss.com/plus-assets/img/ecommerce-images/mega-menu-category-01.jpg",
-//           imageAlt:
-//             "Models sitting back to back, wearing Basic Tee in black and bone.",
-//         },
-//         {
-//           name: "Basic Tees",
-//           href: "#",
-//           imageSrc:
-//             "https://tailwindcss.com/plus-assets/img/ecommerce-images/mega-menu-category-02.jpg",
-//           imageAlt:
-//             "Close up of Basic Tee fall bundle with off-white, ochre, olive, and black tees.",
-//         },
-//       ],
-//       sections: [
-//         {
-//           id: "clothing",
-//           name: "Clothing",
-//           items: [
-//             { name: "Tops", href: "#" },
-//             { name: "Dresses", href: "#" },
-//             { name: "Pants", href: "#" },
-//             { name: "Denim", href: "#" },
-//             { name: "Sweaters", href: "#" },
-//             { name: "T-Shirts", href: "#" },
-//             { name: "Jackets", href: "#" },
-//             { name: "Activewear", href: "#" },
-//             { name: "Browse All", href: "#" },
-//           ],
-//         },
-//         {
-//           id: "accessories",
-//           name: "Accessories",
-//           items: [
-//             { name: "Watches", href: "#" },
-//             { name: "Wallets", href: "#" },
-//             { name: "Bags", href: "#" },
-//             { name: "Sunglasses", href: "#" },
-//             { name: "Hats", href: "#" },
-//             { name: "Belts", href: "#" },
-//           ],
-//         },
-//         {
-//           id: "brands",
-//           name: "Brands",
-//           items: [
-//             { name: "Full Nelson", href: "#" },
-//             { name: "My Way", href: "#" },
-//             { name: "Re-Arranged", href: "#" },
-//             { name: "Counterfeit", href: "#" },
-//             { name: "Significant Other", href: "#" },
-//           ],
-//         },
-//       ],
-//     },
-//     {
-//       id: "men",
-//       name: "Men",
-//       featured: [
-//         {
-//           name: "New Arrivals",
-//           href: "#",
-//           imageSrc:
-//             "https://tailwindcss.com/plus-assets/img/ecommerce-images/product-page-04-detail-product-shot-01.jpg",
-//           imageAlt:
-//             "Drawstring top with elastic loop closure and textured interior padding.",
-//         },
-//         {
-//           name: "Artwork Tees",
-//           href: "#",
-//           imageSrc:
-//             "https://tailwindcss.com/plus-assets/img/ecommerce-images/category-page-02-image-card-06.jpg",
-//           imageAlt:
-//             "Three shirts in gray, white, and blue arranged on table with same line drawing of hands and shapes overlapping on front of shirt.",
-//         },
-//       ],
-//       sections: [
-//         {
-//           id: "clothing",
-//           name: "Clothing",
-//           items: [
-//             { name: "Tops", href: "#" },
-//             { name: "Pants", href: "#" },
-//             { name: "Sweaters", href: "#" },
-//             { name: "T-Shirts", href: "#" },
-//             { name: "Jackets", href: "#" },
-//             { name: "Activewear", href: "#" },
-//             { name: "Browse All", href: "#" },
-//           ],
-//         },
-//         {
-//           id: "accessories",
-//           name: "Accessories",
-//           items: [
-//             { name: "Watches", href: "#" },
-//             { name: "Wallets", href: "#" },
-//             { name: "Bags", href: "#" },
-//             { name: "Sunglasses", href: "#" },
-//             { name: "Hats", href: "#" },
-//             { name: "Belts", href: "#" },
-//           ],
-//         },
-//         {
-//           id: "brands",
-//           name: "Brands",
-//           items: [
-//             { name: "Re-Arranged", href: "#" },
-//             { name: "Counterfeit", href: "#" },
-//             { name: "Full Nelson", href: "#" },
-//             { name: "My Way", href: "#" },
-//           ],
-//         },
-//       ],
-//     },
-//   ],
-//
-// };
 const pages = [
-  { name: "Shop", href: "/products" },
+  { name: "Shop", href: "/shop" },
   { name: "Company", href: "#" },
   { name: "Stores", href: "#" },
   { name: "Admin", href: "/admin" },
 ];
+
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const { data: session, status } = useSession();
-  const router = useRouter();
   const { cart } = useCart();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const [activeLink, setactiveLink] = useState<string>("");
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<
+    { category: string; subcategories?: string[] }[]
+  >([]);
+  const [openTabs, setOpenTabs] = useState<{ [key: string]: boolean }>({});
+  const tabRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
   useEffect(() => {
     if (pathname) {
       setactiveLink(pathname);
@@ -191,7 +65,6 @@ export default function Navbar() {
     }
   };
 
-  // ---------------------------
   const memoizedCategories = useMemo(() => categories, [categories]);
   useEffect(() => {
     const fetchData = async () => {
@@ -201,7 +74,6 @@ export default function Navbar() {
         );
         if (!response.ok) throw new Error("Failed to fetch");
         const data = await response.json();
-        console.log("Data from API:", data);
         setCategories(data);
       } catch (err) {
         console.error("Fetch error:", err);
@@ -211,10 +83,54 @@ export default function Navbar() {
     fetchData();
   }, []);
 
-  // ---------------------------
-  // ---------------------------
+  const toggleTab = (category: string) => {
+    setOpenTabs((prev) => {
+      const resetTabs = Object.keys(prev).reduce((acc, key) => {
+        acc[key] = false;
+        return acc;
+      }, {} as { [key: string]: boolean });
 
-  // ---------------------------
+      return {
+        ...resetTabs,
+        [category]: !prev[category],
+      };
+    });
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const isClickInsideAnyTab = Object.values(tabRefs.current).some(
+        (ref) => ref && ref.contains(event.target as Node)
+      );
+
+      if (
+        !isClickInsideAnyTab &&
+        Object.values(openTabs).some((isOpen) => isOpen)
+      ) {
+        setOpenTabs((prev) =>
+          Object.keys(prev).reduce(
+            (acc, key) => ({ ...acc, [key]: false }),
+            {} as { [key: string]: boolean }
+          )
+        );
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openTabs]);
+
+  // Обработка поиска
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/shop?name=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery("");
+      setIsSearchOpen(false);
+    }
+  };
 
   return (
     <div>
@@ -225,7 +141,6 @@ export default function Navbar() {
           transition
           className="fixed inset-0 bg-black/25 transition-opacity duration-300 ease-linear data-closed:opacity-0"
         />
-
         <div className="fixed inset-0 z-40 flex">
           <DialogPanel
             transition
@@ -242,82 +157,6 @@ export default function Navbar() {
                 <XMarkIcon aria-hidden="true" className="size-6" />
               </button>
             </div>
-
-            {/* Links */}
-            <TabGroup className="mt-2">
-              <div className="border-b border-gray-200">
-                <TabList className="-mb-px flex space-x-8 px-4">
-                  {/* {categories.map((category) => (
-                    <Tab
-                      key={category.name}
-                      className="flex-1 border-b-2 border-transparent px-1 py-4 text-base font-medium whitespace-nowrap text-gray-900 data-selected:border-indigo-600 data-selected:text-indigo-600"
-                    >
-                      {category.name}
-                    </Tab>
-                  ))} */}
-                </TabList>
-              </div>
-              <TabPanels as={Fragment}>
-                {/* {categories.map((category) => (
-                  <TabPanel
-                    key={category.name}
-                    className="space-y-10 px-4 pt-10 pb-8"
-                  >
-                    <div className="grid grid-cols-2 gap-x-4">
-                      {category.featured.map((item) => (
-                        <div key={item.name} className="group relative text-sm">
-                          <img
-                            alt={item.imageAlt}
-                            src={item.imageSrc}
-                            className="aspect-square w-full rounded-lg bg-gray-100 object-cover group-hover:opacity-75"
-                          />
-                          <a
-                            href={item.href}
-                            className="mt-6 block font-medium text-gray-900"
-                          >
-                            <span
-                              aria-hidden="true"
-                              className="absolute inset-0 z-10"
-                            />
-                            {item.name}
-                          </a>
-                          <p aria-hidden="true" className="mt-1">
-                            Shop now
-                          </p>
-                        </div>
-                      ))} 
-                    </div>
-                    {category.sections.map((section) => (
-                      <div key={section.name}>
-                        <p
-                          id={`${category.id}-${section.id}-heading-mobile`}
-                          className="font-medium text-gray-900"
-                        >
-                          {section.name}
-                        </p>
-                        <ul
-                          role="list"
-                          aria-labelledby={`${category.id}-${section.id}-heading-mobile`}
-                          className="mt-6 flex flex-col space-y-6"
-                        >
-                          {section.items.map((item) => (
-                            <li key={item.name} className="flow-root">
-                              <a
-                                href={item.href}
-                                className="-m-2 block p-2 text-gray-500"
-                              >
-                                {item.name}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))} 
-                  </TabPanel>
-                ))} */}
-              </TabPanels>
-            </TabGroup>
-
             <div className="space-y-6 border-t border-gray-200 px-4 py-6">
               {pages.map((page) => (
                 <div key={page.name} className="flow-root">
@@ -330,49 +169,6 @@ export default function Navbar() {
                 </div>
               ))}
             </div>
-            {/* Мобильное меню */}
-            {/* <div className="space-y-6 border-t border-gray-200 px-4 py-6">
-              {session ? (
-                <div className="flow-root">
-                  {session.user?.image && (
-                    <img
-                      className="rounded-full mr-2 w-10 h-10"
-                      src={session.user?.image}
-                      alt={session.user?.name || "User avatar"}
-                    />
-                  )}
-                  <span className="-m-2 block p-2 text-gray-900">
-                    Hallo, {session.user?.name}
-                  </span>
-                  <button
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                    className="-m-2 block p-2 font-medium text-gray-900 hover:text-gray-700"
-                  >
-                    Sign out
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="flow-root">
-                    <Link
-                      href="/auth/signin"
-                      className="-m-2 block p-2 font-medium text-gray-900"
-                    >
-                      Sign in
-                    </Link>
-                  </div>
-                  <div className="flow-root">
-                    <Link
-                      href="/auth/signup"
-                      className="-m-2 block p-2 font-medium text-gray-900"
-                    >
-                      Create account
-                    </Link>
-                  </div>
-                </>
-              )}
-            </div> */}
-
             <div className="border-t border-gray-200 px-4 py-6">
               <a href="#" className="-m-2 flex items-center p-2">
                 <img
@@ -389,22 +185,18 @@ export default function Navbar() {
           </DialogPanel>
         </div>
       </Dialog>
-      {/* ==============================header===== */}
-      {/* ==============================header===== */}
-      {/* ==============================header===== */}
-      {/* ==============================header===== */}
-      {/* ==============================header===== */}
+
       <header className="relative bg-white z-[100]">
         <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
           Get free delivery on orders over $100
         </p>
-        <nav aria-label="Top" className="mx-auto max-w-[1600px]  px-4">
+        <nav aria-label="Top" className="mx-auto max-w-[1600px] px-4">
           <div className="border-b border-gray-200">
             <div className="flex h-16 items-center">
               <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className="relative rounded-md bg-white p-2   lg:hidden cursor-pointer transition-all duration-300 ease-in-out"
+                className="relative rounded-md bg-white p-2 lg:hidden cursor-pointer transition-all duration-300 ease-in-out"
               >
                 <span className="absolute -inset-0.5" />
                 <span className="sr-only">Open menu</span>
@@ -414,7 +206,6 @@ export default function Navbar() {
                 />
               </button>
 
-              {/* Logo */}
               <div className="ml-4 flex lg:ml-0">
                 <Link href={`/`} onClick={() => setOpen(false)}>
                   <Image
@@ -426,51 +217,78 @@ export default function Navbar() {
                 </Link>
               </div>
 
-              {/* Flyout menus */}
-              <PopoverGroup className="hidden lg:ml-8 lg:block lg:self-stretch ">
-                <div className="flex h-full space-x-8">
+              <PopoverGroup className="hidden lg:ml-8 lg:block lg:self-stretch">
+                <div className="flex h-full space-x-4 items-center">
                   {memoizedCategories &&
                     memoizedCategories.map((category) => {
                       const categorySlug = category.category;
                       const subCategories = category.subcategories;
-                      // .toLowerCase();
-                      // .replace(/\s+/g, "-") // Заменяем пробелы на дефисы
-                      // .replace(/[^\w-]+/g, ""); // Удаляем спецсимволы
-                      // console.log("<====category====>", category);
-                      // console.log(
-                      //   "<====subCategories memo====>",
-                      //   subCategories
-                      // );
-                      // console.log(
-                      //   "<====subCategories memo typeof====>",
-                      //   subCategories.map((foo) => typeof foo)
-                      // );
+
                       return (
-                        <div key={category.category}>
-                          <Link
-                            href={`/shop/${categorySlug}`}
-                            className={`flex items-center text-sm border-bottom text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
-                              activeLink.startsWith(`/shop/${categorySlug}`)
-                                ? "border-b-2 border-indigo-600 text-indigo-600"
-                                : "text-gray-700 font-medium"
-                            }`}
-                          >
-                            {category.category}
-                          </Link>
-                          {subCategories &&
-                            subCategories.map((foo) => (
-                              <Link
-                                key={foo}
-                                href={`/shop/${categorySlug}/${foo}`}
-                                className={`flex items-center text-sm border-bottom text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
-                                  activeLink.startsWith(`/shop/${categorySlug}`)
-                                    ? "border-b-2 border-indigo-600 text-indigo-600"
-                                    : "text-gray-700 font-medium"
+                        <div
+                          key={category.category}
+                          className="w-full relative min-w-[100px]"
+                          ref={(el) =>
+                            (tabRefs.current[category.category] = el)
+                          }
+                        >
+                          <div className="tab border border-gray-200 rounded-md bg-white overflow-hidden">
+                            <div
+                              className="tab-header flex items-center justify-between p-1 cursor-pointer hover:bg-gray-300 transition-colors text-sm text-gray-700 hover:text-indigo-500 duration-200 ease-in-out group"
+                              onClick={() => {
+                                toggleTab(category.category);
+                              }}
+                            >
+                              {category.category.charAt(0).toUpperCase() +
+                                category.category.slice(1)}
+                              <Shevron
+                                className={`w-4 h-4 ml-2 text-gray-700 group-hover:text-indigo-500 transition-transform transition-colors duration-200 ease-in-out ${
+                                  openTabs[category.category]
+                                    ? "rotate-180"
+                                    : "rotate-0"
                                 }`}
-                              >
-                                {foo}
-                              </Link>
-                            ))}
+                              />
+                            </div>
+                            <div
+                              className={`transition-all duration-200 ease-in-out bg-white absolute grid w-full ${
+                                openTabs[category.category]
+                                  ? "grid-rows-[1fr] border-gray-200 border rounded-md"
+                                  : "grid-rows-[0fr] border-transparent"
+                              } overflow-hidden`}
+                            >
+                              <div className="min-h-0">
+                                <Link
+                                  href={`/shop/${categorySlug}`}
+                                  className={`block text-sm text-gray-700 px-2 pt-2 pb-2 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                                    activeLink === `/shop/${categorySlug}`
+                                      ? "border-l-4 border-indigo-600 text-indigo-600 font-medium"
+                                      : "text-gray-700 border-l-4 border-transparent"
+                                  }`}
+                                >
+                                  {category.category.charAt(0).toUpperCase() +
+                                    category.category.slice(1)}
+                                </Link>
+                                <div className="py-2 border-t-1">
+                                  {subCategories &&
+                                    subCategories.map((foo) => (
+                                      <Link
+                                        key={foo}
+                                        href={`/shop/${categorySlug}/${foo}`}
+                                        className={`block px-2 text-sm text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                                          activeLink ===
+                                          `/shop/${categorySlug}/${foo}`
+                                            ? "border-l-4 border-indigo-600 text-indigo-600 font-medium"
+                                            : "text-gray-700 border-l-4 border-transparent"
+                                        }`}
+                                      >
+                                        {foo.charAt(0).toUpperCase() +
+                                          foo.slice(1)}
+                                      </Link>
+                                    ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       );
                     })}
@@ -478,9 +296,9 @@ export default function Navbar() {
                     <Link
                       key={page.name}
                       href={page.href}
-                      className={`flex items-center text-sm  border-bottom border-indigo-600 text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                      className={`flex items-center text-sm border-bottom border-indigo-600 text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
                         activeLink.startsWith(page.href)
-                          ? " border-b-2 border-indigo-600 text-indigo-600"
+                          ? "border-b-2 border-indigo-600 text-indigo-600"
                           : "text-gray-700 font-medium"
                       }`}
                     >
@@ -492,13 +310,12 @@ export default function Navbar() {
 
               <div className="ml-auto flex items-center h-[100%]">
                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6 h-[100%]">
-                  {/* Десктопное меню */}
                   {session ? (
                     <>
                       {session.user?.image && (
                         <Link href="/profile">
                           <img
-                            className="rounded-full mr-2 w-10 h-10 cursor-pointer "
+                            className="rounded-full mr-2 w-10 h-10 cursor-pointer"
                             src={session.user?.image}
                             alt={session.user?.name || "User avatar"}
                           />
@@ -518,10 +335,10 @@ export default function Navbar() {
                     <>
                       <Link
                         href="/auth/signin"
-                        className={`flex items-center text-sm h-[100%]  text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out 
+                        className={`flex items-center text-sm h-[100%] text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out 
                             ${
                               "/auth/signin" === activeLink
-                                ? " border-b-2 border-indigo-600 text-indigo-600"
+                                ? "border-b-2 border-indigo-600 text-indigo-600"
                                 : "text-gray-700 font-medium"
                             }`}
                       >
@@ -536,7 +353,7 @@ export default function Navbar() {
                         className={`flex items-center text-sm h-[100%] text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out 
                             ${
                               "/auth/signup" === activeLink
-                                ? " border-b-2 border-indigo-600 text-indigo-600"
+                                ? "border-b-2 border-indigo-600 text-indigo-600"
                                 : "text-gray-700 font-medium"
                             }`}
                       >
@@ -556,20 +373,49 @@ export default function Navbar() {
                       src="https://tailwindcss.com/plus-assets/img/flags/flag-canada.svg"
                       className="block h-auto w-5 shrink-0"
                     />
-                    <span className="ml-3 block text-sm font-medium">CAD</span>
+                    <span className="ml-3 block text-sm font-medium">USD</span>
                     <span className="sr-only">, change currency</span>
                   </a>
                 </div>
 
                 {/* Search */}
-                <div className="flex lg:ml-6">
-                  <a href="#" className="p-2 text-gray-400 hover:text-gray-500">
+                <div className="flex lg:ml-6 relative">
+                  <button
+                    onClick={() => setIsSearchOpen(!isSearchOpen)}
+                    className="p-2 text-gray-400 hover:text-gray-500"
+                  >
                     <span className="sr-only">Search</span>
                     <MagnifyingGlassIcon
                       aria-hidden="true"
-                      className="size-6"
+                      className="size-6  cursor-pointer"
                     />
-                  </a>
+                  </button>
+                  {isSearchOpen && (
+                    <form
+                      onSubmit={handleSearchSubmit}
+                      className="absolute top-12 right-0 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-50"
+                    >
+                      <div className="flex items-center p-2">
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search by name..."
+                          className="w-full px-3 py-2 text-sm text-gray-700 border-none focus:outline-none focus:ring-0"
+                          autoFocus
+                        />
+                        <button
+                          type="submit"
+                          className="p-2 text-gray-400 hover:text-indigo-500"
+                        >
+                          <MagnifyingGlassIcon
+                            aria-hidden="true"
+                            className="size-5 cursor-pointer"
+                          />
+                        </button>
+                      </div>
+                    </form>
+                  )}
                 </div>
 
                 {/* Cart */}
@@ -586,11 +432,11 @@ export default function Navbar() {
                       aria-hidden="true"
                       className={`size-6 shrink-0 text-gray-400 group-hover:text-gray-500 ${
                         "/cart" === activeLink
-                          ? "text-indigo-900 "
+                          ? "text-indigo-900"
                           : "text-gray-400"
                       }`}
                     />
-                    <p className="ml-2 text-[12px] font-light  text-gray-100 group-hover:text-gray-300 absolute right-0 top-2 bg-[#e11d48] rounded-full  w-4.5 h-4.5 flex justify-center items-center cursor-pointer transition-all duration-300 ease-in-out">
+                    <p className="ml-2 text-[12px] font-light text-gray-100 group-hover:text-gray-300 absolute right-0 top-2 bg-[#e11d48] rounded-full w-4.5 h-4.5 flex justify-center items-center cursor-pointer transition-all duration-300 ease-in-out">
                       <span>{totalItems}</span>
                     </p>
                     <span className="sr-only">items in cart, view bag</span>

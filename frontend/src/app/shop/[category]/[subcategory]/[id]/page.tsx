@@ -5,7 +5,7 @@ import Loader from "@/components/Loading/Loading";
 import ProductCard from "@/components/ProductCard";
 import Tab from "@/components/ui/Tab/Tab";
 import ProductGalery from "@/components/ProductGalery";
-
+import Breadcrumbs from "@/components/Breadcrumbs";
 interface ColorData {
   color: string;
   images: string[];
@@ -36,6 +36,7 @@ async function fetchProduct(id: string): Promise<Product | null> {
       { cache: "no-store" }
     );
     if (!response.ok) return null;
+    console.log("<====response====>", response);
     return await response.json();
   } catch (error) {
     console.error("Error fetching product:", error);
@@ -86,6 +87,11 @@ export default async function ProductPage({
 
   return (
     <Suspense fallback={<Loader />}>
+      <Breadcrumbs
+        category={product.category}
+        subcategory={product.subcategory}
+        productName={product.name}
+      />
       <h1 className="text-3xl font-bold mt-4 text-center">{product.name}</h1>
       <div className="mx-auto px-4 py-8 grid grid-cols-[50%_1fr] gap-4">
         <div>

@@ -25,10 +25,15 @@ interface ProductProps {
 const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
   return (
     <div className="group relative shadow-lg rounded-lg grid grid-rows-[1fr_auto] overflow-hidden">
-      <Link href={`/products/${product._id}`} className="relative block">
+      <Link
+        href={`/shop/${product.category}/${product.subcategory}/${product._id}`}
+        className="relative block"
+      >
         <img
           alt={product.name}
-          src={product.colors.flatMap((c) => c.images)[0] || "/placeholder.jpg"}
+          src={
+            product.colors?.flatMap((c) => c.images)[0] || "/placeholder.jpg"
+          }
           className={`aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:transform group-hover:scale-105 transition duration-300 ease-in-out lg:aspect-auto lg:min-h-100 cursor-pointer ${
             product.stock === 0 ? "blur-sm" : ""
           }`}
@@ -45,8 +50,11 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
       <div className="flex flex-col p-4">
         <h3 className="text-sm text-gray-700">Name: {product.name}</h3>
         <p className="mt-1 text-sm text-gray-500">Price: ${product.price}</p>
-        {product.color && (
-          <p className="mt-1 text-sm text-gray-500">Color: {product.color}</p>
+        {product.colors && (
+          <p className="mt-1 text-sm text-gray-500">
+            Colors:
+            {product.colors.map((color) => color.color).join(", ")}
+          </p>
         )}
         {product.category && (
           <p className="mt-1 text-sm text-gray-500">

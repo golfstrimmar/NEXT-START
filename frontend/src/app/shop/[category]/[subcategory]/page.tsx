@@ -1,5 +1,5 @@
 import ProductsList from "@/components/ProductsList";
-
+import Breadcrumbs from "@/components/Breadcrumbs";
 interface Product {
   _id: string;
   name: string;
@@ -57,9 +57,10 @@ async function getSubcategoryProducts(
   };
 }
 
-async function getFilters(category: string): Promise<any> {
+async function getFilters(category: string, subcategory: string): Promise<any> {
   const params = new URLSearchParams({
     category: category,
+    subcategory: subcategory,
   });
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/filters?${params.toString()}`,
@@ -78,11 +79,12 @@ export default async function SubcategoryPage({
 }) {
   const { category, subcategory } = await params; // Ждем параметры
   const initialData = await getSubcategoryProducts(category, subcategory);
-  const filtersData = await getFilters(category);
+  const filtersData = await getFilters(category, subcategory);
 
   return (
     <div>
       <div className="mx-auto max-w-[1600px] my-4">
+        <Breadcrumbs category={category} subcategory={subcategory} />
         <h2 className="text-2xl md:text-4xl font-bold text-gray-900 text-center relative z-10">
           {subcategory}
         </h2>
