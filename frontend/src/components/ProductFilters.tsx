@@ -31,10 +31,12 @@ interface ProductFiltersProps {
   colors: string[];
   itemsPerPage: number;
   onFilterChange: (products: Product[], total: number) => void;
-  setLoading: (loading: boolean) => void;
+  // setLoading: (loading: boolean) => void;
   setError: (error: string) => void;
   currentPage: number;
   setCurrentPage: (page: number) => void;
+  category?: string;
+  disableAutoRequests?: boolean;
 }
 
 const ProductFilters: React.FC<ProductFiltersProps> = ({
@@ -44,10 +46,11 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
   colors,
   itemsPerPage,
   onFilterChange,
-  setLoading,
+  // setLoading,
   setError,
   currentPage,
   setCurrentPage,
+  category,
 }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -69,14 +72,15 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
     searchParams.get("color") || null
   );
   const [categoryFilter, setCategoryFilter] = useState<string | null>(
-    searchParams.get("category") || null
+    category?.toString()
+      ? category.toString()
+      : searchParams.get("category") || null
   );
 
   // Логика получения продуктов
   const handleGetProducts = async () => {
-    setLoading(true);
+    // setLoading(true);
     setError("");
-
     const params = new URLSearchParams({
       name: nameFilter,
       minPrice: priceRange[0].toString(),
@@ -111,9 +115,10 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
       console.error("Error fetching products:", error);
       setError(error instanceof Error ? error.message : "Something went wrong");
       onFilterChange([], 0);
-    } finally {
-      setLoading(false);
     }
+    // finally {
+    //   setLoading(false);
+    // }
   };
 
   // Сброс фильтров
@@ -127,7 +132,6 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
     handleGetProducts();
   };
 
-  // Запуск фильтрации при изменении
   useEffect(() => {
     const timer = setTimeout(() => handleGetProducts(), 300);
     return () => clearTimeout(timer);
@@ -138,6 +142,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
     colorFilter,
     categoryFilter,
     currentPage,
+    category,
   ]);
 
   // UI фильтров
@@ -186,20 +191,24 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
           />
         </div>
       </div>
-      <div className="shadow-[0_0_12px_0_rgba(0,0,0,0.1)] rounded-[5px] py-2 px-1">
-        <label className="block text-sm font-medium text-gray-700">
-          Filter by category
-        </label>
-        <InputRadio
-          type="radio"
-          data="category"
-          value={categoryFilter || "all"}
-          options={[...categories, "all"]}
-          onChange={(e) =>
-            setCategoryFilter(e.target.value === "all" ? null : e.target.value)
-          }
-        />
-      </div>
+      {!category?.toString() && (
+        <div className="shadow-[0_0_12px_0_rgba(0,0,0,0.1)] rounded-[5px] py-2 px-1">
+          <label className="block text-sm font-medium text-gray-700">
+            Filter by category
+          </label>
+          <InputRadio
+            type="radio"
+            data="category"
+            value={categoryFilter || "all"}
+            options={[...categories, "all"]}
+            onChange={(e) =>
+              setCategoryFilter(
+                e.target.value === "all" ? null : e.target.value
+              )
+            }
+          />
+        </div>
+      )}
       <div className="shadow-[0_0_12px_0_rgba(0,0,0,0.1)] rounded-[5px] py-2 px-1">
         <label className="block text-sm font-medium text-gray-700">
           Filter by color

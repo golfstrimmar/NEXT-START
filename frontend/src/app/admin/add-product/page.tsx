@@ -6,18 +6,22 @@ import axios from "axios";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import ImagesIcon from "@/assets/svg/images.svg";
 import Button from "@/components/ui/Button/Button";
+import Loading from "@/components/Loading/Loading";
 
 interface Detail {
   key: string;
   value: string;
 }
 
+interface ColorData {
+  color: string;
+  images: string[];
+}
+
 interface ProductForm {
   name: string;
   price: number;
-  images: string[];
-  imageAlt: string;
-  colors: string[];
+  colors: ColorData[];
   category?: string;
   subcategory?: string;
   details: Detail[];
@@ -29,9 +33,7 @@ const AddProductPage: React.FC = () => {
   const [formData, setFormData] = useState<ProductForm>({
     name: "",
     price: 0,
-    images: [],
-    imageAlt: "",
-    colors: [],
+    colors: [{ color: "default", images: [] }],
     category: "",
     subcategory: "",
     details: [],
@@ -41,16 +43,19 @@ const AddProductPage: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [openModalMessage, setOpenModalMessage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [color, setColor] = useState<string>("");
+  const [currentColor, setCurrentColor] = useState<string>("");
+  const [currentImageFiles, setCurrentImageFiles] = useState<File[]>([]);
+  const [currentImagePreviews, setCurrentImagePreviews] = useState<string[]>(
+    []
+  );
+  const [activeColorTab, setActiveColorTab] = useState<string>("default");
 
   // Очистка превью изображений при размонтировании
   useEffect(() => {
     return () => {
-      imagePreviews.forEach((preview) => URL.revokeObjectURL(preview));
+      currentImagePreviews.forEach((preview) => URL.revokeObjectURL(preview));
     };
-  }, [imagePreviews]);
+  }, [currentImagePreviews]);
 
   // Обработчик изменений для основных полей
   const handleChange = (
@@ -65,7 +70,6 @@ const AddProductPage: React.FC = () => {
   // Обработчик изменений для деталей (details)
   const handleDetailChange = (key: string, value: string) => {
     setFormData((prev) => {
-      // Если значение пустое - удаляем detail
       if (!value.trim()) {
         return {
           ...prev,
@@ -73,7 +77,6 @@ const AddProductPage: React.FC = () => {
         };
       }
 
-      // Обновляем или добавляем detail
       const existingDetail = prev.details.find((d) => d.key === key);
       const newDetails = existingDetail
         ? prev.details.map((d) => (d.key === key ? { ...d, value } : d))
@@ -83,70 +86,117 @@ const AddProductPage: React.FC = () => {
     });
   };
 
-  // Добавление цвета
+  // Добавление нового цвета
   const handleAddColor = (e?: React.MouseEvent<HTMLButtonElement>) => {
     e?.preventDefault();
 
-    if (!color.trim()) {
+    if (!currentColor.trim()) {
       setError("Color cannot be empty");
       return;
     }
 
-    if (formData.colors.includes(color)) {
+    if (formData.colors.some((c) => c.color === currentColor)) {
       setError("This color already exists");
       return;
     }
 
     setFormData((prev) => ({
       ...prev,
-      colors: [...prev.colors, color.trim()],
+      colors: [...prev.colors, { color: currentColor.trim(), images: [] }],
     }));
-    setColor("");
+    setCurrentColor("");
     setError("");
   };
 
   // Удаление цвета
-  const handleRemoveColor = (index: number) => {
+  const handleRemoveColor = (colorToRemove: string) => {
+    if (colorToRemove === "default") return;
+
     setFormData((prev) => ({
       ...prev,
-      colors: prev.colors.filter((_, i) => i !== index),
+      colors: prev.colors.filter((c) => c.color !== colorToRemove),
     }));
+    if (activeColorTab === colorToRemove) {
+      setActiveColorTab("default");
+    }
   };
 
-  // Загрузка изображений
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Загрузка изображений для текущего цвета
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setError("");
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
       const validFiles: File[] = [];
       const previews: string[] = [];
 
-      files.forEach((file) => {
+      for (const file of files) {
         if (!file.type.startsWith("image/")) {
           setError("Please upload only image files");
-          return;
+          continue;
         }
         if (file.size > 5 * 1024 * 1024) {
           setError("Each image must be less than 5MB");
-          return;
+          continue;
         }
         validFiles.push(file);
         previews.push(URL.createObjectURL(file));
-      });
+      }
 
       if (validFiles.length > 0) {
-        setImageFiles((prev) => [...prev, ...validFiles]);
-        setImagePreviews((prev) => [...prev, ...previews]);
-        setFormData((prev) => ({ ...prev, images: [] }));
+        setCurrentImageFiles(validFiles);
+        setCurrentImagePreviews(previews);
       }
     }
   };
 
-  // Удаление превью изображения
-  const handleRemoveImage = (index: number) => {
-    URL.revokeObjectURL(imagePreviews[index]);
-    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
-    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+  // Сохранение изображений для активного цвета
+  const saveImagesForCurrentColor = async (e: React.MouseEvent) => {
+    e?.preventDefault();
+    if (currentImageFiles.length === 0) return;
+
+    try {
+      setLoading(true);
+      const uploadedImages = await Promise.all(
+        currentImageFiles.map(async (file) => {
+          const formDataCloudinary = new FormData();
+          formDataCloudinary.append("file", file);
+          formDataCloudinary.append("upload_preset", "blogblog");
+          const response = await axios.post(
+            process.env.NEXT_PUBLIC_CLOUDINARY_URL as string,
+            formDataCloudinary
+          );
+          return response.data.secure_url;
+        })
+      );
+
+      setFormData((prev) => ({
+        ...prev,
+        colors: prev.colors.map((c) =>
+          c.color === activeColorTab
+            ? { ...c, images: [...c.images, ...uploadedImages] }
+            : c
+        ),
+      }));
+
+      setCurrentImageFiles([]);
+      setCurrentImagePreviews([]);
+    } catch (err) {
+      setError("Failed to upload images");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Удаление изображения
+  const handleRemoveImage = (imageUrl: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      colors: prev.colors.map((c) =>
+        c.color === activeColorTab
+          ? { ...c, images: c.images.filter((img) => img !== imageUrl) }
+          : c
+      ),
+    }));
   };
 
   // Отправка формы
@@ -160,11 +210,7 @@ const AddProductPage: React.FC = () => {
       const requiredFields = [
         { name: "name", value: formData.name, message: "Name is required" },
         { name: "price", value: formData.price, message: "Price is required" },
-        {
-          name: "imageAlt",
-          value: formData.imageAlt,
-          message: "Image description is required",
-        },
+
         {
           name: "category",
           value: formData.category,
@@ -198,40 +244,17 @@ const AddProductPage: React.FC = () => {
         throw new Error("At least one detail is required");
       }
 
-      if (!imageFiles.length && !formData.images.length) {
+      // Проверка что есть хотя бы одно изображение
+      const hasImages = formData.colors.some((c) => c.images.length > 0);
+      if (!hasImages) {
         throw new Error("Please upload at least one image");
-      }
-
-      if (formData.colors.length === 0) {
-        throw new Error("Please add at least one color");
-      }
-
-      // Загрузка изображений на Cloudinary
-      let imageUrls = [...formData.images];
-      if (imageFiles.length > 0) {
-        imageUrls = await Promise.all(
-          imageFiles.map(async (file) => {
-            const formDataCloudinary = new FormData();
-            formDataCloudinary.append("file", file);
-            formDataCloudinary.append("upload_preset", "blogblog");
-
-            const response = await axios.post(
-              process.env.NEXT_PUBLIC_CLOUDINARY_URL as string,
-              formDataCloudinary
-            );
-            return response.data.secure_url;
-          })
-        );
       }
 
       // Отправка данных на сервер
       const res = await fetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          images: imageUrls,
-        }),
+        body: JSON.stringify(formData),
       });
 
       if (!res.ok) {
@@ -260,17 +283,23 @@ const AddProductPage: React.FC = () => {
     setFormData({
       name: "",
       price: 0,
-      images: [],
-      imageAlt: "",
-      colors: [],
+      colors: [{ color: "default", images: [] }],
       category: "",
       subcategory: "",
       details: [],
       stock: 1,
     });
-    setImageFiles([]);
-    setImagePreviews([]);
-    setColor("");
+    setCurrentColor("");
+    setCurrentImageFiles([]);
+    setCurrentImagePreviews([]);
+    setActiveColorTab("default");
+  };
+
+  // Получение изображений для активного цвета
+  const getCurrentColorImages = () => {
+    return (
+      formData.colors.find((c) => c.color === activeColorTab)?.images || []
+    );
   };
 
   return (
@@ -301,46 +330,151 @@ const AddProductPage: React.FC = () => {
             aria-invalid={!!error && formData.price <= 0}
           />
 
-          {/* Загрузка изображений */}
-          <div>
-            <div className="mt-4">
-              <label
-                htmlFor="imageUpload"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Upload Images * (max 5MB each)
-              </label>
-              <input
-                type="file"
-                id="imageUpload"
-                accept="image/*"
-                multiple
-                onChange={handleImageChange}
-                className="mt-1 block w-full text-sm text-gray-500"
-                required={!imageFiles.length && !formData.images.length}
+          {/* Управление цветами */}
+          <div className="border border-gray-300 rounded-lg p-4 space-y-4">
+            <h3 className="font-medium">Color Management</h3>
+
+            {/* Список цветов */}
+            <div className="flex flex-wrap gap-2">
+              {formData.colors.map((colorData) => (
+                <button
+                  key={colorData.color}
+                  type="button"
+                  onClick={() => setActiveColorTab(colorData.color)}
+                  className={`px-3 py-1 rounded-full border cursor-pointer flex items-center  ${
+                    activeColorTab === colorData.color
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-300"
+                  } ${
+                    colorData.color === "default" ? "bg-gray-200" : "bg-white"
+                  }`}
+                >
+                  {colorData.color !== "default" && (
+                    <div
+                      className="w-4 h-4 ml-2 rounded-full mr-1 border border-gray-300"
+                      style={{
+                        backgroundColor: colorData.color,
+                      }}
+                    />
+                  )}
+
+                  {colorData.color}
+                  {colorData.color !== "default" && (
+                    <span
+                      className="ml-1 text-red-500"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveColor(colorData.color);
+                      }}
+                    >
+                      ×
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Добавление нового цвета */}
+            <div className="grid grid-cols-[1fr_auto] gap-2 mt-2">
+              <Input
+                id="newColor"
+                typeInput="text"
+                data="Add New Color"
+                name="newColor"
+                value={currentColor}
+                onChange={(e) => setCurrentColor(e.target.value)}
+                className="flex-1"
+                disabled={loading}
               />
-              <label
-                htmlFor="imageUpload"
-                className="cursor-pointer transition"
+              <Button
+                type="button"
+                onClick={handleAddColor}
+                disabled={loading || !currentColor.trim()}
               >
-                <ImagesIcon className="w-10 h-10" />
+                Add Color
+              </Button>
+            </div>
+
+            {/* Загрузка изображений для активного цвета */}
+            <div className="mt-4">
+              <label className="flex  items-center text-sm font-medium text-gray-700">
+                Images for{" "}
+                <div
+                  className="w-4 h-4 ml-2 rounded-full mr-1 border border-gray-300"
+                  style={{
+                    backgroundColor:
+                      activeColorTab === "default"
+                        ? "transparent"
+                        : activeColorTab,
+                  }}
+                />
+                <span className="font-semibold text-[16px] mx-2">
+                  {activeColorTab}
+                </span>{" "}
+                color:
               </label>
 
-              {imagePreviews.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600">Image Previews:</p>
+              <div className="mt-2 ">
+                <input
+                  type="file"
+                  id="imageUpload"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageChange}
+                  className="block w-full text-sm text-gray-500"
+                  disabled={loading}
+                />
+                <label htmlFor="imageUpload" className="cursor-pointer">
+                  {" "}
+                  <ImagesIcon></ImagesIcon>
+                </label>
+              </div>
+
+              {/* Превью новых изображений */}
+              {currentImagePreviews.length > 0 && (
+                <div className="mt-4">
                   <div className="flex flex-wrap gap-2">
-                    {imagePreviews.map((preview, index) => (
+                    {currentImagePreviews.map((preview, index) => (
                       <div key={index} className="relative">
                         <img
                           src={preview}
                           alt={`Preview ${index + 1}`}
-                          className="w-32 h-32 object-cover rounded-md"
+                          className="w-24 h-24 object-cover rounded-md"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-2">
+                    <Button
+                      type="button"
+                      onClick={(e) => saveImagesForCurrentColor(e)}
+                      disabled={loading}
+                    >
+                      {loading ? "Uploading..." : "Save Images"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Сохраненные изображения */}
+              {getCurrentColorImages().length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    Saved Images:
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {getCurrentColorImages().map((img, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={img}
+                          alt={`Image ${index + 1}`}
+                          className="w-24 h-24 object-cover rounded-md"
                         />
                         <button
                           type="button"
-                          onClick={() => handleRemoveImage(index)}
+                          onClick={() => handleRemoveImage(img)}
                           className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
+                          disabled={loading}
                         >
                           ×
                         </button>
@@ -349,53 +483,6 @@ const AddProductPage: React.FC = () => {
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-
-          <Input
-            id="imageAlt"
-            typeInput="text"
-            data="Image Description *"
-            name="imageAlt"
-            value={formData.imageAlt}
-            onChange={handleChange}
-            required
-            aria-invalid={!!error && !formData.imageAlt.trim()}
-          />
-
-          {/* Цвета */}
-          <div className="border border-gray-500 rounded p-2 bg-gray-200 space-y-2">
-            <p>Colors:</p>
-            <div className="flex flex-wrap gap-2">
-              {formData.colors.map((color, index) => (
-                <div
-                  key={index}
-                  className="flex items-center bg-white px-2 py-1 rounded-full"
-                >
-                  <span>{color}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveColor(index)}
-                    className="ml-1 text-gray-500 hover:text-red-500"
-                  >
-                    &times;
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <Input
-                id="color"
-                typeInput="text"
-                data="Add Color"
-                name="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="flex-1"
-              />
-              <Button type="button" onClick={handleAddColor}>
-                Add
-              </Button>
             </div>
           </div>
 
@@ -526,10 +613,10 @@ const AddProductPage: React.FC = () => {
               {error}
             </p>
           )}
-
+          {loading && <Loading />}
           {/* Кнопка отправки */}
-          <Button type="submit" disabled={loading}>
-            {loading ? "Adding..." : "Add Product"}
+          <Button type="submit" disabled={loading} className="w-full py-2">
+            Add Product
           </Button>
         </form>
       </div>

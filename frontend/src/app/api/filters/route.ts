@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 interface FiltersResponse {
   categories: string[];
   colors: string[];
+  stocks: string[];
 }
 
 interface ErrorResponse {
@@ -23,17 +24,19 @@ export async function GET(
 
     const allColors: string[] = await mongoose.connection
       .collection("products")
-      .distinct("colors");
-    let allStocks: string[] = await mongoose.connection
+      .distinct("colors.color");
+
+    const allStocks: number[] = await mongoose.connection
       .collection("products")
       .distinct("stock");
-    allStocks = allStocks.map((stock: string) => {
-      return Number(stock) > 0 ? "in Stock" : "out of Stock";
-    });
+    const uniqueStocks = Array.from(
+      new Set(allStocks.map((stock) => (stock > 0 ? "inStock" : "outOfStock")))
+    );
+
     return NextResponse.json({
       categories: allCategories,
       colors: allColors,
-      stocks: allStocks,
+      stocks: uniqueStocks,
     });
   } catch (error) {
     console.error("Error fetching filters:", error);
@@ -43,3 +46,4 @@ export async function GET(
     );
   }
 }
+

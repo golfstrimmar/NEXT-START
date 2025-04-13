@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ProductCard from "@/components/ProductCard";
 import Pagination from "@/components/Pagination";
 import Loading from "./Loading/Loading";
@@ -11,7 +11,7 @@ interface Product {
   price: string;
   imageSrc: string;
   imageAlt: string;
-  color?: string;
+  colors?: string[];
   category?: string;
   createdAt: string;
   stock: number;
@@ -23,6 +23,7 @@ interface ProductsListProps {
   initialTotal: number;
   categories: string[];
   colors: string[];
+  category?: string;
 }
 
 const ProductsList: React.FC<ProductsListProps> = ({
@@ -30,17 +31,23 @@ const ProductsList: React.FC<ProductsListProps> = ({
   initialTotal,
   categories,
   colors,
+  category,
 }) => {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [displayProducts, setDisplayProducts] =
+    useState<Product[]>(initialProducts);
   const [totalItems, setTotalItems] = useState<number>(initialTotal);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(false);
+  const [isFilterUpdating, setIsFilterUpdating] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 3;
 
+  // Применение фильтров
   const handleFilterChange = (filteredProducts: Product[], total: number) => {
-    setProducts(filteredProducts);
+    setIsFilterUpdating(true);
+    setDisplayProducts(filteredProducts);
     setTotalItems(total);
+    setIsFilterUpdating(false);
   };
 
   return (
@@ -53,21 +60,25 @@ const ProductsList: React.FC<ProductsListProps> = ({
           colors={colors}
           itemsPerPage={itemsPerPage}
           onFilterChange={handleFilterChange}
-          setLoading={setLoading}
           setError={setError}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
+          category={category}
         />
         <div>
-          {loading ? (
+          {isInitialLoading ? (
             <Loading />
           ) : error ? (
             <p className="text-red-500 text-center mt-6">{error}</p>
-          ) : products.length === 0 ? (
+          ) : displayProducts.length === 0 ? (
             <p className="text-center mt-6">No products found</p>
           ) : (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-x-6 gap-y-10">
-              {products.map((product) => (
+            <div
+              className={`grid grid-cols-[repeat(auto-fill,300px)] gap-x-6 gap-y-10 transition-opacity duration-200 ${
+                isFilterUpdating ? "opacity-70" : "opacity-100"
+              }`}
+            >
+              {displayProducts.map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}
             </div>

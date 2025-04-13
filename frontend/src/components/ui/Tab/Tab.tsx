@@ -16,10 +16,10 @@ const Tab: React.FC<TabProps> = ({ details }) => {
     <div className="tab-container">
       <div className="tab border border-gray-200 rounded-md bg-white overflow-hidden">
         <div
-          className="tab-header flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+          className="tab-header flex items-center bg-gray-100 justify-between p-3 cursor-pointer hover:bg-gray-300 transition-colors"
           onClick={() => setIsOpen(!isOpen)}
         >
-          <p className="text-gray-700 font-medium">Details</p>
+          <p className="text-gray-600 font-medium">Details</p>
           <Shevron
             className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
               isOpen ? "rotate-180" : ""
@@ -37,7 +37,7 @@ const Tab: React.FC<TabProps> = ({ details }) => {
               {details.map((detail, index) => (
                 <div key={index} className="flex justify-between">
                   <span className="text-gray-600">{detail.key}:</span>
-                  <span className="text-gray-800 font-medium">
+                  <span className="text-gray-600 font-medium">
                     {detail.value}
                   </span>
                 </div>

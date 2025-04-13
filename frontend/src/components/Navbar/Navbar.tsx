@@ -1,9 +1,10 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Fragment, useState } from "react";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
+import getCategories from "@/components/Navbar/GetCategories";
 import {
   Dialog,
   DialogBackdrop,
@@ -27,138 +28,139 @@ import {
 import { useSession, signOut } from "next-auth/react";
 import { useCart } from "@/providers/CartContext";
 import { useRouter, useParams, usePathname } from "next/navigation";
-const navigation = {
-  categories: [
-    {
-      id: "women",
-      name: "Women",
-      featured: [
-        {
-          name: "New Arrivals",
-          href: "#",
-          imageSrc:
-            "https://tailwindcss.com/plus-assets/img/ecommerce-images/mega-menu-category-01.jpg",
-          imageAlt:
-            "Models sitting back to back, wearing Basic Tee in black and bone.",
-        },
-        {
-          name: "Basic Tees",
-          href: "#",
-          imageSrc:
-            "https://tailwindcss.com/plus-assets/img/ecommerce-images/mega-menu-category-02.jpg",
-          imageAlt:
-            "Close up of Basic Tee fall bundle with off-white, ochre, olive, and black tees.",
-        },
-      ],
-      sections: [
-        {
-          id: "clothing",
-          name: "Clothing",
-          items: [
-            { name: "Tops", href: "#" },
-            { name: "Dresses", href: "#" },
-            { name: "Pants", href: "#" },
-            { name: "Denim", href: "#" },
-            { name: "Sweaters", href: "#" },
-            { name: "T-Shirts", href: "#" },
-            { name: "Jackets", href: "#" },
-            { name: "Activewear", href: "#" },
-            { name: "Browse All", href: "#" },
-          ],
-        },
-        {
-          id: "accessories",
-          name: "Accessories",
-          items: [
-            { name: "Watches", href: "#" },
-            { name: "Wallets", href: "#" },
-            { name: "Bags", href: "#" },
-            { name: "Sunglasses", href: "#" },
-            { name: "Hats", href: "#" },
-            { name: "Belts", href: "#" },
-          ],
-        },
-        {
-          id: "brands",
-          name: "Brands",
-          items: [
-            { name: "Full Nelson", href: "#" },
-            { name: "My Way", href: "#" },
-            { name: "Re-Arranged", href: "#" },
-            { name: "Counterfeit", href: "#" },
-            { name: "Significant Other", href: "#" },
-          ],
-        },
-      ],
-    },
-    {
-      id: "men",
-      name: "Men",
-      featured: [
-        {
-          name: "New Arrivals",
-          href: "#",
-          imageSrc:
-            "https://tailwindcss.com/plus-assets/img/ecommerce-images/product-page-04-detail-product-shot-01.jpg",
-          imageAlt:
-            "Drawstring top with elastic loop closure and textured interior padding.",
-        },
-        {
-          name: "Artwork Tees",
-          href: "#",
-          imageSrc:
-            "https://tailwindcss.com/plus-assets/img/ecommerce-images/category-page-02-image-card-06.jpg",
-          imageAlt:
-            "Three shirts in gray, white, and blue arranged on table with same line drawing of hands and shapes overlapping on front of shirt.",
-        },
-      ],
-      sections: [
-        {
-          id: "clothing",
-          name: "Clothing",
-          items: [
-            { name: "Tops", href: "#" },
-            { name: "Pants", href: "#" },
-            { name: "Sweaters", href: "#" },
-            { name: "T-Shirts", href: "#" },
-            { name: "Jackets", href: "#" },
-            { name: "Activewear", href: "#" },
-            { name: "Browse All", href: "#" },
-          ],
-        },
-        {
-          id: "accessories",
-          name: "Accessories",
-          items: [
-            { name: "Watches", href: "#" },
-            { name: "Wallets", href: "#" },
-            { name: "Bags", href: "#" },
-            { name: "Sunglasses", href: "#" },
-            { name: "Hats", href: "#" },
-            { name: "Belts", href: "#" },
-          ],
-        },
-        {
-          id: "brands",
-          name: "Brands",
-          items: [
-            { name: "Re-Arranged", href: "#" },
-            { name: "Counterfeit", href: "#" },
-            { name: "Full Nelson", href: "#" },
-            { name: "My Way", href: "#" },
-          ],
-        },
-      ],
-    },
-  ],
-  pages: [
-    { name: "Shop", href: "/products" },
-    { name: "Company", href: "#" },
-    { name: "Stores", href: "#" },
-    { name: "Admin", href: "/admin" },
-  ],
-};
 
+// const navigation = {
+//   categories: [
+//     {
+//       id: "women",
+//       name: "Women",
+//       featured: [
+//         {
+//           name: "New Arrivals",
+//           href: "#",
+//           imageSrc:
+//             "https://tailwindcss.com/plus-assets/img/ecommerce-images/mega-menu-category-01.jpg",
+//           imageAlt:
+//             "Models sitting back to back, wearing Basic Tee in black and bone.",
+//         },
+//         {
+//           name: "Basic Tees",
+//           href: "#",
+//           imageSrc:
+//             "https://tailwindcss.com/plus-assets/img/ecommerce-images/mega-menu-category-02.jpg",
+//           imageAlt:
+//             "Close up of Basic Tee fall bundle with off-white, ochre, olive, and black tees.",
+//         },
+//       ],
+//       sections: [
+//         {
+//           id: "clothing",
+//           name: "Clothing",
+//           items: [
+//             { name: "Tops", href: "#" },
+//             { name: "Dresses", href: "#" },
+//             { name: "Pants", href: "#" },
+//             { name: "Denim", href: "#" },
+//             { name: "Sweaters", href: "#" },
+//             { name: "T-Shirts", href: "#" },
+//             { name: "Jackets", href: "#" },
+//             { name: "Activewear", href: "#" },
+//             { name: "Browse All", href: "#" },
+//           ],
+//         },
+//         {
+//           id: "accessories",
+//           name: "Accessories",
+//           items: [
+//             { name: "Watches", href: "#" },
+//             { name: "Wallets", href: "#" },
+//             { name: "Bags", href: "#" },
+//             { name: "Sunglasses", href: "#" },
+//             { name: "Hats", href: "#" },
+//             { name: "Belts", href: "#" },
+//           ],
+//         },
+//         {
+//           id: "brands",
+//           name: "Brands",
+//           items: [
+//             { name: "Full Nelson", href: "#" },
+//             { name: "My Way", href: "#" },
+//             { name: "Re-Arranged", href: "#" },
+//             { name: "Counterfeit", href: "#" },
+//             { name: "Significant Other", href: "#" },
+//           ],
+//         },
+//       ],
+//     },
+//     {
+//       id: "men",
+//       name: "Men",
+//       featured: [
+//         {
+//           name: "New Arrivals",
+//           href: "#",
+//           imageSrc:
+//             "https://tailwindcss.com/plus-assets/img/ecommerce-images/product-page-04-detail-product-shot-01.jpg",
+//           imageAlt:
+//             "Drawstring top with elastic loop closure and textured interior padding.",
+//         },
+//         {
+//           name: "Artwork Tees",
+//           href: "#",
+//           imageSrc:
+//             "https://tailwindcss.com/plus-assets/img/ecommerce-images/category-page-02-image-card-06.jpg",
+//           imageAlt:
+//             "Three shirts in gray, white, and blue arranged on table with same line drawing of hands and shapes overlapping on front of shirt.",
+//         },
+//       ],
+//       sections: [
+//         {
+//           id: "clothing",
+//           name: "Clothing",
+//           items: [
+//             { name: "Tops", href: "#" },
+//             { name: "Pants", href: "#" },
+//             { name: "Sweaters", href: "#" },
+//             { name: "T-Shirts", href: "#" },
+//             { name: "Jackets", href: "#" },
+//             { name: "Activewear", href: "#" },
+//             { name: "Browse All", href: "#" },
+//           ],
+//         },
+//         {
+//           id: "accessories",
+//           name: "Accessories",
+//           items: [
+//             { name: "Watches", href: "#" },
+//             { name: "Wallets", href: "#" },
+//             { name: "Bags", href: "#" },
+//             { name: "Sunglasses", href: "#" },
+//             { name: "Hats", href: "#" },
+//             { name: "Belts", href: "#" },
+//           ],
+//         },
+//         {
+//           id: "brands",
+//           name: "Brands",
+//           items: [
+//             { name: "Re-Arranged", href: "#" },
+//             { name: "Counterfeit", href: "#" },
+//             { name: "Full Nelson", href: "#" },
+//             { name: "My Way", href: "#" },
+//           ],
+//         },
+//       ],
+//     },
+//   ],
+//
+// };
+const pages = [
+  { name: "Shop", href: "/products" },
+  { name: "Company", href: "#" },
+  { name: "Stores", href: "#" },
+  { name: "Admin", href: "/admin" },
+];
 export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -169,14 +171,12 @@ export default function Navbar() {
   const [error, setError] = useState<string>("");
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const [activeLink, setactiveLink] = useState<string>("");
-
+  const [categories, setCategories] = useState<string[]>([]);
   useEffect(() => {
     if (pathname) {
       setactiveLink(pathname);
     }
   }, [pathname]);
-
-  if (status === "loading") return null;
 
   const handleCartClick = () => {
     if (status === "authenticated") {
@@ -190,6 +190,34 @@ export default function Navbar() {
       }, 1500);
     }
   };
+
+  // ---------------------------
+  const memoizedCategories = useMemo(() => categories, [categories]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/categories`
+        );
+        if (!response.ok) throw new Error("Failed to fetch");
+        const data = await response.json();
+        console.log("Data from API:", data);
+        setCategories(data);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setError(err instanceof Error ? err.message : "Unknown error");
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (Object.keys(categories).length > 0) {
+      console.log("Categories state updated:", categories);
+    }
+  }, [categories]);
+  // ---------------------------
+
   return (
     <div>
       {error && <ModalMessage message={error} open={showModal} />}
@@ -221,18 +249,18 @@ export default function Navbar() {
             <TabGroup className="mt-2">
               <div className="border-b border-gray-200">
                 <TabList className="-mb-px flex space-x-8 px-4">
-                  {navigation.categories.map((category) => (
+                  {/* {categories.map((category) => (
                     <Tab
                       key={category.name}
                       className="flex-1 border-b-2 border-transparent px-1 py-4 text-base font-medium whitespace-nowrap text-gray-900 data-selected:border-indigo-600 data-selected:text-indigo-600"
                     >
                       {category.name}
                     </Tab>
-                  ))}
+                  ))} */}
                 </TabList>
               </div>
               <TabPanels as={Fragment}>
-                {navigation.categories.map((category) => (
+                {/* {categories.map((category) => (
                   <TabPanel
                     key={category.name}
                     className="space-y-10 px-4 pt-10 pb-8"
@@ -259,7 +287,7 @@ export default function Navbar() {
                             Shop now
                           </p>
                         </div>
-                      ))}
+                      ))} 
                     </div>
                     {category.sections.map((section) => (
                       <div key={section.name}>
@@ -286,14 +314,14 @@ export default function Navbar() {
                           ))}
                         </ul>
                       </div>
-                    ))}
+                    ))} 
                   </TabPanel>
-                ))}
+                ))} */}
               </TabPanels>
             </TabGroup>
 
             <div className="space-y-6 border-t border-gray-200 px-4 py-6">
-              {navigation.pages.map((page) => (
+              {pages.map((page) => (
                 <div key={page.name} className="flow-root">
                   <a
                     href={page.href}
@@ -304,9 +332,8 @@ export default function Navbar() {
                 </div>
               ))}
             </div>
-
-            <div className="space-y-6 border-t border-gray-200 px-4 py-6">
-              {/* Мобильное меню */}
+            {/* Мобильное меню */}
+            {/* <div className="space-y-6 border-t border-gray-200 px-4 py-6">
               {session ? (
                 <div className="flow-root">
                   {session.user?.image && (
@@ -346,7 +373,7 @@ export default function Navbar() {
                   </div>
                 </>
               )}
-            </div>
+            </div> */}
 
             <div className="border-t border-gray-200 px-4 py-6">
               <a href="#" className="-m-2 flex items-center p-2">
@@ -364,6 +391,11 @@ export default function Navbar() {
           </DialogPanel>
         </div>
       </Dialog>
+      {/* ==============================header===== */}
+      {/* ==============================header===== */}
+      {/* ==============================header===== */}
+      {/* ==============================header===== */}
+      {/* ==============================header===== */}
       <header className="relative bg-white z-[100]">
         <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
           Get free delivery on orders over $100
@@ -399,88 +431,28 @@ export default function Navbar() {
               {/* Flyout menus */}
               <PopoverGroup className="hidden lg:ml-8 lg:block lg:self-stretch ">
                 <div className="flex h-full space-x-8">
-                  {navigation.categories.map((category) => (
-                    <Popover key={category.name} className="flex">
-                      <div className="relative flex">
-                        <PopoverButton className="relative z-10 -mb-px flex items-center border-b-2 border-transparent pt-px text-sm font-medium text-gray-700 transition-colors duration-200 ease-out hover:text-indigo-500 data-open:border-indigo-600 data-open:text-indigo-600 cursor-pointer">
-                          {category.name}
-                        </PopoverButton>
-                      </div>
+                  {memoizedCategories &&
+                    memoizedCategories.map((category) => {
+                      const categorySlug = category.category;
+                      // .toLowerCase();
+                      // .replace(/\s+/g, "-") // Заменяем пробелы на дефисы
+                      // .replace(/[^\w-]+/g, ""); // Удаляем спецсимволы
 
-                      <PopoverPanel
-                        transition
-                        className="absolute inset-x-0 top-full text-sm text-gray-500 transition data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
-                      >
-                        <div
-                          aria-hidden="true"
-                          className="absolute inset-0 top-1/2 bg-white shadow-sm"
-                        />
-                        <div className="relative bg-white">
-                          <div className="mx-auto max-w-[1600px] px-8">
-                            <div className="grid grid-cols-2 gap-x-8 gap-y-10 py-16">
-                              <div className="col-start-2 grid grid-cols-2 gap-x-8">
-                                {category.featured.map((item) => (
-                                  <div
-                                    key={item.name}
-                                    className="group relative text-base sm:text-sm"
-                                  >
-                                    <img
-                                      alt={item.imageAlt}
-                                      src={item.imageSrc}
-                                      className="aspect-square w-full rounded-lg bg-gray-100 object-cover group-hover:opacity-75"
-                                    />
-                                    <a
-                                      href={item.href}
-                                      className="mt-6 block font-medium text-gray-900"
-                                    >
-                                      <span
-                                        aria-hidden="true"
-                                        className="absolute inset-0 z-10"
-                                      />
-                                      {item.name}
-                                    </a>
-                                    <p aria-hidden="true" className="mt-1">
-                                      Shop now
-                                    </p>
-                                  </div>
-                                ))}
-                              </div>
-                              <div className="row-start-1 grid grid-cols-3 gap-x-8 gap-y-10 text-sm">
-                                {category.sections.map((section) => (
-                                  <div key={section.name}>
-                                    <p
-                                      id={`${section.name}-heading`}
-                                      className="font-medium text-gray-900"
-                                    >
-                                      {section.name}
-                                    </p>
-                                    <ul
-                                      role="list"
-                                      aria-labelledby={`${section.name}-heading`}
-                                      className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
-                                    >
-                                      {section.items.map((item) => (
-                                        <li key={item.name} className="flex">
-                                          <a
-                                            href={item.href}
-                                            className="hover:text-indigo-500"
-                                          >
-                                            {item.name}
-                                          </a>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </PopoverPanel>
-                    </Popover>
-                  ))}
-
-                  {navigation.pages.map((page) => (
+                      return (
+                        <Link
+                          key={category.category}
+                          href={`/shop/${categorySlug}`}
+                          className={`flex items-center text-sm border-bottom text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                            activeLink.startsWith(`/shop/${categorySlug}`)
+                              ? "border-b-2 border-indigo-600 text-indigo-600"
+                              : "text-gray-700 font-medium"
+                          }`}
+                        >
+                          {category.category}
+                        </Link>
+                      );
+                    })}
+                  {pages.map((page: { name: string; href: string }) => (
                     <Link
                       key={page.name}
                       href={page.href}

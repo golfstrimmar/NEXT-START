@@ -8,27 +8,32 @@ export async function POST(request: Request) {
     const data = await request.json();
 
     // Валидация данных
-    if (!data.name || !data.price || !data.category) {
+    if (!data.name || !data.price || !data.category || !data.stock) {
       return NextResponse.json(
-        { error: "Name, price and category are required" },
+        { error: "Name, price, category and stock are required" },
         { status: 400 }
       );
     }
 
     // Нормализация массива цветов
     const colors = Array.isArray(data.colors)
-      ? data.colors.filter((color: string) => color.trim())
-      : [];
+      ? data.colors.map((color: any) => ({
+          color: color.color?.trim() || "default",
+          images: Array.isArray(color.images)
+            ? color.images.filter((img: string) => img.trim())
+            : [],
+        }))
+      : [{ color: "default", images: [] }];
 
     const product = new Product({
       name: data.name,
       price: Number(data.price),
-      images: Array.isArray(data.images) ? data.images : [],
-      imageAlt: data.imageAlt || "",
       category: data.category,
       subcategory: data.subcategory || "",
+      details: Array.isArray(data.details)
+        ? data.details.filter((d: any) => d.key && d.value)
+        : [],
       colors: colors,
-      details: Array.isArray(data.details) ? data.details : [],
       stock: Number(data.stock) || 0,
     });
 
@@ -66,7 +71,7 @@ export async function GET(request: Request) {
   // Фильтрация по наличию
   if (inStock === "inStock") {
     filter.stock = { $gt: 0 };
-  } else if (inStock === "outOfStock") {
+  } else if (inStock === "out of Stock") {
     filter.stock = 0;
   }
 
@@ -82,9 +87,9 @@ export async function GET(request: Request) {
     filter.name = { $regex: name, $options: "i" };
   }
 
-  // Фильтрация по цвету (ищем в массиве цветов)
+  // Фильтрация по цвету
   if (color) {
-    filter.colors = color;
+    filter["colors.color"] = color;
   }
 
   // Фильтрация по категории
@@ -108,7 +113,7 @@ export async function GET(request: Request) {
     const skip = (page - 1) * limit;
 
     // Получаем продукты с пагинацией
-    const products = await Product.find(filter).skip(skip).limit(limit).lean(); // Используем lean() для лучшей производительности
+    const products = await Product.find(filter).skip(skip).limit(limit).lean();
 
     // Получаем общее количество для пагинации
     const total = await Product.countDocuments(filter);
@@ -117,6 +122,8 @@ export async function GET(request: Request) {
       products: products.map((p) => ({
         ...p,
         id: p._id.toString(),
+        // Для обратной совместимости
+        images: p.colors[0]?.images || [],
       })),
       total,
     });
@@ -142,8 +149,13 @@ export async function PUT(request: Request) {
     // Нормализация массива цветов при обновлении
     if (updateData.colors) {
       updateData.colors = Array.isArray(updateData.colors)
-        ? updateData.colors.filter((color: string) => color.trim())
-        : [];
+        ? updateData.colors.map((color: any) => ({
+            color: color.color?.trim() || "default",
+            images: Array.isArray(color.images)
+              ? color.images.filter((img: string) => img.trim())
+              : [],
+          }))
+        : [{ color: "default", images: [] }];
     }
 
     const product = await Product.findByIdAndUpdate(id, updateData, {
@@ -184,7 +196,7 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({
       message: "Product deleted successfully",
-      deletedColors: product.colors, // Возвращаем удаленные цвета для информации
+      deletedColorData: product.colors,
     });
   } catch (error) {
     console.error("Error deleting product:", error);

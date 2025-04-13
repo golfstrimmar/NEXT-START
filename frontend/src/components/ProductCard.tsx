@@ -5,7 +5,10 @@ interface Detail {
   key: string;
   value: string;
 }
-
+interface ColorData {
+  color: string;
+  images: string[];
+}
 interface ProductProps {
   _id: string;
   name: string;
@@ -14,21 +17,20 @@ interface ProductProps {
   price: string;
   category?: string;
   subcategory?: string;
-  details?: Detail[]; // Исправлено с string[] на Detail[]
-  color?: string;
+  details?: Detail[];
+  colors: ColorData[];
   stock?: number;
 }
 
 const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
-  console.log("<====product====>", product);
   return (
     <div className="group relative shadow-lg rounded-lg grid grid-rows-[1fr_auto] overflow-hidden">
       <Link href={`/products/${product._id}`} className="relative block">
         <img
-          alt={product.imageAlt}
-          src={product.images[0]}
-          className={`aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:transform group-hover:scale-105 transition duration-300 ease-in-out lg:aspect-auto lg:h-80 cursor-pointer ${
-            product.stock === 0 ? "blur-sm" : "" // Заменил blur-xs на blur-sm (Tailwind)
+          alt={product.name}
+          src={product.colors.flatMap((c) => c.images)[0] || "/placeholder.jpg"}
+          className={`aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:transform group-hover:scale-105 transition duration-300 ease-in-out lg:aspect-auto lg:min-h-100 cursor-pointer ${
+            product.stock === 0 ? "blur-sm" : ""
           }`}
         />
         <span

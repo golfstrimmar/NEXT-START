@@ -4,24 +4,27 @@ import AddToCart from "@/components/AddToCart";
 import Loader from "@/components/Loading/Loading";
 import ProductCard from "@/components/ProductCard";
 import Tab from "@/components/ui/Tab/Tab";
-import ProductGalery from "@/components/ProductGalery/ProductGalery";
+import ProductGalery from "@/components/ProductGalery";
+
+interface ColorData {
+  color: string;
+  images: string[];
+}
 
 interface Detail {
   key: string;
   value: string;
 }
-
 interface Product {
   _id: string;
   name: string;
-  price: string;
-  images: string[];
+  price: number;
+  imageSrc: string;
   imageAlt: string;
-  colors?: string[];
+  colors: ColorData[];
   category?: string;
   subcategory?: string;
-  details?: Detail[];
-  createdAt: string;
+  details: Detail[];
   stock: number;
   __v: number;
 }
@@ -79,38 +82,65 @@ export default async function ProductPage({
     product.subcategory,
     resolvedParams.id
   );
-  console.log("<====product====>", product);
+  const allImages = product.colors?.flatMap((color) => color.images);
+
   return (
     <Suspense fallback={<Loader />}>
       <h1 className="text-3xl font-bold mt-4 text-center">{product.name}</h1>
       <div className="mx-auto px-4 py-8 grid grid-cols-[50%_1fr] gap-4">
         <div>
-          <ProductGalery images={product.images} />
+          {allImages && allImages.length > 0 && (
+            <ProductGalery colors={product.colors} />
+          )}
         </div>
+        {/* <div>
+          <ProductGalery images={product.images} />
+        </div> */}
         {/* <div className="overflow-hidden border-gray-500  max-w-[300px]  rounded-md ml-auto">
           <InteractiveImage src={product.images[0]} alt={product.imageAlt} />
         </div> */}
         <div className="flex flex-col space-y-2">
-          <p className="text-gray-500">Category: {product.category}</p>
-          {product.subcategory && (
-            <p className="text-gray-500">Subcategory: {product.subcategory}</p>
-          )}
-          <p className="text-gray-500">Price: ${product.price}</p>
-          <p className="text-gray-500">Colors: </p>
-          <div className="flex flex-wrap gap-2 mt-1">
-            {product.colors &&
-              product.colors.map((color, index) => (
-                <div key={index} className="flex items-center">
-                  <div
-                    className="w-8 h-8 rounded-full mr-1 border border-gray-300"
-                    style={{ backgroundColor: color.toLowerCase() }}
-                  />
-                  {/* <span className="text-gray-500">{color}</span> */}
-                </div>
-              ))}
-          </div>
           <p className="text-gray-500">
-            Stock: {product.stock !== undefined ? product.stock : "N/A"}
+            Category:{" "}
+            <span style={{ fontFamily: '"Garamond", serif' }}>
+              {product.category}
+            </span>{" "}
+          </p>
+          {product.subcategory && (
+            <p className="text-gray-500">
+              Subcategory:{" "}
+              <span style={{ fontFamily: '"Garamond", serif' }}>
+                {product.subcategory}
+              </span>{" "}
+            </p>
+          )}
+          <p className="text-gray-500">
+            Price: $
+            <span style={{ fontFamily: '"Garamond", serif' }}>
+              {product.price}
+            </span>{" "}
+          </p>
+          {/* <div className="flex flex-wrap gap-2 mt-1">
+            {product.colors &&
+              product.colors
+                .filter((foo) => {
+                  return foo.images.length > 0;
+                })
+                .map((color, index) => (
+                  <div key={index} className="flex items-center">
+                    <div
+                      className="w-8 h-8 rounded-full mr-1 border border-gray-300"
+                      style={{ backgroundColor: color?.color }}
+                    />
+                  
+                  </div>
+                ))}
+          </div> */}
+          <p className="text-gray-500">
+            In stock:{" "}
+            <span style={{ fontFamily: '"Garamond", serif' }}>
+              {product.stock !== undefined ? product.stock : "N/A"}
+            </span>{" "}
           </p>
           {product.details && product.details.length > 0 && (
             <Tab details={product.details} />

@@ -1,20 +1,28 @@
 import React from "react";
 import ProductsList from "@/components/ProductsList";
 
+interface ColorData {
+  color: string;
+  images: string[];
+}
+
+interface Detail {
+  key: string;
+  value: string;
+}
 interface Product {
   _id: string;
   name: string;
-  price: string;
+  price: number;
   imageSrc: string;
   imageAlt: string;
+  colors: ColorData[];
   category?: string;
-  details?: string[];
-  color?: string;
-  createdAt: string;
+  subcategory?: string;
+  details: Detail[];
   stock: number;
   __v: number;
 }
-
 async function getInitialProducts() {
   const params = new URLSearchParams({
     page: "1",
