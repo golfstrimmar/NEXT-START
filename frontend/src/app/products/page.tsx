@@ -56,7 +56,7 @@ const Products: React.FC = async () => {
   const totalItems: number = initialData.total;
   const categories: string[] = filtersData.categories;
   const colors: string[] = filtersData.colors;
-
+  const stocks: string[] = filtersData.stocks;
   return (
     <div>
       <div className="mx-auto max-w-[1600px] my-4">
@@ -68,6 +68,7 @@ const Products: React.FC = async () => {
           initialTotal={totalItems}
           categories={categories}
           colors={colors}
+          stocks={stocks}
         />
       </div>
     </div>

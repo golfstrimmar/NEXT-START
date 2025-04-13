@@ -24,6 +24,7 @@ interface ProductsListProps {
   categories: string[];
   colors: string[];
   category?: string;
+  stocks?: string[];
 }
 
 const ProductsList: React.FC<ProductsListProps> = ({
@@ -32,6 +33,7 @@ const ProductsList: React.FC<ProductsListProps> = ({
   categories,
   colors,
   category,
+  stocks,
 }) => {
   const [displayProducts, setDisplayProducts] =
     useState<Product[]>(initialProducts);
@@ -58,6 +60,7 @@ const ProductsList: React.FC<ProductsListProps> = ({
           initialTotal={initialTotal}
           categories={categories}
           colors={colors}
+          stocks={stocks}
           itemsPerPage={itemsPerPage}
           onFilterChange={handleFilterChange}
           setError={setError}

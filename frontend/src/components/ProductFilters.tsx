@@ -15,6 +15,7 @@ interface Product {
   category?: string;
   createdAt: string;
   stock: number;
+
   __v: number;
 }
 
@@ -29,6 +30,7 @@ interface ProductFiltersProps {
   initialTotal: number;
   categories: string[];
   colors: string[];
+  stocks: string[];
   itemsPerPage: number;
   onFilterChange: (products: Product[], total: number) => void;
   // setLoading: (loading: boolean) => void;
@@ -44,6 +46,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
   initialTotal,
   categories,
   colors,
+  stocks,
   itemsPerPage,
   onFilterChange,
   // setLoading,
@@ -237,7 +240,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
           type="radio"
           data="inStock"
           value={inStockFilter}
-          options={["in Stock", "out of Stock", "all"]}
+          options={[...stocks, "all"]}
           onChange={(e) => setInStockFilter(e.target.value)}
         />
       </div>

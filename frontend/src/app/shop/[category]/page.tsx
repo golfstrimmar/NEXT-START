@@ -45,9 +45,12 @@ async function getCategoryProducts(category: string): Promise<Product | null> {
   };
 }
 
-async function getFilters() {
+async function getFilters(category: string): Promise<any> {
+  const params = new URLSearchParams({
+    category: category,
+  });
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/filters`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/filters?${params.toString()}`,
     { cache: "no-store" }
   );
   if (!response.ok) throw new Error("Failed to fetch filters");
@@ -61,7 +64,7 @@ export default async function CategoryPage({
 }) {
   const resolvedParams = await Promise.resolve(params);
   const initialData = await getCategoryProducts(resolvedParams?.category);
-  const filtersData = await getFilters();
+  const filtersData = await getFilters(resolvedParams?.category);
 
   return (
     <div>
@@ -75,6 +78,7 @@ export default async function CategoryPage({
           categories={filtersData.categories}
           colors={filtersData.colors}
           category={resolvedParams?.category}
+          stocks={filtersData.stocks}
         />
       </div>
     </div>
