@@ -58,9 +58,9 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({
 
       <div className="flex flex-col p-4">
         <div className="flex justify-between items-start">
-          <h3 className="text-sm text-gray-700">Name: {product.name}</h3>
+          <h3 className=" text-gray-700">Name: {product.name}</h3>
         </div>
-        <p className="my-1 text-sm text-gray-500">Price: ${product.price}</p>
+        <p className="my-1  text-gray-500">Price: ${product.price}</p>
         {product.colors &&
           product.colors.length === 1 &&
           product.colors[0].images &&
@@ -95,19 +95,17 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({
             </div>
           )}
         {product.category && (
-          <p className="my-1 text-sm text-gray-500">
-            Category: {product.category}
-          </p>
+          <p className="my-1  text-gray-500">Category: {product.category}</p>
         )}
         {product.subcategory && (
-          <p className="my-1 text-sm text-gray-500">
+          <p className="my-1  text-gray-500">
             Subcategory: {product.subcategory}
           </p>
         )}
-        <p className="my-1  text-sm text-gray-500">
+        <p className="my-1   text-gray-500">
           Stock: {product.stock !== undefined ? product.stock : "N/A"}
         </p>
-        <p className="my-1 mb-3 text-sm text-gray-500">
+        <p className="my-1 mb-3  text-gray-500">
           <ProductFavorites productId={product._id} onRemove={onRemove} />
         </p>
         <div className=" mt-auto">

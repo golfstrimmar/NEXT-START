@@ -111,9 +111,7 @@ export default function SignIn() {
         {error && <ModalMessage message={error} open={showModal} />}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
+            <label className="block  font-medium text-gray-700">Email</label>
             <input
               type="email"
               value={email}
@@ -123,9 +121,7 @@ export default function SignIn() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
+            <label className="block  font-medium text-gray-700">Password</label>
             <input
               type="password"
               value={password}

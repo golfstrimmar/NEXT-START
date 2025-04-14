@@ -45,7 +45,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
 
   return (
     <nav aria-label="breadcrumb" className="my-4 px-4 sm:px-6 lg:px-8">
-      <ol className="flex flex-wrap items-center space-x-2 text-sm text-gray-600">
+      <ol className="flex flex-wrap items-center space-x-2  text-gray-600">
         {crumbs.map((crumb, index) => (
           <li key={crumb.label} className="flex items-center">
             {crumb.href ? (

@@ -229,18 +229,18 @@ export default function CheckoutPage() {
                               alt={item.imageAlt}
                               className="w-12 h-12 rounded-md object-cover mr-4"
                             />
-                            <span className="text-sm font-medium text-gray-900">
+                            <span className=" font-medium text-gray-900">
                               {item.name}
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap  text-gray-500">
                           ${itemPrice.toFixed(2)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap  text-gray-500">
                           {item.quantity}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap  font-medium text-gray-900">
                           ${itemTotal.toFixed(2)}
                         </td>
                       </tr>
@@ -270,27 +270,23 @@ export default function CheckoutPage() {
                         className="w-16 h-16 object-cover rounded"
                       />
                       <div>
-                        <h3 className="text-sm font-medium text-gray-900">
+                        <h3 className=" font-medium text-gray-900">
                           {item.name}
                         </h3>
-                        <p className="text-sm text-gray-600">
+                        <p className=" text-gray-600">
                           ${itemPrice.toFixed(2)}
                         </p>
                       </div>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className=" font-medium text-gray-700">
                         Quantity:
                       </span>
-                      <span className="text-sm text-gray-900">
-                        {item.quantity}
-                      </span>
+                      <span className=" text-gray-900">{item.quantity}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm font-medium text-gray-700">
-                        Total:
-                      </span>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className=" font-medium text-gray-700">Total:</span>
+                      <span className=" font-medium text-gray-900">
                         ${itemTotal.toFixed(2)}
                       </span>
                     </div>
@@ -316,7 +312,7 @@ export default function CheckoutPage() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block  font-medium text-gray-700 mb-1"
                   >
                     Email
                   </label>
@@ -333,15 +329,13 @@ export default function CheckoutPage() {
                     required
                   />
                   {formErrors.email && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {formErrors.email}
-                    </p>
+                    <p className="mt-1  text-red-600">{formErrors.email}</p>
                   )}
                 </div>
                 <div>
                   <label
                     htmlFor="addressLine1"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block  font-medium text-gray-700 mb-1"
                   >
                     Address Line 1
                   </label>
@@ -360,7 +354,7 @@ export default function CheckoutPage() {
                     required
                   />
                   {formErrors.addressLine1 && (
-                    <p className="mt-1 text-sm text-red-600">
+                    <p className="mt-1  text-red-600">
                       {formErrors.addressLine1}
                     </p>
                   )}
@@ -368,7 +362,7 @@ export default function CheckoutPage() {
                 <div>
                   <label
                     htmlFor="addressLine2"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block  font-medium text-gray-700 mb-1"
                   >
                     Address Line 2 (Optional)
                   </label>
@@ -385,7 +379,7 @@ export default function CheckoutPage() {
                 <div>
                   <label
                     htmlFor="city"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block  font-medium text-gray-700 mb-1"
                   >
                     City
                   </label>
@@ -402,15 +396,13 @@ export default function CheckoutPage() {
                     required
                   />
                   {formErrors.city && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {formErrors.city}
-                    </p>
+                    <p className="mt-1  text-red-600">{formErrors.city}</p>
                   )}
                 </div>
                 <div>
                   <label
                     htmlFor="state"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block  font-medium text-gray-700 mb-1"
                   >
                     State/Province
                   </label>
@@ -427,15 +419,13 @@ export default function CheckoutPage() {
                     required
                   />
                   {formErrors.state && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {formErrors.state}
-                    </p>
+                    <p className="mt-1  text-red-600">{formErrors.state}</p>
                   )}
                 </div>
                 <div>
                   <label
                     htmlFor="postalCode"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block  font-medium text-gray-700 mb-1"
                   >
                     ZIP/Postal Code
                   </label>
@@ -454,7 +444,7 @@ export default function CheckoutPage() {
                     required
                   />
                   {formErrors.postalCode && (
-                    <p className="mt-1 text-sm text-red-600">
+                    <p className="mt-1  text-red-600">
                       {formErrors.postalCode}
                     </p>
                   )}
@@ -462,7 +452,7 @@ export default function CheckoutPage() {
                 <div className="sm:col-span-2">
                   <label
                     htmlFor="country"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block  font-medium text-gray-700 mb-1"
                   >
                     Country
                   </label>
@@ -479,9 +469,7 @@ export default function CheckoutPage() {
                     required
                   />
                   {formErrors.country && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {formErrors.country}
-                    </p>
+                    <p className="mt-1  text-red-600">{formErrors.country}</p>
                   )}
                 </div>
               </div>
@@ -496,7 +484,7 @@ export default function CheckoutPage() {
                 <div className="sm:col-span-2">
                   <label
                     htmlFor="cardNumber"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block  font-medium text-gray-700 mb-1"
                   >
                     Card Number
                   </label>
@@ -515,7 +503,7 @@ export default function CheckoutPage() {
                     required
                   />
                   {formErrors.cardNumber && (
-                    <p className="mt-1 text-sm text-red-600">
+                    <p className="mt-1  text-red-600">
                       {formErrors.cardNumber}
                     </p>
                   )}
@@ -523,7 +511,7 @@ export default function CheckoutPage() {
                 <div>
                   <label
                     htmlFor="expirationDate"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block  font-medium text-gray-700 mb-1"
                   >
                     Expiration Date
                   </label>
@@ -542,7 +530,7 @@ export default function CheckoutPage() {
                     required
                   />
                   {formErrors.expirationDate && (
-                    <p className="mt-1 text-sm text-red-600">
+                    <p className="mt-1  text-red-600">
                       {formErrors.expirationDate}
                     </p>
                   )}
@@ -550,7 +538,7 @@ export default function CheckoutPage() {
                 <div>
                   <label
                     htmlFor="cvv"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block  font-medium text-gray-700 mb-1"
                   >
                     CVV
                   </label>
@@ -567,9 +555,7 @@ export default function CheckoutPage() {
                     required
                   />
                   {formErrors.cvv && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {formErrors.cvv}
-                    </p>
+                    <p className="mt-1  text-red-600">{formErrors.cvv}</p>
                   )}
                 </div>
               </div>

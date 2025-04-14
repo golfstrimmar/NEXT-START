@@ -31,10 +31,10 @@ const pages = [
 ];
 
 export default function Navbar() {
+  const { data: session, status } = useSession();
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const { data: session, status } = useSession();
   const { cart } = useCart();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -93,6 +93,7 @@ export default function Navbar() {
     };
     fetchData();
   }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       setOpenTabs({});
@@ -102,6 +103,7 @@ export default function Navbar() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
   const toggleTab = (category: string) => {
     setOpenTabs((prev) => {
       const resetTabs = Object.keys(prev).reduce((acc, key) => {
@@ -122,14 +124,35 @@ export default function Navbar() {
       [category]: !prev[category],
     }));
   };
-
+  const [loading, setloading] = useState<boolean>(false);
   const [favoritesLength, setFavoritesLength] = useState<number>(0);
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!session) {
+      setloading(true);
+      return;
+    }
 
-    const updateCount = () => {
-      const count = Number(localStorage.getItem("favoritesCount") || 0);
-      setFavoritesLength(count);
+    setloading(false);
+    if (session) {
+      console.log("<====session====>", session);
+    }
+
+    const updateCount = async () => {
+      try {
+        const user = session?.user?.email;
+        const response = await fetch(`/api/favorites?email=${user}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        const data = await response.json();
+        console.log("<====data====>", data);
+        const count = data.favorites.length;
+        localStorage.setItem("favoritesCount", count);
+        setFavoritesLength(count);
+      } catch (error) {
+        console.error("Error toggling favorite:", error);
+        alert("Something went wrong. Please try again.");
+      }
     };
 
     updateCount();
@@ -148,7 +171,7 @@ export default function Navbar() {
       window.removeEventListener("storage", handleStorageEvent);
       window.removeEventListener("localStorageUpdated", handleCustomEvent);
     };
-  }, []);
+  }, [session]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

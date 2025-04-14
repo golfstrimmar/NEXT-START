@@ -179,7 +179,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
         onChange={(e) => setNameFilter(e.target.value)}
       />
       <div className="shadow-[0_0_12px_0_rgba(0,0,0,0.1)] rounded-[5px] py-2 px-1">
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block  font-medium text-gray-700">
           Price Range: ${priceRange[0]} - ${priceRange[1]}
         </label>
         <div className="flex space-x-4 mt-1">
@@ -205,7 +205,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
       </div>
       {!category?.toString() && (
         <div className="shadow-[0_0_12px_0_rgba(0,0,0,0.1)] rounded-[5px] py-2 px-1">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block  font-medium text-gray-700">
             Filter by category
           </label>
           <InputRadio
@@ -222,7 +222,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
         </div>
       )}
       <div className="shadow-[0_0_12px_0_rgba(0,0,0,0.1)] rounded-[5px] py-2 px-1">
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block  font-medium text-gray-700">
           Filter by color
         </label>
         <div className="flex flex-wrap gap-2 mt-1">
@@ -242,7 +242,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
         </div>
       </div>
       <div className="shadow-[0_0_12px_0_rgba(0,0,0,0.1)] rounded-[5px] py-2 px-1">
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block  font-medium text-gray-700">
           Filter by Stock
         </label>
         <InputRadio

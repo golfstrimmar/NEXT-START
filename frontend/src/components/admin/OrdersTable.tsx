@@ -101,22 +101,22 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
           <tbody className="divide-y divide-gray-200">
             {orders.map((order) => (
               <tr key={order._id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap  text-gray-900">
                   {order._id.slice(-6)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap  text-gray-900">
                   {order.email}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap  text-gray-900">
                   ${order.total.toFixed(2)}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
+                <td className="px-6 py-4  text-gray-900">
                   {order.items.length} item(s)
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap  text-gray-900">
                   {new Date(order.createdAt).toLocaleDateString()}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap  text-gray-900">
                   <Select
                     selectItems={statusOptions}
                     setSortOrder={(value) =>
@@ -139,39 +139,33 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
             className="border border-gray-200 rounded-lg p-4 space-y-2"
           >
             <div className="flex justify-between">
-              <span className="text-sm font-medium text-gray-700">
-                Order ID:
-              </span>
-              <span className="text-sm text-gray-900">
-                {order._id.slice(-6)}
-              </span>
+              <span className=" font-medium text-gray-700">Order ID:</span>
+              <span className=" text-gray-900">{order._id.slice(-6)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm font-medium text-gray-700">Email:</span>
-              <span className="text-sm text-gray-900 truncate max-w-[200px]">
+              <span className=" font-medium text-gray-700">Email:</span>
+              <span className=" text-gray-900 truncate max-w-[200px]">
                 {order.email}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm font-medium text-gray-700">Total:</span>
-              <span className="text-sm text-gray-900">
-                ${order.total.toFixed(2)}
-              </span>
+              <span className=" font-medium text-gray-700">Total:</span>
+              <span className=" text-gray-900">${order.total.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm font-medium text-gray-700">Items:</span>
-              <span className="text-sm text-gray-900">
+              <span className=" font-medium text-gray-700">Items:</span>
+              <span className=" text-gray-900">
                 {order.items.length} item(s)
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm font-medium text-gray-700">Date:</span>
-              <span className="text-sm text-gray-900">
+              <span className=" font-medium text-gray-700">Date:</span>
+              <span className=" text-gray-900">
                 {new Date(order.createdAt).toLocaleDateString()}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-700">Status:</span>
+              <span className=" font-medium text-gray-700">Status:</span>
               <div className="w-32">
                 <Select
                   selectItems={statusOptions}

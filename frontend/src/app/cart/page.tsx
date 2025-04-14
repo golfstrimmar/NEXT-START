@@ -119,7 +119,7 @@ export default function CartPage() {
                       </p>
                     </div>
                     {typeof product.stock === "number" && (
-                      <div className="mt-1 text-sm text-gray-500 text-center">
+                      <div className="mt-1  text-gray-500 text-center">
                         In stock: {product.stock}
                       </div>
                     )}
@@ -147,7 +147,7 @@ export default function CartPage() {
                     </div>
                     <button
                       onClick={() => removeFromCart(product.id)}
-                      className="mt-2 text-sm text-red-600 hover:text-red-800 cursor-pointer transition-all duration-300 ease-in-out "
+                      className="mt-2  text-red-600 hover:text-red-800 cursor-pointer transition-all duration-300 ease-in-out "
                     >
                       Remove
                     </button>
@@ -162,7 +162,7 @@ export default function CartPage() {
               <p>Subtotal</p>
               <p>${subtotal.toFixed(2)}</p>
             </div>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1  text-gray-500">
               Shipping and taxes calculated at checkout.
             </p>
             <div className="mt-4 ">

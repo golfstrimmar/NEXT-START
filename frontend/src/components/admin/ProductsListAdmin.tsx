@@ -214,25 +214,25 @@ const ProductsListAdmin: React.FC<ProductsListProps> = ({
                           className="w-12 h-12 object-cover rounded"
                         />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap  text-gray-900">
                         {product.name}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap  text-gray-900">
                         {product.price}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap  text-gray-900">
                         {product.category || "N/A"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap  text-gray-900">
                         {product.subcategory || "N/A"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap  text-gray-900">
                         {product.color || "N/A"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap  text-gray-900">
                         {product.stock !== undefined ? product.stock : "N/A"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-6 py-4 whitespace-nowrap ">
                         <button
                           onClick={() => handleEdit(product)}
                           className="text-indigo-600 hover:text-indigo-800 mr-4 cursor-pointer transition-all duration-300 ease-in-out px-2 py-1"
@@ -272,54 +272,50 @@ const ProductsListAdmin: React.FC<ProductsListProps> = ({
                       className="w-16 h-16 object-cover rounded"
                     />
                     <div>
-                      <h3 className="text-sm font-medium text-gray-900">
+                      <h3 className=" font-medium text-gray-900">
                         {product.name}
                       </h3>
-                      <p className="text-sm text-gray-600">${product.price}</p>
+                      <p className=" text-gray-600">${product.price}</p>
                     </div>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className=" font-medium text-gray-700">
                       Category:
                     </span>
-                    <span className="text-sm text-gray-900">
+                    <span className=" text-gray-900">
                       {product.category || "N/A"}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className=" font-medium text-gray-700">
                       Subcategory:
                     </span>
-                    <span className="text-sm text-gray-900">
+                    <span className=" text-gray-900">
                       {product.subcategory || "N/A"}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm font-medium text-gray-700">
-                      Color:
-                    </span>
-                    <span className="text-sm text-gray-900">
+                    <span className=" font-medium text-gray-700">Color:</span>
+                    <span className=" text-gray-900">
                       {product.color || "N/A"}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm font-medium text-gray-700">
-                      Stock:
-                    </span>
-                    <span className="text-sm text-gray-900">
+                    <span className=" font-medium text-gray-700">Stock:</span>
+                    <span className=" text-gray-900">
                       {product.stock !== undefined ? product.stock : "N/A"}
                     </span>
                   </div>
                   <div className="flex justify-end space-x-4 pt-2">
                     <button
                       onClick={() => handleEdit(product)}
-                      className="text-indigo-600 hover:text-indigo-800 text-sm font-medium cursor-pointer transition-all duration-300 ease-in-out px-2 py-1"
+                      className="text-indigo-600 hover:text-indigo-800  font-medium cursor-pointer transition-all duration-300 ease-in-out px-2 py-1"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(product._id)}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium cursor-pointer transition-all duration-300 ease-in-out px-2 py-1"
+                      className="text-red-600 hover:text-red-800  font-medium cursor-pointer transition-all duration-300 ease-in-out px-2 py-1"
                     >
                       Delete
                     </button>

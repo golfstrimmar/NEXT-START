@@ -13,29 +13,20 @@ export default function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Колонка 1: Категории */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900">Categories</h3>
+              <h3 className=" font-medium text-gray-900">Categories</h3>
               <ul role="list" className="mt-6 space-y-4">
                 <li>
-                  <a
-                    href="#"
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                  >
+                  <a href="#" className=" text-gray-500 hover:text-gray-700">
                     Women
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                  >
+                  <a href="#" className=" text-gray-500 hover:text-gray-700">
                     Men
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                  >
+                  <a href="#" className=" text-gray-500 hover:text-gray-700">
                     Browse All
                   </a>
                 </li>
@@ -44,29 +35,20 @@ export default function Footer() {
 
             {/* Колонка 2: О компании */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900">Company</h3>
+              <h3 className=" font-medium text-gray-900">Company</h3>
               <ul role="list" className="mt-6 space-y-4">
                 <li>
-                  <a
-                    href="#"
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                  >
+                  <a href="#" className=" text-gray-500 hover:text-gray-700">
                     About
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                  >
+                  <a href="#" className=" text-gray-500 hover:text-gray-700">
                     Contact
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                  >
+                  <a href="#" className=" text-gray-500 hover:text-gray-700">
                     Careers
                   </a>
                 </li>
@@ -75,29 +57,20 @@ export default function Footer() {
 
             {/* Колонка 3: Поддержка */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900">Support</h3>
+              <h3 className=" font-medium text-gray-900">Support</h3>
               <ul role="list" className="mt-6 space-y-4">
                 <li>
-                  <a
-                    href="#"
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                  >
+                  <a href="#" className=" text-gray-500 hover:text-gray-700">
                     FAQ
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                  >
+                  <a href="#" className=" text-gray-500 hover:text-gray-700">
                     Returns
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                  >
+                  <a href="#" className=" text-gray-500 hover:text-gray-700">
                     Contact Support
                   </a>
                 </li>
@@ -110,7 +83,7 @@ export default function Footer() {
         <div className="border-t border-gray-200 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             {/* Копирайт */}
-            <p className="text-sm text-gray-700">
+            <p className=" text-gray-700">
               © 2025 My Shop. All rights reserved.
             </p>
 

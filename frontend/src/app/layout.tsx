@@ -37,7 +37,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className={` antialiased  flex flex-col min-h-screen `}>
+      <body className={`flex flex-col min-h-screen`}>
         <AuthProvider>
           <CartProvider>
             <Navbar />

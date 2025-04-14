@@ -86,9 +86,7 @@ export default function SetPassword() {
         {status === "loading" && <p className="mb-4">Loading session...</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
+            <label className="block  font-medium text-gray-700">Password</label>
             <input
               type="password"
               value={password}

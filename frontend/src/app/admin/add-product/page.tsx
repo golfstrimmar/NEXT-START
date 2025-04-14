@@ -397,7 +397,7 @@ const AddProductPage: React.FC = () => {
 
             {/* Загрузка изображений для активного цвета */}
             <div className="mt-4">
-              <label className="flex  items-center text-sm font-medium text-gray-700">
+              <label className="flex  items-center  font-medium text-gray-700">
                 Images for{" "}
                 <div
                   className="w-4 h-4 ml-2 rounded-full mr-1 border border-gray-300"
@@ -421,7 +421,7 @@ const AddProductPage: React.FC = () => {
                   accept="image/*"
                   multiple
                   onChange={handleImageChange}
-                  className="block w-full text-sm text-gray-500"
+                  className="block w-full  text-gray-500"
                   disabled={loading}
                 />
                 <label htmlFor="imageUpload" className="cursor-pointer">
@@ -459,7 +459,7 @@ const AddProductPage: React.FC = () => {
               {/* Сохраненные изображения */}
               {getCurrentColorImages().length > 0 && (
                 <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                  <h4 className=" font-medium text-gray-700 mb-2">
                     Saved Images:
                   </h4>
                   <div className="flex flex-wrap gap-2">
@@ -609,7 +609,7 @@ const AddProductPage: React.FC = () => {
 
           {/* Ошибка */}
           {error && (
-            <p className="text-red-500 text-sm mt-2" role="alert">
+            <p className="text-red-500  mt-2" role="alert">
               {error}
             </p>
           )}
