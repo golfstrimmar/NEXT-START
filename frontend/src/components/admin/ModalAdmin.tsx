@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 export default function ModalAdmin() {
   const router = useRouter();
   setTimeout(() => {
-    router.push("/products");
+    router.push("/shop");
   }, 1500);
   return (
     <div
