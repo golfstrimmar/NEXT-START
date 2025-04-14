@@ -60,7 +60,7 @@ const AddToCart = ({ product }: { product: any }) => {
           id: product._id,
           name: product.name,
           price: product.price,
-          imageSrc: product.imageSrc,
+          colors: product.colors,
           imageAlt: product.imageAlt,
           stock: product.stock,
           quantity: initialQuantity,

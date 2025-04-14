@@ -57,6 +57,9 @@ const ProductsPage: React.FC = async () => {
       initialTotal={initialTotal}
       categories={filtersData.categories}
       colors={filtersData.colors}
+      stocks={filtersData.stocks}
+      category={filtersData.category}
+      subcategory={filtersData.subcategory}
     />
   );
 };

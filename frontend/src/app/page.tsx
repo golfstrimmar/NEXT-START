@@ -33,7 +33,9 @@ export default async function Home() {
     },
   ];
   const popularProducts = await fetchPopularProducts();
-
+  // popularProducts.map((foo) => {
+  //   return console.log("<====foo====>", foo);
+  // });
   return (
     <div>
       <SwiperSlider slides={slides} />

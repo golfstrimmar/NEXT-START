@@ -18,7 +18,7 @@ export default function CartPage() {
   useEffect(() => {
     setLoading(false);
   }, []);
-
+  console.log("<==== cart====>", cart);
   const subtotal = cart.reduce((sum, item) => {
     const price =
       item.price == null
@@ -96,15 +96,20 @@ export default function CartPage() {
               return (
                 <li
                   key={product.id}
-                  className="flex items-center border-b pb-4"
+                  className="flex flex-col md:flex-row items-center border-b pb-4"
                 >
                   <img
-                    src={product.imageSrc}
+                    src={
+                      product.colors?.find((color) => color.images?.length > 0)
+                        ?.images[0] ||
+                      product.imageSrc ||
+                      "/placeholder-image.jpg"
+                    }
                     alt={product.imageAlt}
                     className="w-20 h-20 object-cover rounded-md mr-4"
                   />
-                  <div className="flex-1">
-                    <div className="flex justify-between items-center">
+                  <div className=" md:flex-1 text-center">
+                    <div className="flex  flex-col items-center md:flex-row md:justify-between">
                       <h2 className="text-lg font-medium text-gray-900">
                         {product.name}
                       </h2>
@@ -114,11 +119,11 @@ export default function CartPage() {
                       </p>
                     </div>
                     {typeof product.stock === "number" && (
-                      <div className="mt-1 text-sm text-gray-500">
+                      <div className="mt-1 text-sm text-gray-500 text-center">
                         In stock: {product.stock}
                       </div>
                     )}
-                    <div className="flex items-center mt-2">
+                    <div className="flex justify-center mt-2">
                       <button
                         onClick={() =>
                           handleUpdateQuantity(product.id, product.quantity - 1)
@@ -136,17 +141,13 @@ export default function CartPage() {
                           handleUpdateQuantity(product.id, product.quantity + 1)
                         }
                         className="px-2 py-1 bg-gray-200 rounded-r-md hover:bg-gray-300 cursor-pointer transition-all duration-300 ease-in-out"
-                        // disabled={
-                        //   typeof product.stock === "number" &&
-                        //   product.quantity >= product.stock
-                        // }
                       >
                         +
                       </button>
                     </div>
                     <button
                       onClick={() => removeFromCart(product.id)}
-                      className="mt-2 text-sm text-red-600 hover:text-red-800 cursor-pointer transition-all duration-300 ease-in-out"
+                      className="mt-2 text-sm text-red-600 hover:text-red-800 cursor-pointer transition-all duration-300 ease-in-out "
                     >
                       Remove
                     </button>
@@ -164,7 +165,7 @@ export default function CartPage() {
             <p className="mt-1 text-sm text-gray-500">
               Shipping and taxes calculated at checkout.
             </p>
-            <div className="mt-4">
+            <div className="mt-4 ">
               <Button buttonText="Checkout" onClick={handleCheckout} />
             </div>
           </div>

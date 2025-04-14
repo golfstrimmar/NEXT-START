@@ -306,8 +306,8 @@ const AddProductPage: React.FC = () => {
     <div className="min-h-screen bg-gray-100">
       <ModalMessage message={successMessage} open={openModalMessage} />
       <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:max-w-[1600px] lg:px-8">
-        <h1 className="text-2xl font-bold mb-6">Add New Product</h1>
-        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+        <h1 className="text-2xl font-bold my-6">Add New Product</h1>
+        <form onSubmit={handleSubmit} className="space-y-6 pb-4" noValidate>
           {/* Основные поля */}
           <Input
             id="name"

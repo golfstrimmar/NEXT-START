@@ -1,5 +1,7 @@
 import Link from "next/link";
+import ProductFavorites from "./ProductFavorites";
 import AddToCart from "./AddToCart";
+import { Span } from "next/dist/trace";
 
 interface Detail {
   key: string;
@@ -20,9 +22,16 @@ interface ProductProps {
   details?: Detail[];
   colors: ColorData[];
   stock?: number;
+  createdAt?: string;
+  __v?: number;
+  favorites?: string[];
+  onRemove?: (_id: string) => void;
 }
 
-const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
+const ProductCard: React.FC<{ product: ProductProps }> = ({
+  product,
+  onRemove,
+}) => {
   return (
     <div className="group relative shadow-lg rounded-lg grid grid-rows-[1fr_auto] overflow-hidden">
       <Link
@@ -48,38 +57,60 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
       </Link>
 
       <div className="flex flex-col p-4">
-        <h3 className="text-sm text-gray-700">Name: {product.name}</h3>
-        <p className="mt-1 text-sm text-gray-500">Price: ${product.price}</p>
-        {product.colors && (
-          <p className="mt-1 text-sm text-gray-500">
-            Colors:
-            {product.colors.map((color) => color.color).join(", ")}
-          </p>
-        )}
+        <div className="flex justify-between items-start">
+          <h3 className="text-sm text-gray-700">Name: {product.name}</h3>
+        </div>
+        <p className="my-1 text-sm text-gray-500">Price: ${product.price}</p>
+        {product.colors &&
+          product.colors.length === 1 &&
+          product.colors[0].images &&
+          product.colors[0].images.length === 0 &&
+          null}
+        {product.colors &&
+          product.colors.length === 1 &&
+          product.colors[0].images &&
+          product.colors[0].images.length > 0 && (
+            <div className="flex">
+              {product.colors.map((color, index) => (
+                <div
+                  key={index}
+                  className="w-4 h-4 rounded-full mr-2 border border-gray-300"
+                  style={{ backgroundColor: color.color }}
+                ></div>
+              ))}
+            </div>
+          )}
+        {product.colors &&
+          product.colors.length > 1 &&
+          product.colors[0].images &&
+          product.colors[0].images.length === 0 && (
+            <div className="flex">
+              {product.colors.slice(1).map((color, index) => (
+                <div
+                  key={index}
+                  className="w-4 h-4 rounded-full mr-2 border border-gray-300"
+                  style={{ backgroundColor: color.color }}
+                ></div>
+              ))}
+            </div>
+          )}
         {product.category && (
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="my-1 text-sm text-gray-500">
             Category: {product.category}
           </p>
         )}
         {product.subcategory && (
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="my-1 text-sm text-gray-500">
             Subcategory: {product.subcategory}
           </p>
         )}
-        {/* {product.details && product.details.length > 0 && (
-          <div className="mt-1">
-            <p className="text-sm text-gray-500 font-medium">Details:</p>
-            {product.details.map((detail, index) => (
-              <p key={index} className="mt-1 text-sm text-gray-500">
-                {detail.key}: {detail.value}
-              </p>
-            ))}
-          </div>
-        )} */}
-        <p className="mt-1 mb-4 text-sm text-gray-500">
+        <p className="my-1  text-sm text-gray-500">
           Stock: {product.stock !== undefined ? product.stock : "N/A"}
         </p>
-        <div className="mt-auto">
+        <p className="my-1 mb-3 text-sm text-gray-500">
+          <ProductFavorites productId={product._id} onRemove={onRemove} />
+        </p>
+        <div className=" mt-auto">
           <AddToCart product={product} />
         </div>
       </div>

@@ -206,3 +206,37 @@ export async function DELETE(request: Request) {
     );
   }
 }
+export async function PATCH(request: Request) {
+  try {
+    await dbConnect();
+    const { ids } = await request.json();
+
+    // Валидация данных
+    if (!ids || !Array.isArray(ids)) {
+      return NextResponse.json(
+        { error: "Array of product IDs is required" },
+        { status: 400 }
+      );
+    }
+
+    // Получаем продукты по массиву ID
+    const products = await Product.find({
+      _id: { $in: ids },
+    }).lean();
+
+    return NextResponse.json({
+      products: products.map((p) => ({
+        ...p,
+        id: p._id.toString(),
+        // Для обратной совместимости
+        images: p.colors[0]?.images || [],
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching products by IDs:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch products by IDs" },
+      { status: 500 }
+    );
+  }
+}

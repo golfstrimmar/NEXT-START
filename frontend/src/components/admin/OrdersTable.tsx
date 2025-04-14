@@ -69,11 +69,12 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
     }
   };
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
+    <div className="bg-white p-2 md:p-6 rounded-lg shadow">
       <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
       {error && <ModalMessage message={error} open={showModal} />}
       {loading && <Loading />}
-      <div className="">
+      {/* Таблица для десктопа */}
+      <div className="hidden lg:block max-[1130px]:hidden">
         <table className="w-full text-left">
           <thead className="bg-gray-50">
             <tr>
@@ -106,7 +107,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {order.email}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm  text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   ${order.total.toFixed(2)}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
@@ -128,6 +129,59 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Карточки для мобильных устройств */}
+      <div className="lg:hidden max-[1130px]:block space-y-4">
+        {orders.map((order) => (
+          <div
+            key={order._id}
+            className="border border-gray-200 rounded-lg p-4 space-y-2"
+          >
+            <div className="flex justify-between">
+              <span className="text-sm font-medium text-gray-700">
+                Order ID:
+              </span>
+              <span className="text-sm text-gray-900">
+                {order._id.slice(-6)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm font-medium text-gray-700">Email:</span>
+              <span className="text-sm text-gray-900 truncate max-w-[200px]">
+                {order.email}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm font-medium text-gray-700">Total:</span>
+              <span className="text-sm text-gray-900">
+                ${order.total.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm font-medium text-gray-700">Items:</span>
+              <span className="text-sm text-gray-900">
+                {order.items.length} item(s)
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm font-medium text-gray-700">Date:</span>
+              <span className="text-sm text-gray-900">
+                {new Date(order.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-gray-700">Status:</span>
+              <div className="w-32">
+                <Select
+                  selectItems={statusOptions}
+                  setSortOrder={(value) => handleStatusChange(order._id, value)}
+                  initialValue={order.status}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

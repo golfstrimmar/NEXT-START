@@ -81,7 +81,7 @@ const ProductsList: React.FC<ProductsListProps> = ({
             <p className="text-center mt-6">No products found</p>
           ) : (
             <div
-              className={`grid grid-cols-[repeat(auto-fill,300px)] gap-x-6 gap-y-10 transition-opacity duration-200 ${
+              className={`grid grid-cols-1 md:grid-cols-[repeat(auto-fill,300px)] gap-x-6 gap-y-10 transition-opacity duration-200 ${
                 isFilterUpdating ? "opacity-70" : "opacity-100"
               }`}
             >

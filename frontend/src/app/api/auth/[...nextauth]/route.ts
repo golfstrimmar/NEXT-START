@@ -1,9 +1,38 @@
-import NextAuth, { type AuthOptions } from "next-auth";
+import NextAuth, { type AuthOptions, type DefaultSession } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import dbConnect from "@/lib/db";
 import User, { IUser } from "@/models/User";
+import mongoose from "mongoose";
+
+// Расширяем тип Session для добавления favorites
+declare module "next-auth" {
+  interface Session {
+    user: {
+      email?: string | null;
+      name?: string | null;
+      image?: string | null;
+      googleId?: string | null;
+      isPasswordSet?: boolean;
+      role?: string;
+      favorites?: string[];
+    } & DefaultSession["user"];
+  }
+}
+
+// Расширяем тип JWT
+declare module "next-auth/jwt" {
+  interface JWT {
+    email?: string | null;
+    name?: string | null;
+    image?: string | null;
+    googleId?: string | null;
+    isPasswordSet?: boolean;
+    role?: string;
+    favorites?: string[];
+  }
+}
 
 export const authConfig: AuthOptions = {
   providers: [
@@ -51,6 +80,7 @@ export const authConfig: AuthOptions = {
           googleId: user.googleId,
           isPasswordSet: true,
           role: user.role,
+          favorites: Array.isArray(user.favorites) ? user.favorites : [],
         };
       },
     }),
@@ -79,6 +109,7 @@ export const authConfig: AuthOptions = {
             isPasswordSet: false,
             createdAt: new Date(),
             role,
+            favorites: [],
           });
           await newUser.save();
           console.log("New user created with role:", newUser);
@@ -89,6 +120,7 @@ export const authConfig: AuthOptions = {
           user.name = newUser.name;
           user.isPasswordSet = newUser.isPasswordSet;
           user.role = newUser.role;
+          user.favorites = newUser.favorites || [];
         } else {
           const updateData: any = {};
           if (!existingUser.googleId && account.providerAccountId) {
@@ -113,6 +145,9 @@ export const authConfig: AuthOptions = {
               user.name = updatedUser.name;
               user.isPasswordSet = updatedUser.isPasswordSet;
               user.role = updatedUser.role;
+              user.favorites = Array.isArray(updatedUser.favorites)
+                ? updatedUser.favorites
+                : [];
             }
           } else {
             console.log("No updates needed for existing user:", existingUser);
@@ -122,6 +157,9 @@ export const authConfig: AuthOptions = {
             user.name = existingUser.name;
             user.isPasswordSet = existingUser.isPasswordSet;
             user.role = existingUser.role;
+            user.favorites = Array.isArray(existingUser.favorites)
+              ? existingUser.favorites
+              : [];
           }
         }
         return true;
@@ -138,6 +176,7 @@ export const authConfig: AuthOptions = {
         token.googleId = user.googleId;
         token.isPasswordSet = user.isPasswordSet;
         token.role = user.role;
+        token.favorites = user.favorites;
       }
 
       return token;
@@ -150,6 +189,9 @@ export const authConfig: AuthOptions = {
         session.user.googleId = token.googleId;
         session.user.isPasswordSet = token.isPasswordSet;
         session.user.role = token.role;
+        session.user.favorites = Array.isArray(token.favorites)
+          ? token.favorites
+          : [];
       }
 
       return session;

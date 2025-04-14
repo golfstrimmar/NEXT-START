@@ -162,8 +162,7 @@ export default function CheckoutPage() {
       setTimeout(() => {
         setShowModal(false);
         setError("");
-
-        router.push("/products");
+        router.push("/shop");
       }, 1500);
     } catch (error) {
       console.error("Checkout error:", error);
@@ -194,8 +193,8 @@ export default function CheckoutPage() {
           </div>
         ) : (
           <div className="bg-white shadow-md rounded-lg overflow-hidden">
-            {/* Таблица с товарами */}
-            <div className="overflow-x-auto">
+            {/* Таблица с товарами для десктопа */}
+            <div className="hidden min-[1201px]:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
@@ -222,7 +221,11 @@ export default function CheckoutPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <img
-                              src={item.imageSrc}
+                              src={
+                                item.colors?.find(
+                                  (color) => color.images?.length > 0
+                                )?.images[0] || "/placeholder-image.jpg"
+                              }
                               alt={item.imageAlt}
                               className="w-12 h-12 rounded-md object-cover mr-4"
                             />
@@ -232,7 +235,7 @@ export default function CheckoutPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {item.price}
+                          ${itemPrice.toFixed(2)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {item.quantity}
@@ -245,6 +248,55 @@ export default function CheckoutPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Карточки с товарами для мобильных */}
+            <div className="min-[1201px]:hidden space-y-4 p-4 max-w-2xl mx-auto">
+              {cart.map((item) => {
+                const itemPrice = parseFloat(item.price) || 0;
+                const itemTotal = itemPrice * item.quantity;
+                return (
+                  <div
+                    key={item.id}
+                    className="border border-gray-200 rounded-lg p-4 space-y-2"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <img
+                        src={
+                          item.colors?.find((color) => color.images?.length > 0)
+                            ?.images[0] || "/placeholder-image.jpg"
+                        }
+                        alt={item.imageAlt}
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900">
+                          {item.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          ${itemPrice.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-700">
+                        Quantity:
+                      </span>
+                      <span className="text-sm text-gray-900">
+                        {item.quantity}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-700">
+                        Total:
+                      </span>
+                      <span className="text-sm font-medium text-gray-900">
+                        ${itemTotal.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Итоговая сумма */}

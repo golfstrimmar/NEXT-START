@@ -52,6 +52,7 @@ const userSchema: Schema = new Schema({
     type: Boolean,
     default: false,
   },
+  favorites: [{ type: String }],
 });
 
 export default mongoose.models.User ||
