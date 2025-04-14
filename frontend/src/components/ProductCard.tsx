@@ -33,7 +33,7 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({
   onRemove,
 }) => {
   return (
-    <div className="group relative shadow-lg rounded-lg grid grid-rows-[1fr_auto] overflow-hidden">
+    <div className="group relative shadow-lg rounded-lg grid grid-rows-[1fr_auto] overflow-hidden bg-white">
       <Link
         href={`/shop/${product.category}/${product.subcategory}/${product._id}`}
         className="relative block"

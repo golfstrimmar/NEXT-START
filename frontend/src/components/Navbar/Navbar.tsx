@@ -656,7 +656,7 @@ export default function Navbar() {
                   {isSearchOpen && (
                     <form
                       onSubmit={handleSearchSubmit}
-                      className="fixed top-[104px] left-0 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-50"
+                      className="fixed top-[104px] left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-50"
                     >
                       <div className="flex items-center p-2">
                         <input

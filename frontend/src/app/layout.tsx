@@ -38,7 +38,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100 flex flex-col min-h-screen `}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased  flex flex-col min-h-screen `}
       >
         <AuthProvider>
           <CartProvider>
