@@ -93,7 +93,15 @@ export default function Navbar() {
     };
     fetchData();
   }, []);
-
+  useEffect(() => {
+    const handleScroll = () => {
+      setOpenTabs({});
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
   const toggleTab = (category: string) => {
     setOpenTabs((prev) => {
       const resetTabs = Object.keys(prev).reduce((acc, key) => {
