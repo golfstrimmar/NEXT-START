@@ -37,9 +37,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased  flex flex-col min-h-screen `}
-      >
+      <body className={` antialiased  flex flex-col min-h-screen `}>
         <AuthProvider>
           <CartProvider>
             <Navbar />

@@ -189,7 +189,7 @@ export default function Navbar() {
   if (!isMounted) {
     return (
       <header className="relative bg-white z-[100]">
-        <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
+        <p className="flex h-10 items-center justify-center bg-indigo-600 px-4  font-medium text-white sm:px-6 lg:px-8">
           Get free delivery on orders over $100
         </p>
         <nav aria-label="Top" className="mx-auto max-w-[1600px] px-4">
@@ -257,7 +257,7 @@ export default function Navbar() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search by name..."
-                  className="w-full px-3 py-2 text-sm text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2  text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
                 <button
                   type="submit"
@@ -270,14 +270,12 @@ export default function Navbar() {
 
             {/* Mobile Categories */}
             <div className="space-y-2 px-4 py-4 border-b border-gray-200">
-              <h3 className="text-sm font-semibold text-gray-900">
-                Categories
-              </h3>
+              <h3 className=" font-semibold text-gray-900">Categories</h3>
               {memoizedCategories.map((category) => (
                 <div key={category.category}>
                   <button
                     onClick={() => toggleMobileCategory(category.category)}
-                    className="flex items-center justify-between w-full py-2 text-sm text-gray-700 hover:text-indigo-500"
+                    className="flex items-center justify-between w-full py-2  text-gray-700 hover:text-indigo-500"
                   >
                     <span>
                       {category.category.charAt(0).toUpperCase() +
@@ -296,7 +294,7 @@ export default function Navbar() {
                       <Link
                         href={`/shop/${category.category}`}
                         onClick={() => setOpen(false)}
-                        className={`block text-sm text-gray-700 hover:text-indigo-500 ${
+                        className={`block  text-gray-700 hover:text-indigo-500 ${
                           activeLink === `/shop/${category.category}`
                             ? "text-indigo-600 font-medium"
                             : ""
@@ -309,7 +307,7 @@ export default function Navbar() {
                           key={sub}
                           href={`/shop/${category.category}/${sub}`}
                           onClick={() => setOpen(false)}
-                          className={`block text-sm text-gray-700 hover:text-indigo-500 ${
+                          className={`block  text-gray-700 hover:text-indigo-500 ${
                             activeLink === `/shop/${category.category}/${sub}`
                               ? "text-indigo-600 font-medium"
                               : ""
@@ -331,7 +329,7 @@ export default function Navbar() {
                   key={page.name}
                   href={page.href}
                   onClick={() => setOpen(false)}
-                  className={`block py-2 text-sm text-gray-700 hover:text-indigo-500 ${
+                  className={`block py-2  text-gray-700 hover:text-indigo-500 ${
                     activeLink.startsWith(page.href)
                       ? "text-indigo-600 font-medium"
                       : ""
@@ -356,7 +354,7 @@ export default function Navbar() {
                         />
                       </Link>
                     )}
-                    <span className="text-sm text-gray-700">
+                    <span className=" text-gray-700">
                       Hello, {session.user?.name}
                     </span>
                   </div>
@@ -365,7 +363,7 @@ export default function Navbar() {
                       signOut({ callbackUrl: "/" });
                       setOpen(false);
                     }}
-                    className="block w-full text-left py-2 text-sm text-gray-700 hover:text-indigo-500"
+                    className="block w-full text-left py-2  text-gray-700 hover:text-indigo-500"
                   >
                     Sign out
                   </button>
@@ -375,7 +373,7 @@ export default function Navbar() {
                   <Link
                     href="/auth/signin"
                     onClick={() => setOpen(false)}
-                    className={`block py-2 text-sm text-gray-700 hover:text-indigo-500 ${
+                    className={`block py-2  text-gray-700 hover:text-indigo-500 ${
                       activeLink === "/auth/signin"
                         ? "text-indigo-600 font-medium"
                         : ""
@@ -386,7 +384,7 @@ export default function Navbar() {
                   <Link
                     href="/auth/signup"
                     onClick={() => setOpen(false)}
-                    className={`block py-2 text-sm text-gray-700 hover:text-indigo-500 ${
+                    className={`block py-2  text-gray-700 hover:text-indigo-500 ${
                       activeLink === "/auth/signup"
                         ? "text-indigo-600 font-medium"
                         : ""
@@ -403,7 +401,7 @@ export default function Navbar() {
               <Link
                 href="/favorites"
                 onClick={() => setOpen(false)}
-                className="flex items-center py-2 text-sm text-gray-700 hover:text-indigo-500"
+                className="flex items-center py-2  text-gray-700 hover:text-indigo-500"
               >
                 {favoritesLength > 0 ? (
                   <HeartIcon className="w-5 h-5 text-red-500 mr-2" />
@@ -417,7 +415,7 @@ export default function Navbar() {
                   handleCartClick();
                   if (status === "authenticated") setOpen(false);
                 }}
-                className="flex items-center py-2 text-sm text-gray-700 hover:text-indigo-500 cursor-pointer"
+                className="flex items-center py-2  text-gray-700 hover:text-indigo-500 cursor-pointer"
               >
                 <ShoppingBagIcon
                   aria-hidden="true"
@@ -436,7 +434,7 @@ export default function Navbar() {
             <div className="px-4 py-4">
               <a
                 href="#"
-                className="flex items-center py-2 text-sm text-gray-700 hover:text-indigo-500"
+                className="flex items-center py-2  text-gray-700 hover:text-indigo-500"
               >
                 <img
                   alt=""
@@ -451,7 +449,7 @@ export default function Navbar() {
       </Dialog>
 
       <header className="relative bg-white z-[100]">
-        <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
+        <p className="flex h-10 items-center justify-center bg-indigo-600 px-4  font-medium text-white sm:px-6 lg:px-8">
           Get free delivery on orders over $100
         </p>
         <nav aria-label="Top" className="mx-auto max-w-[1600px] px-4">
@@ -501,7 +499,7 @@ export default function Navbar() {
                         >
                           <div className="tab overflow-hidden h-[100%] flex items-center">
                             <div
-                              className="tab-header flex items-center justify-between p-1 cursor-pointer transition-colors text-sm text-gray-700 hover:text-indigo-500 duration-200 ease-in-out group h-[100%]"
+                              className="tab-header flex items-center justify-between p-1 cursor-pointer transition-colors  text-gray-700 hover:text-indigo-500 duration-200 ease-in-out group h-[100%]"
                               onMouseEnter={() => {
                                 toggleTab(category.category);
                               }}
@@ -526,7 +524,7 @@ export default function Navbar() {
                               <div className="min-h-0">
                                 <Link
                                   href={`/shop/${categorySlug}`}
-                                  className={`block text-sm text-gray-700 px-2 pt-2 pb-2 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                                  className={`block  text-gray-700 px-2 pt-2 pb-2 hover:text-indigo-500 transition duration-300 ease-in-out ${
                                     activeLink === `/shop/${categorySlug}`
                                       ? "border-l-4 border-indigo-600 text-indigo-600 font-medium"
                                       : "text-gray-700 border-l-4 border-transparent"
@@ -541,7 +539,7 @@ export default function Navbar() {
                                       <Link
                                         key={foo}
                                         href={`/shop/${categorySlug}/${foo}`}
-                                        className={`block px-2 text-sm text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                                        className={`block px-2  text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
                                           activeLink ===
                                           `/shop/${categorySlug}/${foo}`
                                             ? "border-l-4 border-indigo-600 text-indigo-600 font-medium"
@@ -563,7 +561,7 @@ export default function Navbar() {
                     <Link
                       key={page.name}
                       href={page.href}
-                      className={`flex items-center text-sm border-bottom border-indigo-600 text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                      className={`flex items-center  border-bottom border-indigo-600 text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
                         activeLink.startsWith(page.href)
                           ? "border-b-2 border-indigo-600 text-indigo-600"
                           : "text-gray-700 font-medium"
@@ -588,12 +586,12 @@ export default function Navbar() {
                           />
                         </Link>
                       )}
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className=" font-medium text-gray-700">
                         Hello, {session.user?.name}
                       </span>
                       <button
                         onClick={() => signOut({ callbackUrl: "/" })}
-                        className="text-sm font-medium text-gray-700 hover:text-indigo-500 cursor-pointer"
+                        className=" font-medium text-gray-700 hover:text-indigo-500 cursor-pointer"
                       >
                         Sign out
                       </button>
@@ -602,7 +600,7 @@ export default function Navbar() {
                     <>
                       <Link
                         href="/auth/signin"
-                        className={`flex items-center text-sm h-[100%] text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                        className={`flex items-center  h-[100%] text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
                           "/auth/signin" === activeLink
                             ? "border-b-2 border-indigo-600 text-indigo-600"
                             : "text-gray-700 font-medium"
@@ -616,7 +614,7 @@ export default function Navbar() {
                       />
                       <Link
                         href="/auth/signup"
-                        className={`flex items-center text-sm h-[100%] text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                        className={`flex items-center  h-[100%] text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
                           "/auth/signup" === activeLink
                             ? "border-b-2 border-indigo-600 text-indigo-600"
                             : "text-gray-700 font-medium"
@@ -637,7 +635,7 @@ export default function Navbar() {
                       src="https://tailwindcss.com/plus-assets/img/flags/flag-canada.svg"
                       className="block h-auto w-5 shrink-0"
                     />
-                    <span className="ml-3 block text-sm font-medium">USD</span>
+                    <span className="ml-3 block  font-medium">USD</span>
                     <span className="sr-only">, change currency</span>
                   </a>
                 </div>
@@ -664,7 +662,7 @@ export default function Navbar() {
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           placeholder="Search by name..."
-                          className="w-full px-3 py-2 text-sm text-gray-700 border-none focus:outline-none focus:ring-0"
+                          className="w-full px-3 py-2  text-gray-700 border-none focus:outline-none focus:ring-0"
                           autoFocus
                         />
                         <button
