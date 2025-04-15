@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useStateContext } from "@/components/StateProvider";
 
 const Dashboard = () => {
@@ -8,6 +8,36 @@ const Dashboard = () => {
   const handlerEnter = (name: string, input: string) => {
     handlerEnterStone(name, input);
   };
+
+  useEffect(() => {
+    console.log("<====dashboard stone====>", stone);
+  }, [stone]);
+
+  const tags = [
+    "div",
+    "a",
+    "button",
+    "br",
+    "img",
+    "header",
+    "footer",
+    "li",
+    "mark",
+    "main",
+    "nav",
+    "ol",
+    "p",
+    "span",
+    "section",
+    "hr",
+    "ul",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+  ];
   const classes = [
     "best",
     "container",
@@ -46,14 +76,22 @@ const Dashboard = () => {
     >
       <div>
         <div className="inline-flex  flex-col ">
-          <span
-            className="border border-gray-300 bg-gray-50 px-1 cursor-pointer inline-block"
-            onMouseEnter={(e) => {
-              handlerEnter("tag", e.currentTarget.textContent || "");
-            }}
-          >
-            div
-          </span>
+          {tags &&
+            tags.map((item, index) => {
+              return (
+                <span
+                  key={index}
+                  className="border border-gray-300 bg-gray-50 px-1 cursor-pointer inline-block"
+                  onMouseEnter={(e) =>
+                    handlerEnter("tag", e.currentTarget.textContent || "")
+                  }
+                >
+                  {item}
+                </span>
+              );
+            })}
+        </div>
+        <div className="inline-flex  flex-col ">
           {classes &&
             classes.map((item, index) => {
               return (
@@ -68,15 +106,6 @@ const Dashboard = () => {
                 </span>
               );
             })}
-
-          {/* <span
-            className="border border-gray-300 bg-gray-50 px-2 cursor-pointer inline-block"
-            onMouseEnter={(e) =>
-              handlerEnter(e.currentTarget.textContent || "")
-            }
-          >
-            &quot;&gt;&lt;/div&gt;
-          </span> */}
         </div>
       </div>
     </div>

@@ -6,43 +6,46 @@ import { useStateContext } from "@/components/StateProvider";
 import { XMarkIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import TagTree from "@/components/TagTree/TagTree";
 
-interface Stone {
-  name: string;
-  value: string;
-}
-
 const Plaza = () => {
   const { stone, setStone } = useStateContext();
   const [tags, setTags] = useState<string[]>([]);
   const Duplicate = useRef(null);
   const Mark = useRef(null);
 
-  const createTagFromArray = (items: Stone[]): string => {
-    const tagItem = items.find((item) => item.name === "tag");
-    const tag = tagItem ? tagItem.value : "div"; // Исправлено: tagItem.value вместо item.value
+  const selfClosingTags = ["br", "img", "hr"];
 
-    const attributes = items.reduce((acc, item) => {
-      if (item.name !== "tag" && item.name !== "content") {
-        acc[item.name === "class" ? "className" : item.name] = item.value; // Предотвращаем ошибку с class
-      }
-      return acc;
-    }, {} as Record<string, string>);
+  const createTagFromArray = (item: {
+    tag: string;
+    className?: string;
+    content?: string;
+  }): string => {
+    const { tag, className, content = "" } = item;
 
-    const contentItem = items.find((item) => item.name === "content");
-    const content = contentItem ? contentItem.value : "";
+    const attributes: Record<string, string> = {};
+    if (className) {
+      attributes.className = className;
+    }
 
     const Tag = tag as keyof JSX.IntrinsicElements;
-    const element = <Tag {...attributes}>{content}</Tag>;
-    const result = renderToStaticMarkup(element);
-    console.log("<====result====>", result);
-    return result;
+
+    if (selfClosingTags.includes(tag)) {
+      // Самозакрывающиеся теги
+      const element = <Tag {...attributes} />;
+      return renderToStaticMarkup(element);
+    } else {
+      // Обычные теги
+      const element = <Tag {...attributes}>{content}</Tag>;
+      return renderToStaticMarkup(element);
+    }
   };
 
   useEffect(() => {
     if (stone.length > 0) {
-      const generatedTag = createTagFromArray(stone);
+      const lastStone = stone[stone.length - 1];
+      const generatedTag = createTagFromArray(lastStone);
       setTags((prev) => [...prev, generatedTag]);
-      setStone([]); // Очищаем stone после добавления
+      // Не очищаем stone полностью, чтобы сохранить историю, но удаляем последний элемент
+      setStone((prev) => prev.slice(0, -1));
     }
   }, [stone, setStone]);
 

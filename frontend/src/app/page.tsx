@@ -10,25 +10,25 @@ import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import { useStateContext } from "@/components/StateProvider";
 
 export default function Home() {
-  const [error, setError] = useState<string>("");
-  const { stone, handlerEnterStone, openModal, setOpenModal } =
-    useStateContext();
+  // const [error, setError] = useState<string>("");
+  // const { stone, handlerEnterStone, openModal, setOpenModal } =
+  //   useStateContext();
 
-  useEffect(() => {
-    console.log("<====stone====>", stone);
-    if (stone.length > 0) {
-      setError(
-        stone.map((item, index) => {
-          return (
-            <div key={index}>
-              <span>{item.name}</span>: <span>{item.value}</span>
-            </div>
-          );
-        })
-      );
-      setOpenModal(true);
-    }
-  }, [stone]);
+  // useEffect(() => {
+  //   console.log("<====stone====>", stone);
+  //   if (stone.length > 0) {
+  //     setError(
+  //       stone.map((item, index) => {
+  //         return (
+  //           <div key={index}>
+  //             <span>{item.name}</span>: <span>{item.value}</span>
+  //           </div>
+  //         );
+  //       })
+  //     );
+  //     setOpenModal(true);
+  //   }
+  // }, [stone]);
 
   return (
     <div className=" min-h-screen  font-[family-name:var(--font-geist-sans)]">
