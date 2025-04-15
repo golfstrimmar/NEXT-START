@@ -133,9 +133,6 @@ export default function Navbar() {
     }
 
     setloading(false);
-    if (session) {
-      console.log("<====session====>", session);
-    }
 
     const updateCount = async () => {
       try {
@@ -503,7 +500,7 @@ export default function Navbar() {
               </div>
 
               <PopoverGroup className="hidden lg:ml-8 lg:block lg:self-stretch ">
-                <div className="flex space-x-4 items-center h-[100%] min-w-[100px]">
+                <div className="flex space-x-2 items-center h-[100%] ">
                   {memoizedCategories &&
                     memoizedCategories.map((category) => {
                       const categorySlug = category.category;
@@ -512,7 +509,7 @@ export default function Navbar() {
                       return (
                         <div
                           key={category.category}
-                          className="w-full relative min-w-[100px] h-[100%]"
+                          className="w-full relative  h-[100%]"
                           ref={(el) =>
                             (tabRefs.current[category.category] = el)
                           }
@@ -522,7 +519,7 @@ export default function Navbar() {
                         >
                           <div className="tab overflow-hidden h-[100%] flex items-center">
                             <div
-                              className="tab-header flex items-center justify-between p-1 cursor-pointer transition-colors  text-gray-700 hover:text-indigo-500 duration-200 ease-in-out group h-[100%]"
+                              className="tab-header font-bold text-[18px] flex items-center justify-between p-1 cursor-pointer transition-colors  text-gray-700 hover:text-indigo-500 duration-200 ease-in-out group h-[100%]"
                               onMouseEnter={() => {
                                 toggleTab(category.category);
                               }}
@@ -547,7 +544,7 @@ export default function Navbar() {
                               <div className="min-h-0">
                                 <Link
                                   href={`/shop/${categorySlug}`}
-                                  className={`block  text-gray-700 px-2 pt-2 pb-2 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                                  className={`block  text-gray-700 font-bold text-[18px] px-2 pt-2 pb-2 hover:text-indigo-500 transition duration-300 ease-in-out ${
                                     activeLink === `/shop/${categorySlug}`
                                       ? "border-l-4 border-indigo-600 text-indigo-600 font-medium"
                                       : "text-gray-700 border-l-4 border-transparent"
@@ -562,7 +559,7 @@ export default function Navbar() {
                                       <Link
                                         key={foo}
                                         href={`/shop/${categorySlug}/${foo}`}
-                                        className={`block px-2  text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                                        className={`block px-2 font-bold text-[18px] text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
                                           activeLink ===
                                           `/shop/${categorySlug}/${foo}`
                                             ? "border-l-4 border-indigo-600 text-indigo-600 font-medium"
@@ -584,10 +581,10 @@ export default function Navbar() {
                     <Link
                       key={page.name}
                       href={page.href}
-                      className={`flex items-center  border-bottom border-indigo-600 text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                      className={`flex items-center font-bold text-[18px] border-bottom border-indigo-600 text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
                         activeLink.startsWith(page.href)
                           ? "border-b-2 border-indigo-600 text-indigo-600"
-                          : "text-gray-700 font-medium"
+                          : "text-gray-700 "
                       }`}
                     >
                       {page.name}
@@ -610,8 +607,15 @@ export default function Navbar() {
                         </Link>
                       )}
                       <span className=" font-medium text-gray-700">
-                        Hello, {session.user?.name}
+                        Hello,{" "}
+                        <span className="text-indigo-600 font-bold">
+                          {session.user?.name}
+                        </span>
                       </span>
+                      <span
+                        aria-hidden="true"
+                        className="h-6 w-px bg-gray-200"
+                      />
                       <button
                         onClick={() => signOut({ callbackUrl: "/" })}
                         className=" font-medium text-gray-700 hover:text-indigo-500 cursor-pointer"
@@ -623,10 +627,10 @@ export default function Navbar() {
                     <>
                       <Link
                         href="/auth/signin"
-                        className={`flex items-center  h-[100%] text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                        className={`flex items-center font-bold text-[18px]  h-[100%] text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
                           "/auth/signin" === activeLink
                             ? "border-b-2 border-indigo-600 text-indigo-600"
-                            : "text-gray-700 font-medium"
+                            : "text-gray-700 "
                         }`}
                       >
                         Sign in
@@ -637,10 +641,10 @@ export default function Navbar() {
                       />
                       <Link
                         href="/auth/signup"
-                        className={`flex items-center  h-[100%] text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
+                        className={`flex items-center font-bold text-[18px] h-[100%] text-gray-700 hover:text-indigo-500 transition duration-300 ease-in-out ${
                           "/auth/signup" === activeLink
                             ? "border-b-2 border-indigo-600 text-indigo-600"
-                            : "text-gray-700 font-medium"
+                            : "text-gray-700 "
                         }`}
                       >
                         Create account
