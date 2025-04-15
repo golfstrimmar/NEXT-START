@@ -9,7 +9,7 @@ export default function Home() {
       <div>
         <HomeImg className="inline-block mr-2 w-8 h-8"></HomeImg>
         <h1 className="text-3xl font-semibold italic text-gray-800 text-center">
-          Home
+          LayoutRobotic
         </h1>
         <div className="w-1/4">
           <Image
