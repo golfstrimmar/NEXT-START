@@ -1,9 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import styles from "./Plaza.module.scss";
 import { useStateContext } from "@/components/StateProvider";
 import { XMarkIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
+import TagTree from "@/components/TagTree/TagTree";
 
 interface Stone {
   name: string;
@@ -13,14 +14,16 @@ interface Stone {
 const Plaza = () => {
   const { stone, setStone } = useStateContext();
   const [tags, setTags] = useState<string[]>([]);
+  const Duplicate = useRef(null);
+  const Mark = useRef(null);
 
   const createTagFromArray = (items: Stone[]): string => {
     const tagItem = items.find((item) => item.name === "tag");
-    const tag = tagItem ? tagItem.value : "div";
+    const tag = tagItem ? tagItem.value : "div"; // Исправлено: tagItem.value вместо item.value
 
     const attributes = items.reduce((acc, item) => {
       if (item.name !== "tag" && item.name !== "content") {
-        acc[item.name] = item.value;
+        acc[item.name === "class" ? "className" : item.name] = item.value; // Предотвращаем ошибку с class
       }
       return acc;
     }, {} as Record<string, string>);
@@ -43,9 +46,29 @@ const Plaza = () => {
     }
   }, [stone, setStone]);
 
-  const handlerCopy = () => {
+  const handlerCopy = (e: React.MouseEvent<HTMLButtonElement>) => {
     console.log("<====tags====>", tags);
     navigator.clipboard.writeText(tags.join(""));
+    if (Duplicate.current) {
+      Duplicate.current.style.boxShadow = "0 0 10px red";
+      setTimeout(() => {
+        if (Duplicate.current) {
+          Duplicate.current.style.boxShadow = "none";
+        }
+      }, 300);
+    }
+  };
+
+  const handlerClear = () => {
+    setTags([]);
+    if (Mark.current) {
+      Mark.current.style.boxShadow = "0 0 10px red";
+      setTimeout(() => {
+        if (Mark.current) {
+          Mark.current.style.boxShadow = "none";
+        }
+      }, 300);
+    }
   };
 
   const handleDragStart = (
@@ -62,20 +85,15 @@ const Plaza = () => {
   ) => {
     e.preventDefault();
     const draggedIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
-
     if (draggedIndex === targetIndex) return;
 
     setTags((prev) => {
       const newTags = [...prev];
       const draggedTag = newTags[draggedIndex];
       const targetTag = newTags[targetIndex];
-
-      // Вкладываем перетаскиваемый тег как содержимое целевого
       const updatedTargetTag = targetTag.replace(/>/, `>${draggedTag}`);
-
       newTags[targetIndex] = updatedTargetTag;
       newTags.splice(draggedIndex, 1);
-
       return newTags;
     });
   };
@@ -86,46 +104,59 @@ const Plaza = () => {
   };
 
   return (
-    <div className="plaza">
-      <div className="flex gap-2 mb-2">
-        <button
-          type="button"
-          onClick={() => setTags([])}
-          className="w-6 h-6 bg-red-400 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-red-600 transition-all duration-200 ease-in-out"
-        >
-          <XMarkIcon className="w-6 h-6 text-white" />
-        </button>
-        <button
-          type="button"
-          onClick={handlerCopy}
-          className="w-6 h-6 bg-cyan-500 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-cyan-600 transition-all duration-200 ease-in-out"
-        >
-          <DocumentDuplicateIcon className="w-6 h-6 text-white" />
-        </button>
+    <div className="flex h-screen">
+      {/* Дерево тегов */}
+      <div className="w-1/2">
+        <TagTree tags={tags} />
       </div>
-      <div className="plaza rounded border border-gray-300">
-        <div className="rounded border border-gray-300 bg-[#B0BEC5]">
-          {tags &&
-            tags.map((tag, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 border border-gray-300"
-                draggable
-                onDragStart={(e) => handleDragStart(e, index)}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, index)}
-              >
-                <button
-                  type="button"
-                  onClick={() => setTags(tags.filter((_, i) => i !== index))}
-                  className="w-6 h-6 border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer bg-yellow-700 transition-all duration-200 ease-in-out"
-                >
-                  <XMarkIcon className="w-6 h-6 text-white" />
-                </button>
-                {tag}
-                <div dangerouslySetInnerHTML={{ __html: tag }} />
-              </div>
-            ))}
+      {/* Основной контент */}
+      <div className="flex-1 p-4">
+        <div className="plaza">
+          <div className="flex gap-2 mb-2">
+            <button
+              ref={Mark}
+              type="button"
+              onClick={handlerClear}
+              className="w-8 h-8 bg-red-400 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-red-600 transition-all duration-200 ease-in-out"
+            >
+              <XMarkIcon className="w-4 h-4 text-white" />
+            </button>
+            <button
+              ref={Duplicate}
+              type="button"
+              onClick={handlerCopy}
+              className="w-8 h-8 bg-cyan-500 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-cyan-600 transition-all duration-200 ease-in-out overflow-hidden"
+            >
+              <DocumentDuplicateIcon className="w-4 h-4 text-white" />
+            </button>
+          </div>
+          <div className="plaza rounded border border-gray-300">
+            <div className="rounded border border-gray-300 bg-[#a6beca]">
+              {tags &&
+                tags.map((tag, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 border border-gray-300"
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, index)}
+                  >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setTags(tags.filter((_, i) => i !== index))
+                      }
+                      className="w-6 h-6 border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer bg-yellow-700 transition-all duration-200 ease-in-out"
+                    >
+                      <XMarkIcon className="w-6 h-6 text-white" />
+                    </button>
+                    <p>{tag}</p>
+                    <div dangerouslySetInnerHTML={{ __html: tag }} />
+                  </div>
+                ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
