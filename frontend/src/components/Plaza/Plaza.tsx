@@ -11,21 +11,28 @@ const Plaza = () => {
   const [tags, setTags] = useState<string[]>([]);
   const Duplicate = useRef(null);
   const Mark = useRef(null);
-
+  console.log("<====plaza stone====>", stone);
   const selfClosingTags = ["br", "img", "hr"];
 
   const createTagFromArray = (item: {
     tag: string;
     className?: string;
+    subClassName?: string;
+    extraClass?: string;
     content?: string;
   }): string => {
-    const { tag, className, content = "" } = item;
+    const { tag, className, subClassName, extraClass, content = "" } = item;
 
     const attributes: Record<string, string> = {};
     if (className) {
       attributes.className = className;
     }
-
+    if (subClassName) {
+      attributes.className = className + subClassName;
+    }
+    if (extraClass) {
+      attributes.className = className + subClassName + " " + extraClass;
+    }
     const Tag = tag as keyof JSX.IntrinsicElements;
 
     if (selfClosingTags.includes(tag)) {
@@ -64,6 +71,7 @@ const Plaza = () => {
 
   const handlerClear = () => {
     setTags([]);
+    setStone([]);
     if (Mark.current) {
       Mark.current.style.boxShadow = "0 0 10px red";
       setTimeout(() => {
@@ -113,6 +121,7 @@ const Plaza = () => {
         <TagTree tags={tags} />
       </div>
       {/* Основной контент */}
+
       <div className="flex-1 p-4">
         <div className="plaza">
           <div className="flex gap-2 mb-2">

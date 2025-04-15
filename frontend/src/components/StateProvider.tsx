@@ -5,38 +5,81 @@ import { createContext, useContext, useState, ReactNode } from "react";
 interface Stone {
   tag: string;
   className?: string;
-  content?: string;
+  subClassName?: string;
 }
 
 interface StateContextType {
   stone: Stone[];
   setStone: React.Dispatch<React.SetStateAction<Stone[]>>;
-  handlerEnterStone: (name: string, input: string) => void;
-  openModal: boolean;
-  setOpenModal: (value: boolean) => void;
+  handlerEnterStone: (
+    name: string,
+    input: string,
+    subClassName?: string
+  ) => void;
 }
 
 const StateContext = createContext<StateContextType | undefined>(undefined);
 
 export function StateProvider({ children }: { children: ReactNode }) {
   const [stone, setStone] = useState<Stone[]>([]);
-  const [openModal, setOpenModal] = useState(false);
 
-  const handlerEnterStone = (name: string, input: string) => {
+  const handlerEnterStone = (
+    name: string,
+    className: string,
+    subClassName?: string,
+    extraClass?: string
+  ) => {
+    console.log("handlerEnterStone", name, className, subClassName, extraClass);
     setStone((prev) => {
-      if (name === "tag") {
-        // Добавляем новый тег
-        return [...prev, { tag: input }];
-      } else if (name === "class" && prev.length > 0) {
-        // Добавляем класс к последнему тегу
-        const updated = [...prev];
-        updated[updated.length - 1] = {
-          ...updated[updated.length - 1],
-          className: input,
-        };
-        return updated;
+      if (name === "" && className !== "" && subClassName === ""&& extraClass === "") {
+        return [
+          ...prev,
+          { tag: "div", className: className, subClassName: "" , extraClass: ""},
+        ];
       }
-      return prev; // Игнорируем класс, если нет тегов
+      if (name !== "" && className === "" && subClassName === "" && extraClass === "") {
+        return [...prev, { tag: name, className: "", subClassName: "" , extraClass: ""}];
+      }
+      if (name !== "" && className !== "" && subClassName === "") {
+        return [...prev, { tag: name, className: className, subClassName: "", extraClass: "" }];
+      }
+      if (subClassName !== "") {
+        return [
+          ...prev,
+          {
+            tag: name,
+            className: className,
+            subClassName: subClassName,
+            extraClass: extraClass,
+          },
+        ];
+      }
+      if (extraClass !== "") {
+        return [
+          ...prev,
+          {
+            tag: name,
+            className: className,
+            subClassName: subClassName,
+            extraClass: extraClass,
+          },
+        ];
+      }
+      // if (name !== "") {
+      //   return [...prev, { tag: "div", className: className }];
+      // }
+      // if (name === "class" && prev.length === 0) {
+      //   return [...prev, { tag: "div", className: className }];
+      // }
+      // if (name === "class" && prev.length > 0) {
+      //   const updated = [...prev];
+      //   updated[updated.length - 1] = {
+      //     ...updated[updated.length - 1],
+      //     className: input,
+      //   };
+      //   return updated;
+      // }
+      return prev;
     });
   };
 
@@ -46,8 +89,6 @@ export function StateProvider({ children }: { children: ReactNode }) {
         stone,
         setStone,
         handlerEnterStone,
-        openModal,
-        setOpenModal,
       }}
     >
       {children}

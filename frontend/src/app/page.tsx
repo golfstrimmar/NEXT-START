@@ -11,8 +11,7 @@ import { useStateContext } from "@/components/StateProvider";
 
 export default function Home() {
   // const [error, setError] = useState<string>("");
-  // const { stone, handlerEnterStone, openModal, setOpenModal } =
-  //   useStateContext();
+  // const { stone, handlerEnterStone } = useStateContext();
 
   // useEffect(() => {
   //   console.log("<====stone====>", stone);
@@ -37,6 +36,7 @@ export default function Home() {
 
         <div className="grid grid-cols-[1fr_20%] gap-2">
           {/* {error && <ModalMessage message={error} open={openModal} />} */}
+
           <Plaza />
           <Dashboard />
         </div>

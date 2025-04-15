@@ -51,12 +51,13 @@ const TagTree: React.FC<{ tags: string[] }> = ({ tags }) => {
 
   // Define colors for different nesting levels
   const depthColors = [
-    "text-blue-600", // Depth 0
-    "text-green-600", // Depth 1
-    "text-purple-600", // Depth 2
-    "text-red-600", // Depth 3
-    "text-yellow-600", // Depth 4
-    "text-teal-600", // Depth 5
+    "text-zinc-900", // Depth 0
+    "text-cyan-900", // Depth 0
+    "text-lime-800", // Depth 1
+    "text-violet-700", // Depth 1
+    "text-sky-500", // Depth 1
+    "text-amber-700",
+    "text-blue-500", // Depth 1
   ];
 
   const renderNode = (node: TagNode, depth: number = 0) => {
@@ -68,14 +69,14 @@ const TagTree: React.FC<{ tags: string[] }> = ({ tags }) => {
     const colorClass = depthColors[depth % depthColors.length];
 
     return (
-      <li key={`${node.name}-${depth}`} className="ml-4">
+      <li key={`${node.name}-${depth}`} className="ml-4 ">
         <span className={`${colorClass} ${styles.node}`}>
           &lt;{node.name}
           {attrString ? ` ${attrString}` : ""}
           &gt;
         </span>
         {node.children.length > 0 && (
-          <ul className="ml-1">
+          <ul className="ml-1 ">
             {node.children.map((child) => renderNode(child, depth + 1))}
           </ul>
         )}
@@ -87,7 +88,7 @@ const TagTree: React.FC<{ tags: string[] }> = ({ tags }) => {
   };
 
   return (
-    <div className="p-4 bg-gray-100 border-l border-gray-300 h-full overflow-auto">
+    <div className="p-4 bg-gray-300 border-l border-gray-300 h-full overflow-auto">
       {tree.length > 0 ? (
         <ul className="text-sm font-mono">
           {tree.map((node) => renderNode(node))}
