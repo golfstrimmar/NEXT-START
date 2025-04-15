@@ -36,7 +36,6 @@ const Dashboard = () => {
   }, [name, className, subClassName, extraClass]);
 
   const tags = [
-    "div",
     "a",
     "button",
     "br",
@@ -47,6 +46,7 @@ const Dashboard = () => {
     "mark",
     "main",
     "nav",
+    "div",
     "ol",
     "p",
     "span",
@@ -202,7 +202,9 @@ const Dashboard = () => {
               return (
                 <span
                   key={index}
-                  className="border border-gray-300 bg-gray-50 px-1 cursor-pointer inline-block"
+                  className={`${
+                    index === 10 ? "py-4 bg-white" : ""
+                  } border border-gray-300 bg-cyan-300 px-1 cursor-pointer inline-block`}
                   onMouseEnter={(e) => {
                     setName(e.currentTarget.textContent || "");
                     refTags.current.style.transform = "scale(0)";
@@ -220,7 +222,7 @@ const Dashboard = () => {
               return (
                 <span
                   key={index}
-                  className="border border-gray-300 bg-gray-50 px-1 cursor-pointer inline-block"
+                  className="border border-gray-300 bg-green-400 px-1 cursor-pointer inline-block"
                   onMouseEnter={(e) => {
                     setClassName(e.currentTarget.textContent || "");
                     refClasses.current.style.transform = "scale(0)";
@@ -237,7 +239,7 @@ const Dashboard = () => {
               return (
                 <span
                   key={index}
-                  className="border border-gray-300 bg-gray-50 px-1 cursor-pointer inline-block"
+                  className="border border-gray-300 bg-indigo-300 px-1 cursor-pointer inline-block"
                   onMouseEnter={(e) => {
                     setSubClassName(e.currentTarget.textContent || "");
                     refSubClasses.current.style.transform = "scale(0)";
@@ -254,7 +256,7 @@ const Dashboard = () => {
               return (
                 <span
                   key={index}
-                  className="border border-gray-300 bg-gray-50 px-1 cursor-pointer inline-block"
+                  className="border border-gray-300 bg-violet-300 px-1 cursor-pointer inline-block"
                   onMouseEnter={(e) => {
                     setExtraClass(e.currentTarget.textContent || "");
                     refextraClasses.current.style.transform = "scale(0)";
