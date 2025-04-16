@@ -26,7 +26,7 @@ const Plaza = () => {
   const CopyScss = useRef(null);
   const [storedSnipets, setStoredSnipets] = useState([]);
   const [snipets, setSnipets] = useState("");
-
+  const [snipOpen, setSnipOpen] = useState<boolean>(false);
   const selfClosingTags = [
     "area",
     "base",
@@ -374,6 +374,8 @@ const Plaza = () => {
         setSelectedTags={setSelectedTags}
         selectedTags={selectedTags}
         setTags={setTags}
+        snipOpen={snipOpen}
+        setSnipOpen={setSnipOpen}
       />
       {/* <div className="w-1/2">
         <TagTree tags={tags} />
@@ -381,6 +383,14 @@ const Plaza = () => {
       <div className="flex-1 p-4">
         <div className="plaza">
           <div className="flex gap-2 mb-2">
+            <button
+              ref={Mark}
+              type="button"
+              onMouseEnter={() => setSnipOpen((prev) => !prev)}
+              className="w-8 h-8 bg-slate-500 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-slate-600 transition-all duration-200 ease-in-out text-white"
+            >
+              S
+            </button>
             <button
               ref={Mark}
               type="button"

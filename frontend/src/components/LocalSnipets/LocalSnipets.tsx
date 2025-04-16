@@ -12,6 +12,8 @@ interface LocalSnipetsProps {
   setSelectedTags: any;
   selectedTags: any;
   setTags: any;
+  snipOpen: boolean;
+  setSnipOpen: any;
 }
 // =================================
 const LocalSnipets: React.FC<LocalSnipetsProps> = ({
@@ -22,6 +24,8 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
   setSelectedTags,
   selectedTags,
   setTags,
+  snipOpen,
+  setSnipOpen,
 }) => {
   // Функция для сохранения нового сниппета
   const copySnipet = () => {
@@ -120,10 +124,14 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
   };
   // ==============================
   return (
-    <div className="p-2 ">
+    <div
+      className={`p-2 absolute  l-0 transform transition-all duration-200 ease-in-out bg-gray-200 ${
+        snipOpen ? "relative translate-x-0" : " translate-x-[-150%]"
+      } `}
+    >
       <Input
         typeInput="text"
-        data="сниппет"
+        data=""
         value={snipets}
         onChange={(e) => setSnipets(e.target.value)}
       />
@@ -137,7 +145,7 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
       </button>
       <ul className="my-2  flex flex-col gap-1">
         {storedSnipets.map((snipet: any) => (
-          <>
+          <div key={snipet.id}>
             <button
               key={snipet.id}
               className=" border border-gray-300 rounded text-left"
@@ -146,15 +154,14 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
               }}
             >
               <TagTree tags={snipet.value} />
-
-              <button
-                className=" w-full bg-red-500 text-amber-50 hover:bg-red-600 transition-all duration-200 ease-in-out cursor-pointer"
-                onClick={() => removeSnipet(snipet.id)}
-              >
-                X
-              </button>
+            </button>{" "}
+            <button
+              className=" w-full bg-red-500 text-amber-50 hover:bg-red-600 transition-all duration-200 ease-in-out cursor-pointer"
+              onClick={() => removeSnipet(snipet.id)}
+            >
+              X
             </button>
-          </>
+          </div>
         ))}
       </ul>
     </div>
