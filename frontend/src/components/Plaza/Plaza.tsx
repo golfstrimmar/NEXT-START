@@ -6,12 +6,14 @@ import { useStateContext } from "@/components/StateProvider";
 import { XMarkIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import TagTree from "@/components/TagTree/TagTree";
 import htmlToPug from "@/app/utils/htmlToPug";
+import htmlToScss from "@/app/utils/htmlToScss";
 const Plaza = () => {
   const { stone, setStone } = useStateContext();
   const [tags, setTags] = useState<string[]>([]);
   const Duplicate = useRef(null);
   const Mark = useRef(null);
   const CopyPug = useRef(null);
+  const CopyScss = useRef(null);
   console.log("<====plaza stone====>", stone);
   const selfClosingTags = ["br", "img", "hr"];
 
@@ -61,7 +63,7 @@ const Plaza = () => {
     console.log("<====tags====>", tags);
     navigator.clipboard.writeText(tags.join(""));
     if (Duplicate.current) {
-      Duplicate.current.style.boxShadow = "0 0 10px red";
+      Duplicate.current.style.boxShadow = "0 0 10px cyan";
       setTimeout(() => {
         if (Duplicate.current) {
           Duplicate.current.style.boxShadow = "none";
@@ -81,6 +83,20 @@ const Plaza = () => {
       }, 300);
     }
   };
+
+  const handlerCopyScss = () => {
+    const scssOutput = tags.map((tag) => htmlToScss(tag)).join("\n");
+    navigator.clipboard.writeText(scssOutput);
+    if (CopyScss.current) {
+      CopyScss.current.style.boxShadow = "0 0 10px green";
+      setTimeout(() => {
+        if (CopyScss.current) {
+          CopyScss.current.style.boxShadow = "none";
+        }
+      }, 300);
+    }
+  };
+
   const handlerClear = () => {
     setTags([]);
     setStone([]);
@@ -160,6 +176,14 @@ const Plaza = () => {
               className="w-8 h-8 bg-purple-500 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-purple-600 transition-all duration-200 ease-in-out overflow-hidden"
             >
               <span className="text-white text-xs">Pug</span>
+            </button>
+            <button
+              ref={CopyScss}
+              type="button"
+              onClick={handlerCopyScss}
+              className="w-8 h-8 bg-green-500 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-green-600 transition-all duration-200 ease-in-out overflow-hidden"
+            >
+              <span className="text-white text-xs">SCSS</span>
             </button>
           </div>
           <div className="plaza rounded border border-gray-300">
