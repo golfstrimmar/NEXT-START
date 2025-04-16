@@ -204,7 +204,7 @@ const Dashboard = () => {
                   key={index}
                   className={`${
                     index === 10 ? "py-4 bg-white" : ""
-                  } border border-gray-300 bg-cyan-300 px-1 cursor-pointer inline-block`}
+                  } border border-gray-300 bg-slate-400 px-1 cursor-pointer inline-block`}
                   onMouseEnter={(e) => {
                     setName(e.currentTarget.textContent || "");
                     refTags.current.style.transform = "scale(0)";
