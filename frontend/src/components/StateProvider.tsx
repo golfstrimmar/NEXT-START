@@ -29,19 +29,39 @@ export function StateProvider({ children }: { children: ReactNode }) {
     subClassName?: string,
     extraClass?: string
   ) => {
-    console.log("handlerEnterStone", name, className, subClassName, extraClass);
     setStone((prev) => {
-      if (name === "" && className !== "" && subClassName === ""&& extraClass === "") {
+      if (
+        name === "" &&
+        className !== "" &&
+        subClassName === "" &&
+        extraClass === ""
+      ) {
         return [
           ...prev,
-          { tag: "div", className: className, subClassName: "" , extraClass: ""},
+          {
+            tag: "div",
+            className: className,
+            subClassName: "",
+            extraClass: "",
+          },
         ];
       }
-      if (name !== "" && className === "" && subClassName === "" && extraClass === "") {
-        return [...prev, { tag: name, className: "", subClassName: "" , extraClass: ""}];
+      if (
+        name !== "" &&
+        className === "" &&
+        subClassName === "" &&
+        extraClass === ""
+      ) {
+        return [
+          ...prev,
+          { tag: name, className: "", subClassName: "", extraClass: "" },
+        ];
       }
       if (name !== "" && className !== "" && subClassName === "") {
-        return [...prev, { tag: name, className: className, subClassName: "", extraClass: "" }];
+        return [
+          ...prev,
+          { tag: name, className: className, subClassName: "", extraClass: "" },
+        ];
       }
       if (subClassName !== "") {
         return [

@@ -13,27 +13,12 @@ const Dashboard = () => {
   const refSubClasses = useRef<HTMLDivElement>(null);
   const refextraClasses = useRef<HTMLDivElement>(null);
   const handlerEnter = () => {
-    console.log("<====enter====>");
     handlerEnterStone(name, className, subClassName, extraClass);
     setName("");
     setClassName("");
     setSubClassName("");
     setExtraClass("");
   };
-
-  useEffect(() => {
-    console.log(
-      "handlerEnter",
-      "name:",
-      name,
-      "className:",
-      className,
-      "subClassName",
-      subClassName,
-      "extraClass",
-      extraClass
-    );
-  }, [name, className, subClassName, extraClass]);
 
   const tags = [
     "a",

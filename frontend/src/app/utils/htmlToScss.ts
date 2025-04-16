@@ -88,8 +88,6 @@ function htmlToScss(html: string): ScssResult {
     const element = node as Element;
     const tagName = element.tagName.toLowerCase();
 
-    console.log(`Проверка тега: <${tagName}>, родитель: ${parentTag || "нет"}`);
-
     // Правило 1: Заголовки h1-h6 не должны содержать другие заголовки
     if (/^h[1-6]$/.test(tagName) && parentTag && /^h[1-6]$/.test(parentTag)) {
       errors.push({
@@ -156,10 +154,6 @@ function htmlToScss(html: string): ScssResult {
       .filter((attr) => attr.name === "class" || attr.name === "className")
       .flatMap((attr) => attr.value.split(/\s+/).filter(Boolean));
 
-    console.log(
-      `Обработка тега: <${tagName}>, классы: ${classNames.join(", ")}`
-    );
-
     // Генерируем SCSS для всех тегов, включая пустые
     const selector = tagName + classNames.map((cls) => `.${cls}`).join("");
     scssOutput += `${indent}${selector} {\n`;
@@ -168,7 +162,6 @@ function htmlToScss(html: string): ScssResult {
   }
 
   if (hasCriticalErrors) {
-    console.log("Критические ошибки найдены:", errors);
     return {
       scss: "/* SCSS не сгенерирован из-за ошибок валидации HTML */",
       errors,
@@ -178,8 +171,6 @@ function htmlToScss(html: string): ScssResult {
   }
 
   nodes.forEach((node) => processNode(node, 0));
-
-  console.log("Итоговый SCSS:", scssOutput.trim());
 
   return {
     scss: scssOutput.trim() || "/* Пустой SCSS */",

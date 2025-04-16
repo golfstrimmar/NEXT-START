@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import styles from "./TagTree.module.scss";
 
 // =================================
@@ -9,7 +9,7 @@ interface TagNode {
   children: TagNode[];
 }
 // =================================
-const TagTree: React.FC<{ tags: string[] }> = ({ tags }) => {
+const TagTree: React.FC<{ tags?: string[] }> = ({ tags = [] }) => {
   // Список самозакрывающихся тегов
   const selfClosingTags = [
     "area",
@@ -34,36 +34,54 @@ const TagTree: React.FC<{ tags: string[] }> = ({ tags }) => {
       return [];
     }
 
+    // Проверка, является ли tags массивом
+    if (!Array.isArray(tags)) {
+      console.error("Проп tags должен быть массивом строк, получено:", tags);
+      return [];
+    }
+
     const parser = new DOMParser();
     const nodes: TagNode[] = [];
 
     tags.forEach((tag, index) => {
-      console.log(`Парсинг тега ${index}:`, tag); // Для отладки
-      // Оборачиваем тег в <div>, чтобы избежать проблем с одиночными тегами
-      const doc = parser.parseFromString(`<div>${tag}</div>`, "text/html");
-      const rootElement = doc.body.firstChild?.firstChild as HTMLElement | null;
+      // Пропускаем пустые или невалидные строки
+      if (!tag || typeof tag !== "string" || tag.trim() === "") {
+        console.warn(`Пропущен невалидный тег на индексе ${index}:`, tag);
+        return;
+      }
 
-      const createNode = (element: HTMLElement): TagNode => {
-        const attributes: Record<string, string> = {};
-        Array.from(element.attributes).forEach((attr) => {
-          attributes[attr.name] = attr.value;
-        });
+      try {
+        // Оборачиваем тег в <div>, чтобы избежать проблем с одиночными тегами
+        const doc = parser.parseFromString(`<div>${tag}</div>`, "text/html");
+        const rootElement = doc.body.firstChild
+          ?.firstChild as HTMLElement | null;
 
-        const children: TagNode[] = Array.from(element.children)
-          .filter((child): child is HTMLElement => child instanceof HTMLElement)
-          .map((child) => createNode(child));
+        const createNode = (element: HTMLElement): TagNode => {
+          const attributes: Record<string, string> = {};
+          Array.from(element.attributes).forEach((attr) => {
+            attributes[attr.name || ""] = attr.value || "";
+          });
 
-        return {
-          name: element.tagName.toLowerCase(),
-          attributes,
-          children,
+          const children: TagNode[] = Array.from(element.children)
+            .filter(
+              (child): child is HTMLElement => child instanceof HTMLElement
+            )
+            .map((child) => createNode(child));
+
+          return {
+            name: element.tagName.toLowerCase(),
+            attributes,
+            children,
+          };
         };
-      };
 
-      if (rootElement) {
-        nodes.push(createNode(rootElement));
-      } else {
-        console.warn(`Не удалось распарсить тег ${index}:`, tag);
+        if (rootElement instanceof HTMLElement) {
+          nodes.push(createNode(rootElement));
+        } else {
+          console.warn(`Не удалось распарсить тег на индексе ${index}:`, tag);
+        }
+      } catch (error) {
+        console.error(`Ошибка парсинга тега на индексе ${index}:`, tag, error);
       }
     });
 
@@ -83,17 +101,18 @@ const TagTree: React.FC<{ tags: string[] }> = ({ tags }) => {
     "text-blue-500",
   ];
 
-  const renderNode = (node: TagNode, depth: number = 0) => {
+  const renderNode = (node: TagNode, depth: number = 0, index: number = 0) => {
     const attrString = Object.entries(node.attributes)
       .map(([key, value]) => `${key}="${value}"`)
       .join(" ");
 
     const colorClass = depthColors[depth % depthColors.length];
+    const nodeKey = `${node.name}-${depth}-${index}`;
 
     // Для самозакрывающихся тегов рендерим только открывающий тег
     if (selfClosingTags.includes(node.name)) {
       return (
-        <li key={`${node.name}-${depth}`} className="ml-4">
+        <li key={nodeKey} className="ml-2">
           <span className={`${colorClass} ${styles.node}`}>
             &lt;{node.name}
             {attrString ? ` ${attrString}` : ""}/&gt;
@@ -103,14 +122,16 @@ const TagTree: React.FC<{ tags: string[] }> = ({ tags }) => {
     }
 
     return (
-      <li key={`${node.name}-${depth}`} className="ml-4">
+      <li key={nodeKey} className="ml-2">
         <span className={`${colorClass} ${styles.node}`}>
           &lt;{node.name}
           {attrString ? ` ${attrString}` : ""}&gt;
         </span>
         {node.children.length > 0 && (
           <ul className="ml-1">
-            {node.children.map((child) => renderNode(child, depth + 1))}
+            {node.children.map((child, childIndex) =>
+              renderNode(child, depth + 1, childIndex)
+            )}
           </ul>
         )}
         <span className={`${colorClass} ${styles.node}`}>
@@ -121,13 +142,17 @@ const TagTree: React.FC<{ tags: string[] }> = ({ tags }) => {
   };
 
   return (
-    <div className="p-4 bg-gray-300 border-l border-gray-300 h-full overflow-auto">
-      {tree.length > 0 && (
+    <div className=" bg-gray-300 border-l border-gray-300 h-full overflow-auto -z-2">
+      {tree.length > 0 ? (
         <ul className="text-sm font-mono">
           {tree.map((node, index) => (
-            <React.Fragment key={index}>{renderNode(node)}</React.Fragment>
+            <React.Fragment key={index}>
+              {renderNode(node, 0, index)}
+            </React.Fragment>
           ))}
         </ul>
+      ) : (
+        <p>Нет тегов для отображения</p>
       )}
     </div>
   );

@@ -12,7 +12,7 @@ import {
 import TagTree from "@/components/TagTree/TagTree";
 import htmlToPug from "@/app/utils/htmlToPug";
 import htmlToScss from "@/app/utils/htmlToScss";
-
+import LocalSnipets from "@/components/LocalSnipets/LocalSnipets";
 const Plaza = () => {
   const { stone, setStone } = useStateContext();
   const [tags, setTags] = useState<string[]>([]);
@@ -24,6 +24,8 @@ const Plaza = () => {
   const Mark = useRef(null);
   const CopyPug = useRef(null);
   const CopyScss = useRef(null);
+  const [storedSnipets, setStoredSnipets] = useState([]);
+  const [snipets, setSnipets] = useState("");
 
   const selfClosingTags = [
     "area",
@@ -65,8 +67,6 @@ const Plaza = () => {
   }): string => {
     const { tag, className, subClassName, extraClass, content = "" } = item;
 
-    console.log("Входной item:", item);
-
     const attributes: Record<string, string> = {};
     const classNames = [className, subClassName, extraClass].filter(Boolean);
     if (classNames.length > 0) {
@@ -85,8 +85,6 @@ const Plaza = () => {
       attributes.type = attributes.type || "button";
     }
 
-    console.log(`Тег: <${tagLower}>, атрибуты:`, attributes);
-
     if (tagLower === "img") {
       const attrList: string[] = [];
       if (attributes.class) {
@@ -96,7 +94,6 @@ const Plaza = () => {
       attrList.push('alt=""');
       const attrString = attrList.join(" ");
       const result = `<img ${attrString}/>`;
-      console.log(`Рендер <${tagLower}>:`, result);
       return result;
     }
 
@@ -109,18 +106,13 @@ const Plaza = () => {
     const attrString = attrList.join(" ");
 
     if (selfClosingTags.includes(tagLower)) {
-      console.log(
-        `Самозакрывающийся тег: ${tagLower}, selfClosingTags:`,
-        selfClosingTags
-      );
       const result = `<${tagLower}${attrString ? ` ${attrString}` : ""}>`;
-      console.log(`Рендер <${tagLower}>:`, result);
       return result;
     } else {
       const result = `<${tagLower}${
         attrString ? ` ${attrString}` : ""
       }>${content}</${tagLower}>`;
-      console.log(`Рендер <${tagLower}>:`, result);
+
       return result;
     }
   };
@@ -135,6 +127,7 @@ const Plaza = () => {
   }, [stone, setStone]);
 
   useEffect(() => {
+    console.log("<====tags====>", tags);
     const errors = tags
       .map((tag, index) => {
         const { errors } = htmlToScss(tag);
@@ -148,9 +141,28 @@ const Plaza = () => {
   }, [tags]);
 
   const handleSelectTag = (index: number) => {
-    setSelectedTags((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
-    );
+    setSelectedTags((prevSelected) => {
+      const isSelected = prevSelected.includes(index);
+      const updatedSelected = isSelected
+        ? prevSelected.filter((i) => i !== index)
+        : [...prevSelected, index];
+
+      // const updatedSnippets = updatedSelected.map((i) => tags[i]);
+      // setSnipets(updatedSnippets);
+
+      return updatedSelected;
+    });
+  };
+
+  const handleClick = (event: MouseEvent) => {
+    if (event.altKey) {
+      setSnipets((prev) => {
+        const newSnipets = [...prev, event?.target?.innerText || ""];
+        return newSnipets;
+      });
+    } else {
+      console.log("<====Обычный клик====>");
+    }
   };
 
   const moveUp = () => {
@@ -354,9 +366,18 @@ const Plaza = () => {
 
   return (
     <div className="flex h-screen">
-      <div className="w-1/2">
+      <LocalSnipets
+        snipets={snipets}
+        setSnipets={setSnipets}
+        storedSnipets={storedSnipets}
+        setStoredSnipets={setStoredSnipets}
+        setSelectedTags={setSelectedTags}
+        selectedTags={selectedTags}
+        setTags={setTags}
+      />
+      {/* <div className="w-1/2">
         <TagTree tags={tags} />
-      </div>
+      </div> */}
       <div className="flex-1 p-4">
         <div className="plaza">
           <div className="flex gap-2 mb-2">
@@ -390,7 +411,7 @@ const Plaza = () => {
               onClick={handlerCopyScss}
               className="w-8 h-8 bg-green-500 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-green-600 transition-all duration-200 ease-in-out overflow-hidden"
             >
-              <span className="text-white text-xs">SCSS</span>
+              <span className="text-white text-[10px]">SCSS</span>
             </button>
             <button
               type="button"
@@ -414,8 +435,8 @@ const Plaza = () => {
               <ArrowDownIcon className="w-4 h-4 text-white" />
             </button>
           </div>
-          <div className="plaza rounded border border-gray-300">
-            <div className="rounded border border-gray-300 bg-[#a6beca]">
+          <div className="plaza rounded border border-zinc-300">
+            <div className="rounded border border-gray-300 bg-transparent">
               {tags.map((tag, index) => {
                 const hasError = validationErrors.some(
                   (err) => err.index === index
@@ -424,14 +445,17 @@ const Plaza = () => {
                 return (
                   <div
                     key={index}
-                    className={`flex items-center justify-between gap-2 border border-gray-300 ${
+                    className={`grid items-center grid-cols-[1fr_20px]  border border-zinc-800 ${
                       hasError ? "border-red-500 bg-red-100" : ""
                     } ${isSelected ? styles.selected : ""}`}
                     draggable
                     onDragStart={(e) => handleDragStart(e, index)}
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, index)}
-                    onClick={() => handleSelectTag(index)}
+                    onClick={(event) => {
+                      handleSelectTag(index);
+                      handleClick(event);
+                    }}
                     title={
                       hasError
                         ? validationErrors
@@ -441,8 +465,9 @@ const Plaza = () => {
                         : ""
                     }
                   >
-                    <p>{tag}</p>
-                    <div dangerouslySetInnerHTML={{ __html: tag }} />
+                    {/* <p>{tag}</p> */}
+                    <TagTree tags={[tag]} />
+                    {/* <div dangerouslySetInnerHTML={{ __html: tag }} /> */}
                     <button
                       type="button"
                       onClick={(e) => {
@@ -452,9 +477,9 @@ const Plaza = () => {
                           selectedTags.filter((i) => i !== index)
                         );
                       }}
-                      className="w-6 h-6 border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer bg-yellow-700 transition-all duration-200 ease-in-out"
+                      className="max-w-6 h-6 border border-zinc-300 flex items-center justify-center leading-none text-[14px] cursor-pointer bg-yellow-700 transition-all duration-200 ease-in-out"
                     >
-                      <XMarkIcon className="w-6 h-6 text-white" />
+                      <XMarkIcon className="max-w-6 h-6 text-white" />
                     </button>
                   </div>
                 );
