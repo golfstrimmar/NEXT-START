@@ -1,6 +1,9 @@
+database user---
+yushinbox
+14n912GG6Zju0jpN
 
-
-
+mongodb+srv://yushinbox:14n912GG6Zju0jpN@clusterrobotic.h1ns99c.mongodb.net/?retryWrites=true&w=majority&appName=ClusterRobotic
+mongodb+srv://yushinbox:14n912GG6Zju0jpN@clusterrobotic.h1ns99c.mongodb.net/?retryWrites=true&w=majority&appName=ClusterRobotic
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 

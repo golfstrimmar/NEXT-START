@@ -1,9 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import styles from "./LocalSnipets.module.scss";
 import Input from "../ui/Input/Input";
 import TagTree from "../TagTree/TagTree";
-// =================================
+import { XMarkIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import { set } from "mongoose";
+
 interface LocalSnipetsProps {
   snipets: any;
   setSnipets: any;
@@ -15,7 +17,7 @@ interface LocalSnipetsProps {
   snipOpen: boolean;
   setSnipOpen: any;
 }
-// =================================
+
 const LocalSnipets: React.FC<LocalSnipetsProps> = ({
   snipets,
   setSnipets,
@@ -27,143 +29,266 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
   snipOpen,
   setSnipOpen,
 }) => {
-  // Функция для сохранения нового сниппета
-  const copySnipet = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [snipetIdToDelete, setSnipetIdToDelete] = useState<number | null>(null);
+  const [category, setCategory] = useState("local");
+  const [categories, setCategories] = useState<string[]>([]);
+  const [openTabs, setOpenTabs] = useState<string[]>([]);
+  const [error, setError] = useState<string>("");
+  const copySnipet = async () => {
     if (snipets) {
-      // Получаем текущие сниппеты из localStorage
-      let localSnipets = [];
       try {
-        const stored = localStorage.getItem("snipets");
-        if (stored) {
-          localSnipets = JSON.parse(stored);
-          // Проверяем, является ли результат массивом
-          if (!Array.isArray(localSnipets)) {
-            localSnipets = [];
-          }
+        const response = await fetch("/api/snipets", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: new Date().getTime(),
+            value: Array.isArray(snipets) ? snipets : [snipets],
+            category,
+          }),
+        });
+
+        if (!response.ok) {
+          setError("Failed to save snipet");
+          setTimeout(() => setError(""), 1000);
+          throw new Error("Failed to save snipet");
         }
-      } catch (e) {
-        console.error("Ошибка парсинга localStorage:", e);
-        localSnipets = [];
+
+        const { snipet } = await response.json();
+        setStoredSnipets((prev: any) => [...prev, snipet]);
+        setSnipets("");
+        setCategory("local");
+        setSelectedTags([]);
+      } catch (error) {
+        console.error("Ошибка сохранения сниппета:", error);
       }
-
-      // Создаем новый сниппет
-      const newSnipet = {
-        id: localSnipets.length + 1,
-        value: snipets, // Сохраняем как строку или массив, в зависимости от ввода
-      };
-
-      // Добавляем новый сниппет в массив
-      const newSnipets = [...localSnipets, newSnipet];
-
-      // Сохраняем в localStorage
-      localStorage.setItem("snipets", JSON.stringify(newSnipets));
-      setStoredSnipets(newSnipets); // Обновляем состояние
-      setSnipets(""); // Очищаем поле ввода
-      setSelectedTags([]);
     }
   };
 
-  // Загрузка сниппетов при монтировании компонента
-  useEffect(() => {
-    const loadSnipets = () => {
-      try {
-        const localSnipets = localStorage.getItem("snipets");
-        if (localSnipets) {
-          const parsedSnipets = JSON.parse(localSnipets);
-          if (Array.isArray(parsedSnipets)) {
-            setStoredSnipets(parsedSnipets);
-          } else {
-            console.warn(
-              "Данные в localStorage не являются массивом:",
-              parsedSnipets
-            );
-            setStoredSnipets([]);
-          }
-        }
-      } catch (e) {
-        console.error("Ошибка загрузки сниппетов:", e);
-        setStoredSnipets([]);
+  const fetchSnipets = async () => {
+    try {
+      const response = await fetch("/api/snipets", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch snipets");
       }
-    };
 
-    loadSnipets();
-  }, []);
-
-  // Подписка на изменения localStorage
-  useEffect(() => {
-    const handleStorageChange = (event) => {
-      if (event.key === "snipets") {
-        try {
-          const updatedSnipets = event.newValue
-            ? JSON.parse(event.newValue)
-            : [];
-          if (Array.isArray(updatedSnipets)) {
-            setStoredSnipets(updatedSnipets);
-          } else {
-            console.warn(
-              "Обновленные данные не являются массивом:",
-              updatedSnipets
-            );
-          }
-        } catch (e) {
-          console.error("Ошибка парсинга обновленных данных:", e);
-        }
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
-  // ==============================
-  const removeSnipet = (id: number) => {
-    const updatedSnipets = storedSnipets.filter(
-      (snipet: any) => snipet.id !== id
-    );
-    localStorage.setItem("snipets", JSON.stringify(updatedSnipets));
-    setStoredSnipets(updatedSnipets);
+      const snipets = await response.json();
+      setStoredSnipets(snipets);
+    } catch (error) {
+      console.error("Ошибка получения сниппетов:", error);
+      setStoredSnipets([]);
+    }
   };
-  // ==============================
+
+  const removeSnipet = async (id: number) => {
+    try {
+      const response = await fetch("/api/snipets", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete snipet");
+      }
+
+      setStoredSnipets((prev: any) =>
+        prev.filter((snipet: any) => snipet.id !== id)
+      );
+      setIsModalOpen(false);
+      setSnipetIdToDelete(null);
+      setCategory("local");
+    } catch (error) {
+      console.error("Ошибка удаления сниппета:", error);
+    }
+  };
+
+  const openDeleteModal = (id: number) => {
+    setSnipetIdToDelete(id);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSnipetIdToDelete(null);
+  };
+
+  const toggleTab = (category: string) => {
+    setOpenTabs((prev) =>
+      prev.includes(category)
+        ? prev.filter((cat) => cat !== category)
+        : [...prev, category]
+    );
+  };
+
+  useEffect(() => {
+    fetchSnipets();
+  }, []);
+
+  useEffect(() => {
+    if (storedSnipets.length > 0) {
+      const uniqueCategories = Array.from(
+        new Set(
+          storedSnipets.map((snipet: any) => snipet.category).filter(Boolean)
+        )
+      );
+      setCategories(uniqueCategories);
+    } else {
+      setCategories([]);
+      setOpenTabs([]);
+    }
+  }, [storedSnipets]);
+
+  const displayCategory = useMemo(
+    () => (category: string) => {
+      return storedSnipets.filter(
+        (snipet: any) => snipet.category === category
+      );
+    },
+    [storedSnipets]
+  );
+
   return (
     <div
-      className={`p-2 absolute  l-0 transform transition-all duration-200 ease-in-out bg-gray-200 ${
-        snipOpen ? "relative translate-x-0" : " translate-x-[-150%]"
-      } `}
+      className={`p-2 absolute l-0 transform transition-all duration-200 ease-in-out bg-gray-200 ${
+        snipOpen ? "relative translate-x-0" : "translate-x-[-150%]"
+      }`}
     >
       <Input
         typeInput="text"
-        data=""
+        data="snipet"
         value={snipets}
         onChange={(e) => setSnipets(e.target.value)}
       />
+      <Input
+        typeInput="text"
+        data="category"
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+      />
+      {error.length > 0 && <p className="text-red-500">{error}</p>}
       <button
         type="button"
         onClick={copySnipet}
-        disabled={selectedTags.length === 0}
+        disabled={selectedTags.length === 0 || snipets.length === 0}
         className="my-2 p-4 h-8 bg-blue-500 rounded-[5px] border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out text-white"
       >
         Save Snipet
       </button>
-      <ul className="my-2  flex flex-col gap-1">
-        {storedSnipets.map((snipet: any) => (
-          <div key={snipet.id}>
-            <button
-              key={snipet.id}
-              className=" border border-gray-300 rounded text-left"
-              onClick={() => {
-                setTags((prev: string[]) => [...prev, ...snipet.value]);
-              }}
-            >
-              <TagTree tags={snipet.value} />
-            </button>{" "}
-            <button
-              className=" w-full bg-red-500 text-amber-50 hover:bg-red-600 transition-all duration-200 ease-in-out cursor-pointer"
-              onClick={() => removeSnipet(snipet.id)}
-            >
-              X
-            </button>
+      <div className="my-2 flex flex-col gap-2">
+        {/* Секция для категории "local" */}
+        {categories.includes("local") && (
+          <div className="border-b border-gray-300">
+            <h3 className="px-4 py-2 text-sm font-medium text-gray-600">
+              local
+            </h3>
+            <ul className="flex flex-col gap-1 px-4 pb-2">
+              {displayCategory("local").map((snipet: any) => (
+                <div key={snipet.id} className="flex gap-1">
+                  <button
+                    className="w-4 h-4 bg-red-500 text-amber-50 hover:bg-red-600 transition-all duration-200 ease-in-out cursor-pointer flex items-center justify-center"
+                    onClick={() => openDeleteModal(snipet.id)}
+                  >
+                    <XMarkIcon className="max-w-3 h-3 text-white" />
+                  </button>
+                  <button
+                    className="border border-gray-300 rounded text-left"
+                    onClick={() => {
+                      setTags((prev: string[]) => [...prev, ...snipet.value]);
+                    }}
+                  >
+                    <TagTree tags={snipet.value} />
+                  </button>
+                </div>
+              ))}
+            </ul>
           </div>
-        ))}
-      </ul>
+        )}
+
+        {/* Табы для остальных категорий */}
+        {categories && categories.length > 0 ? (
+          categories
+            .filter((cat) => cat !== "local")
+            .map((category) => (
+              <div key={category} className="border-b border-gray-300">
+                <button
+                  onClick={() => toggleTab(category)}
+                  className="w-full flex justify-between items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-500 transition-all duration-200 ease-in-out"
+                >
+                  <span>{category}</span>
+                  <ChevronDownIcon
+                    className={`w-5 h-5 transition-transform duration-200 ${
+                      openTabs.includes(category) ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {openTabs.includes(category) && (
+                  <ul className="flex flex-col gap-1 px-4 pb-2">
+                    {displayCategory(category).map((snipet: any) => (
+                      <div key={snipet.id} className="flex gap-1">
+                        <button
+                          className="w-4 h-4 bg-red-500 text-amber-50 hover:bg-red-600 transition-all duration-200 ease-in-out cursor-pointer flex items-center justify-center"
+                          onClick={() => openDeleteModal(snipet.id)}
+                        >
+                          <XMarkIcon className="max-w-3 h-3 text-white" />
+                        </button>
+                        <button
+                          className="border border-gray-300 rounded text-left"
+                          onClick={() => {
+                            setTags((prev: string[]) => [
+                              ...prev,
+                              ...snipet.value,
+                            ]);
+                          }}
+                        >
+                          <TagTree tags={snipet.value} />
+                        </button>
+                      </div>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))
+        ) : !categories.includes("local") ? (
+          <p>Нет категорий</p>
+        ) : null}
+      </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 top-0 flex justify-center bg-black bg-opacity-50">
+          <div className="bg-red-100 p-4 rounded shadow-lg max-w-sm w-full">
+            <p className="mb-4">Delete?</p>
+            <div className="flex justify-start gap-2">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-all duration-200 ease-in-out"
+              >
+                Отмена
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  snipetIdToDelete !== null && removeSnipet(snipetIdToDelete)
+                }
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-all duration-200 ease-in-out"
+              >
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
