@@ -48,6 +48,14 @@ const Plaza = () => {
     "source",
     "track",
     "wbr",
+    "svg",
+    "path",
+    "rect",
+    "circle",
+    "line",
+    "polyline",
+    "polygon",
+    "use",
   ];
 
   const inlineElements = ["span", "a", "b", "i", "strong", "em"];
@@ -391,19 +399,21 @@ const Plaza = () => {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex">
       {error && <ModalMessage message={error} open={showModal} />}
-      <LocalSnipets
-        snipets={snipets}
-        setSnipets={setSnipets}
-        storedSnipets={storedSnipets}
-        setStoredSnipets={setStoredSnipets}
-        setSelectedTags={setSelectedTags}
-        selectedTags={selectedTags}
-        setTags={setTags}
-        snipOpen={snipOpen}
-        setSnipOpen={setSnipOpen}
-      />
+      <div className="max-w-1/4 p-4">
+        <LocalSnipets
+          snipets={snipets}
+          setSnipets={setSnipets}
+          storedSnipets={storedSnipets}
+          setStoredSnipets={setStoredSnipets}
+          setSelectedTags={setSelectedTags}
+          selectedTags={selectedTags}
+          setTags={setTags}
+          snipOpen={snipOpen}
+          setSnipOpen={setSnipOpen}
+        />
+      </div>
       {/* <div className="w-1/2">
         <TagTree tags={tags} />
       </div> */}

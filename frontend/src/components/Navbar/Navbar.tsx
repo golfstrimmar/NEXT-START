@@ -39,9 +39,12 @@ const Navbar: React.FC = () => {
   }, []);
   return (
     <nav className="fixed top-0 left-0 w-full bg-blue-700 p-4 shadow-md z-50">
-      <div className="container mx-auto flex justify-between items-center">
+      <div className="container mx-auto flex  items-center gap-4">
         <Link href="/" className="text-white text-lg font-bold">
           Robotic
+        </Link>
+        <Link href="/convertor" className="text-white text-lg font-bold">
+          Convertor
         </Link>
         {/* <Burger handlerburgerClick={() => setIsOpen(!isOpen)} isOpen={isOpen} /> */}
         {/* <ul className={`${styles["navbar-menu"]} ${isOpen ? styles.run : ""}`}>

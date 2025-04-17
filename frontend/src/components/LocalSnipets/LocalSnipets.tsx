@@ -36,34 +36,42 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
   const [openTabs, setOpenTabs] = useState<string[]>([]);
   const [error, setError] = useState<string>("");
   const copySnipet = async () => {
-    if (snipets) {
-      try {
-        const response = await fetch("/api/snipets", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: new Date().getTime(),
-            value: Array.isArray(snipets) ? snipets : [snipets],
-            category,
-          }),
-        });
+    if (!snipets || (typeof snipets === "string" && snipets.trim() === "")) {
+      setError("Snippet content is required");
+      setTimeout(() => setError(""), 1000);
+      return;
+    }
 
-        if (!response.ok) {
-          setError("Failed to save snipet");
-          setTimeout(() => setError(""), 1000);
-          throw new Error("Failed to save snipet");
-        }
+    try {
+      const payload = {
+        id: new Date().getTime(),
+        value: Array.isArray(snipets) ? snipets : [snipets.trim()],
+        category: category || "local",
+      };
+      console.log("Saving snipet:", payload);
 
-        const { snipet } = await response.json();
-        setStoredSnipets((prev: any) => [...prev, snipet]);
-        setSnipets("");
-        setCategory("local");
-        setSelectedTags([]);
-      } catch (error) {
-        console.error("Ошибка сохранения сниппета:", error);
+      const response = await fetch("/api/snipets", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to save snipet");
+        setTimeout(() => setError(""), 1000);
+        throw new Error(errorData.error || "Failed to save snipet");
       }
+
+      const { snipet } = await response.json();
+      setStoredSnipets((prev: any) => [...prev, snipet]);
+      setSnipets("");
+      setCategory("local");
+      setSelectedTags([]);
+    } catch (error) {
+      console.error("Ошибка сохранения сниппета:", error);
     }
   };
 
@@ -164,27 +172,6 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
         snipOpen ? "relative translate-x-0" : "translate-x-[-150%]"
       }`}
     >
-      <Input
-        typeInput="text"
-        data="snipet"
-        value={snipets}
-        onChange={(e) => setSnipets(e.target.value)}
-      />
-      <Input
-        typeInput="text"
-        data="category"
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-      />
-      {error.length > 0 && <p className="text-red-500">{error}</p>}
-      <button
-        type="button"
-        onClick={copySnipet}
-        disabled={selectedTags.length === 0 || snipets.length === 0}
-        className="my-2 p-4 h-8 bg-blue-500 rounded-[5px] border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out text-white"
-      >
-        Save Snipet
-      </button>
       <div className="my-2 flex flex-col gap-2">
         {/* Секция для категории "local" */}
         {categories.includes("local") && (
@@ -263,9 +250,36 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
           <p>Нет категорий</p>
         ) : null}
       </div>
-
+      <Input
+        typeInput="text"
+        data="snippet"
+        value={snipets}
+        onChange={(e) => {
+          // setStoredSnipets(e.target.value);
+          setSnipets(e.target.value);
+        }}
+      />
+      <br />
+      <Input
+        typeInput="text"
+        data="category"
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+      />
+      {error.length > 0 && <p className="text-red-500">{error}</p>}
+      <button
+        type="button"
+        onClick={copySnipet}
+        disabled={
+          (typeof snipets === "string" && snipets.trim() === "") ||
+          (Array.isArray(snipets) && snipets.length === 0)
+        }
+        className="my-2 p-4 h-8 bg-blue-500 rounded-[5px] border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out text-white"
+      >
+        Save Snipet
+      </button>
       {isModalOpen && (
-        <div className="fixed inset-0 top-0 flex justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 top-0 flex justify-center bg-black bg-opacity-50 z-2000">
           <div className="bg-red-100 p-4 rounded shadow-lg max-w-sm w-full">
             <p className="mb-4">Delete?</p>
             <div className="flex justify-start gap-2">
