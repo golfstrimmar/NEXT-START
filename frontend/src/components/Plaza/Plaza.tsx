@@ -3,18 +3,21 @@ import React, { useState, useEffect, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import styles from "./Plaza.module.scss";
 import { useStateContext } from "@/components/StateProvider";
+import ModalMessage from "@/components/ModalMessage/ModalMessage";
+
 import {
   XMarkIcon,
   DocumentDuplicateIcon,
   ArrowUpIcon,
   ArrowDownIcon,
+  ArrowUturnLeftIcon,
 } from "@heroicons/react/24/outline";
 import TagTree from "@/components/TagTree/TagTree";
 import htmlToPug from "@/app/utils/htmlToPug";
 import htmlToScss from "@/app/utils/htmlToScss";
 import LocalSnipets from "@/components/LocalSnipets/LocalSnipets";
 const Plaza = () => {
-  const { stone, setStone } = useStateContext();
+  const { stone, setStone, handlerLastTags, lastTags } = useStateContext();
   const [tags, setTags] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
   const [validationErrors, setValidationErrors] = useState<
@@ -27,6 +30,9 @@ const Plaza = () => {
   const [storedSnipets, setStoredSnipets] = useState([]);
   const [snipets, setSnipets] = useState("");
   const [snipOpen, setSnipOpen] = useState<boolean>(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+
   const selfClosingTags = [
     "area",
     "base",
@@ -118,9 +124,20 @@ const Plaza = () => {
   };
 
   useEffect(() => {
+    if (lastTags.length > 0) {
+      console.log("<====lastTags====>", lastTags);
+    }
+  }, [lastTags]);
+  const moveReturn = () => {
+    if (lastTags.length > 0) {
+      setTags(lastTags);
+    }
+  };
+  useEffect(() => {
     if (stone.length > 0) {
       const lastStone = stone[stone.length - 1];
       const generatedTag = createTagFromArray(lastStone);
+      handlerLastTags(tags);
       setTags((prev) => [...prev, generatedTag]);
       setStone((prev) => prev.slice(0, -1));
     }
@@ -349,14 +366,23 @@ const Plaza = () => {
     }
 
     if (errorMessage) {
-      alert(errorMessage);
+      setError(errorMessage);
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        setError("");
+      }, 1500);
       return;
     }
 
     const updatedTargetTag = targetTag.replace(/>/, `>${draggedTag}`);
     newTags[targetIndex] = updatedTargetTag;
     newTags.splice(draggedIndex, 1);
-    setTags(newTags);
+
+    setTags((prev) => {
+      handlerLastTags(prev);
+      return newTags;
+    });
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -366,6 +392,7 @@ const Plaza = () => {
 
   return (
     <div className="flex h-screen">
+      {error && <ModalMessage message={error} open={showModal} />}
       <LocalSnipets
         snipets={snipets}
         setSnipets={setSnipets}
@@ -386,7 +413,7 @@ const Plaza = () => {
             <button
               ref={Mark}
               type="button"
-              onMouseEnter={() => setSnipOpen((prev) => !prev)}
+              onClick={() => setSnipOpen((prev) => !prev)}
               className="w-8 h-8 bg-slate-500 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-slate-600 transition-all duration-200 ease-in-out text-white"
             >
               S
@@ -443,6 +470,14 @@ const Plaza = () => {
               className="w-8 h-8 bg-blue-500 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out"
             >
               <ArrowDownIcon className="w-4 h-4 text-white" />
+            </button>
+            <button
+              type="button"
+              onClick={moveReturn}
+              disabled={tags.length === 0}
+              className="w-8 h-8 bg-slate-400 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out"
+            >
+              <ArrowUturnLeftIcon className="w-4 h-4 text-white" />
             </button>
           </div>
           <div className="plaza rounded border border-zinc-300">

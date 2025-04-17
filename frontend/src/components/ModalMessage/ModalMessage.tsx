@@ -6,9 +6,15 @@ interface ModalMessageProps {
 }
 const ModalMessage: React.FC<ModalMessageProps> = ({ message, open }) => {
   return (
-    <div className={`modalmessage  ${open ? "run" : ""}  `}>
-      <div className="modalmessage-inner">
-        <h3 className="modalmessage-message">{message}</h3>
+    <div
+      className={`w-1/2 bg-[rgba(0, 0, 0, .9)] modalmessage  ${
+        open ? "run" : ""
+      }  `}
+    >
+      <div className="w-full bg-red-700 shadow-[inset_0_0_12px_rgba(255,255,255)]   rounded">
+        <h3 className="grid place-items-center text-italic p-2 text-amber-50">
+          {message}
+        </h3>
       </div>
     </div>
   );

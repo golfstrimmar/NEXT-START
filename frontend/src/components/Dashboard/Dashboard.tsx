@@ -20,7 +20,7 @@ const Dashboard = () => {
     setExtraClass("");
   };
 
-  const tags = [
+  const tagsToShow = [
     "a",
     "button",
     "br",
@@ -46,7 +46,7 @@ const Dashboard = () => {
     "h6",
   ];
 
-  const classes = [
+  const classesToShow = [
     "best",
     "container",
     "bages",
@@ -78,7 +78,7 @@ const Dashboard = () => {
     "units",
     "unit",
   ];
-  const extraclasses = [
+  const extraclassesToShow = [
     "best",
     "container",
     "bages",
@@ -110,7 +110,7 @@ const Dashboard = () => {
     "units",
     "unit",
   ];
-  const subclasses = [
+  const subclassesToShow = [
     "__wrap",
     "__blocks",
     "__block",
@@ -182,8 +182,8 @@ const Dashboard = () => {
 
       <div className="flex justify-between">
         <div className="inline-flex  flex-col " ref={refTags}>
-          {tags &&
-            tags.map((item, index) => {
+          {tagsToShow &&
+            tagsToShow.map((item, index) => {
               return (
                 <span
                   key={index}
@@ -202,8 +202,8 @@ const Dashboard = () => {
         </div>
 
         <div className="inline-flex  flex-col " ref={refClasses}>
-          {classes &&
-            classes.map((item, index) => {
+          {classesToShow &&
+            classesToShow.map((item, index) => {
               return (
                 <span
                   key={index}
@@ -219,8 +219,8 @@ const Dashboard = () => {
             })}
         </div>
         <div className="inline-flex  flex-col " ref={refSubClasses}>
-          {subclasses &&
-            subclasses.map((item, index) => {
+          {subclassesToShow &&
+            subclassesToShow.map((item, index) => {
               return (
                 <span
                   key={index}
@@ -236,8 +236,8 @@ const Dashboard = () => {
             })}
         </div>
         <div className="inline-flex  flex-col " ref={refextraClasses}>
-          {extraclasses &&
-            extraclasses.map((item, index) => {
+          {extraclassesToShow &&
+            extraclassesToShow.map((item, index) => {
               return (
                 <span
                   key={index}

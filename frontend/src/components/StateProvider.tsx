@@ -16,13 +16,18 @@ interface StateContextType {
     input: string,
     subClassName?: string
   ) => void;
+  lastTags: string[];
+  handlerLastTags: (tags: string[]) => void;
 }
 
 const StateContext = createContext<StateContextType | undefined>(undefined);
 
 export function StateProvider({ children }: { children: ReactNode }) {
   const [stone, setStone] = useState<Stone[]>([]);
-
+  const [lastTags, setLastTags] = useState<string[]>([]);
+  const handlerLastTags = (tags: string[]) => {
+    setLastTags(tags);
+  };
   const handlerEnterStone = (
     name: string,
     className: string,
@@ -109,6 +114,8 @@ export function StateProvider({ children }: { children: ReactNode }) {
         stone,
         setStone,
         handlerEnterStone,
+        lastTags,
+        handlerLastTags,
       }}
     >
       {children}
