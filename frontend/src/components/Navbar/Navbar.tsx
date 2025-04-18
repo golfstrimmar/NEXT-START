@@ -46,26 +46,9 @@ const Navbar: React.FC = () => {
         <Link href="/convertor" className="text-white text-lg font-bold">
           Convertor
         </Link>
-        {/* <Link href="/plazaconstructor" className="text-white text-lg font-bold">
-          Convertor
-        </Link> */}
-
-        {/* <Burger handlerburgerClick={() => setIsOpen(!isOpen)} isOpen={isOpen} /> */}
-        {/* <ul className={`${styles["navbar-menu"]} ${isOpen ? styles.run : ""}`}>
-          <li>
-            <Link
-              href="/"
-              className={` hover:text-gray-300 transition-colors duration-200 ${
-                activeLink === "/" ? "text-blue" : "text-white "
-              }`}
-              onClick={() => {
-                setIsOpen(false);
-              }}
-            >
-              Home
-            </Link>
-          </li>
-        </ul> */}
+        <Link href="/constructor" className="text-white text-lg font-bold">
+          Constructor
+        </Link>
       </div>
     </nav>
   );

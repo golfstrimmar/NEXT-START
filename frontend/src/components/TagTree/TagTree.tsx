@@ -172,7 +172,7 @@ const TagTree: React.FC<{ tags?: string[] }> = ({ tags = [] }) => {
 
   return (
     <div className="bg-gray-300 border-l border-gray-300 h-full overflow-auto -z-2">
-      {tree.length > 0 ? (
+      {tree.length > 0 && (
         <ul className="text-sm font-mono">
           {tree.map((node, index) => (
             <React.Fragment key={index}>
@@ -180,8 +180,6 @@ const TagTree: React.FC<{ tags?: string[] }> = ({ tags = [] }) => {
             </React.Fragment>
           ))}
         </ul>
-      ) : (
-        <p>Нет тегов для отображения</p>
       )}
     </div>
   );

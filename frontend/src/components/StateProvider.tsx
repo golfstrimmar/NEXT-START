@@ -18,6 +18,8 @@ interface StateContextType {
   ) => void;
   lastTags: string[];
   handlerLastTags: (tags: string[]) => void;
+  handlerSetTags: (tags: string[]) => void;
+  providerTags: string[];
 }
 
 const StateContext = createContext<StateContextType | undefined>(undefined);
@@ -25,8 +27,12 @@ const StateContext = createContext<StateContextType | undefined>(undefined);
 export function StateProvider({ children }: { children: ReactNode }) {
   const [stone, setStone] = useState<Stone[]>([]);
   const [lastTags, setLastTags] = useState<string[]>([]);
+  const [providerTags, setProviderTags] = useState<string[]>([]);
   const handlerLastTags = (tags: string[]) => {
     setLastTags(tags);
+  };
+  const handlerSetTags = (tags: string[]) => {
+    setProviderTags(tags);
   };
   const handlerEnterStone = (
     name: string,
@@ -35,75 +41,41 @@ export function StateProvider({ children }: { children: ReactNode }) {
     extraClass?: string
   ) => {
     setStone((prev) => {
-      if (
-        name === "" &&
-        className !== "" &&
-        subClassName === "" &&
-        extraClass === ""
-      ) {
+      if (name === "" && className !== "" && !subClassName && !extraClass) {
         return [
           ...prev,
-          {
-            tag: "div",
-            className: className,
-            subClassName: "",
-            extraClass: "",
-          },
+          { tag: "div", className, subClassName: "", extraClass: "" },
         ];
       }
-      if (
-        name !== "" &&
-        className === "" &&
-        subClassName === "" &&
-        extraClass === ""
-      ) {
+      if (name !== "" && className === "" && !subClassName && !extraClass) {
         return [
           ...prev,
           { tag: name, className: "", subClassName: "", extraClass: "" },
         ];
       }
-      if (name !== "" && className !== "" && subClassName === "") {
+      if (name !== "" && className !== "" && !subClassName) {
         return [
           ...prev,
-          { tag: name, className: className, subClassName: "", extraClass: "" },
+          { tag: name, className, subClassName: "", extraClass: "" },
         ];
       }
-      if (subClassName !== "") {
+      if (subClassName) {
         return [
           ...prev,
-          {
-            tag: name,
-            className: className,
-            subClassName: subClassName,
-            extraClass: extraClass,
-          },
+          { tag: name, className, subClassName, extraClass: extraClass || "" },
         ];
       }
-      if (extraClass !== "") {
+      if (extraClass) {
         return [
           ...prev,
           {
             tag: name,
-            className: className,
-            subClassName: subClassName,
-            extraClass: extraClass,
+            className,
+            subClassName: subClassName || "",
+            extraClass,
           },
         ];
       }
-      // if (name !== "") {
-      //   return [...prev, { tag: "div", className: className }];
-      // }
-      // if (name === "class" && prev.length === 0) {
-      //   return [...prev, { tag: "div", className: className }];
-      // }
-      // if (name === "class" && prev.length > 0) {
-      //   const updated = [...prev];
-      //   updated[updated.length - 1] = {
-      //     ...updated[updated.length - 1],
-      //     className: input,
-      //   };
-      //   return updated;
-      // }
       return prev;
     });
   };
@@ -116,6 +88,8 @@ export function StateProvider({ children }: { children: ReactNode }) {
         handlerEnterStone,
         lastTags,
         handlerLastTags,
+        handlerSetTags,
+        providerTags,
       }}
     >
       {children}

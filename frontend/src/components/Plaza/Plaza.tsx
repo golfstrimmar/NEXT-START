@@ -17,7 +17,14 @@ import htmlToPug from "@/app/utils/htmlToPug";
 import htmlToScss from "@/app/utils/htmlToScss";
 import LocalSnipets from "@/components/LocalSnipets/LocalSnipets";
 const Plaza = () => {
-  const { stone, setStone, handlerLastTags, lastTags } = useStateContext();
+  const {
+    stone,
+    setStone,
+    handlerLastTags,
+    lastTags,
+    handlerSetTags,
+    providerTags,
+  } = useStateContext();
   const [tags, setTags] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
   const [validationErrors, setValidationErrors] = useState<
@@ -72,6 +79,13 @@ const Plaza = () => {
     "article",
   ];
 
+  useEffect(() => {
+    if (providerTags.length > 0) {
+      console.log("<====providerTags====>", providerTags);
+      setTags(providerTags);
+    }
+  }, [providerTags]);
+
   const createTagFromArray = (item: {
     tag: string;
     className?: string;
@@ -84,10 +98,10 @@ const Plaza = () => {
     const attributes: Record<string, string> = {};
     const classNames = [className, subClassName, extraClass].filter(Boolean);
     if (classNames.length > 0) {
-      attributes.class = classNames.join(" ");
+      attributes.class = classNames.join("");
     }
 
-    const tagLower = tag.toLowerCase().trim();
+    const tagLower = tag?.toLowerCase().trim();
     if (tagLower === "a") {
       attributes.href = attributes.href || "#";
     }
@@ -117,7 +131,7 @@ const Plaza = () => {
         attrList.push(value !== "" ? `${key}="${value}"` : key);
       }
     }
-    const attrString = attrList.join(" ");
+    const attrString = attrList.join("");
 
     if (selfClosingTags.includes(tagLower)) {
       const result = `<${tagLower}${attrString ? ` ${attrString}` : ""}>`;
@@ -149,7 +163,7 @@ const Plaza = () => {
       setTags((prev) => [...prev, generatedTag]);
       setStone((prev) => prev.slice(0, -1));
     }
-  }, [stone, setStone]);
+  }, [stone, setStone, handlerLastTags, tags]);
 
   useEffect(() => {
     console.log("<====tags====>", tags);
