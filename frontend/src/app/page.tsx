@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 // import IMG10 from "@/assets/images/15.jpg";
 
 import Dashboard from "@/components/Dashboard/Dashboard";
-import Plaza from "@/components/Plaza/Plaza";
+import Plaza from "@/app/plaza/page";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import { useStateContext } from "@/components/StateProvider";
 

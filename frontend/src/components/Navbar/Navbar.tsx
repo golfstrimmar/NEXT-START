@@ -46,6 +46,9 @@ const Navbar: React.FC = () => {
         <Link href="/convertor" className="text-white text-lg font-bold">
           Convertor
         </Link>
+        <Link href="/plaza" className="text-white text-lg font-bold">
+          Convertor
+        </Link>
         {/* <Burger handlerburgerClick={() => setIsOpen(!isOpen)} isOpen={isOpen} /> */}
         {/* <ul className={`${styles["navbar-menu"]} ${isOpen ? styles.run : ""}`}>
           <li>
