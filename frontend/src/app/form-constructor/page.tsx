@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import Globe from "../../../public/globe.svg";
+import Globe from "../../../public/globe.svg"; // Заменить на твой SVG для Star или chevron-down, если нужно
 import { useStateContext } from "@/components/StateProvider";
 import { useRouter } from "next/navigation";
 import TagTree from "@/components/TagTree/TagTree";
@@ -24,60 +24,60 @@ const availableElements: Record<
     order: number;
   }
 > = {
-  img: {
+  inputName: {
+    id: 1,
+    value:
+      '<div class="send__linia input-field text-field"><input id="firstname" type="text" name="name" value="" placeholder="Denzel Washington"><label class="text-field__label" for="name"></label><span></span></div>',
+    parentId: 0, // Внутри form
+    order: 1,
+  },
+  inputEmail: {
     id: 2,
     value:
-      '<div class="best__img rel"><div class="imgs"><img src="" alt=""></div></div>',
-    parentId: 1, // Внутри best__wrap
-    order: 1,
-  },
-  svg: {
-    id: 4,
-    value: '<svg><use xlink:href="#flag"></use></svg>',
-    parentId: 3, // Внутри best__content
-    order: 1,
-  },
-  h2: {
-    id: 5,
-    value: "<h2></h2>",
-    parentId: 3, // Внутри best__content
+      '<div class="send__linia input-field text-field"><input id="email" type="email" name="email" value="" placeholder="Denzel Washington"><label class="text-field__label" for="email"></label><span></span></div>',
+    parentId: 0, // Внутри form
     order: 2,
   },
-  h3: {
-    id: 6,
-    value: "<h3></h3>",
-    parentId: 3, // Внутри best__content
+  inputTel: {
+    id: 3,
+    value:
+      '<div class="send__linia input-field text-field"><input id="tel" type="tel" name="tel" value="" placeholder="Denzel Washington"><label class="text-field__label" for="tel"></label><span></span></div>',
+    parentId: 0, // Внутри form
     order: 3,
   },
-  p: {
-    id: 7,
-    value: '<p class="best__text"></p>',
-    parentId: 3, // Внутри best__content
+  textarea: {
+    id: 4,
+    value:
+      '<div class="send__linia textarea-field text-field"><textarea id="textarea4" name="textarea4" row="20" placeholder="Введите текст"></textarea><label for="textarea4"></label></div>',
+    parentId: 0, // Внутри form
     order: 4,
   },
-  span: {
-    id: 8,
-    value: "<span></span>",
-    parentId: 3, // Внутри best__content
+  rating: {
+    id: 5,
+    value:
+      '<div class="send__linia"><p></p><fieldset class="fildset-rating"><div class="fildset-rating__items"><input type="radio" id="ratingForm5" name="ratingForm" value="5"><label for="ratingForm5"><svg><use xlink:href="#Star"></use></svg></label><input type="radio" id="ratingForm4" name="ratingForm" value="4"><label for="ratingForm4"><svg><use xlink:href="#Star"></use></svg></label><input type="radio" id="ratingForm3" name="ratingForm" value="3"><label for="ratingForm3"><svg><use xlink:href="#Star"></use></svg></label><input type="radio" id="ratingForm2" name="ratingForm" value="2"><label for="ratingForm2"><svg><use xlink:href="#Star"></use></svg></label><input type="radio" id="ratingForm1" name="ratingForm" value="1"><label for="ratingForm1"><svg><use xlink:href="#Star"></use></svg></label></div></fieldset></div>',
+    parentId: 0, // Внутри form
     order: 5,
   },
-  link: {
-    id: 9,
-    value: '<a class="best__link" href="#"></a>',
-    parentId: 3, // Внутри best__content
+  select: {
+    id: 6,
+    value:
+      '<div class="send__linia select" id="wal"><button class="dropdown-button"><span></span><input type="hidden" name="place"><svg class="icon"><use xlink:href="#chevron-down"></use></svg></button><ul class="dropdown-list"><li class="dropdown-list__item" data-value="Notes"></li><li class="dropdown-list__item" data-value="Photo"></li><li class="dropdown-list__item" data-value="Dictionary"></li></ul></div>',
+    parentId: 0, // Внутри form
     order: 6,
   },
-  button1: {
-    id: 10,
+  checkbox: {
+    id: 7,
     value:
-      '<button class="btn btn-success but-wave" href="#!" type="button"></button>',
-    parentId: 3, // Внутри best__content
+      '<div class="fildset-checkbox"><div class="form-check"><input id="agree" type="checkbox" name="agree"><label for="agree"></label></div></div>',
+    parentId: 0, // Внутри form
     order: 7,
   },
-  button2: {
-    id: 11,
-    value: '<button class="btn btn-blue" href="#!" type="button"></button>',
-    parentId: 3, // Внутри best__content
+  submitButton: {
+    id: 8,
+    value:
+      '<p class="but-wave"><button class="btn btn-success" type="submit"></button></p>',
+    parentId: 0, // Внутри form
     order: 8,
   },
 };
@@ -85,9 +85,12 @@ const availableElements: Record<
 const Constructor = () => {
   const [result, setResult] = useState<string>("");
   const [base, setBase] = useState<Item[]>([
-    { id: 0, value: '<div class="best"></div>', children: ["1"] },
-    { id: 1, value: '<div class="best__wrap"></div>', children: ["3"] },
-    { id: 3, value: '<div class="best__content"></div>', children: [] },
+    {
+      id: 0,
+      value:
+        '<form class="send send-form" id="send-form" action="#" method="post" name="send-form"></form>',
+      children: [],
+    },
   ]);
   const router = useRouter();
   const { handlerSetTags } = useStateContext();
@@ -167,23 +170,14 @@ const Constructor = () => {
       // Обновляем children родителя с учётом порядка
       updatedBase = updatedBase.map((item) => {
         if (item.id === element.parentId) {
-          // Для best__wrap (id: 1): img (2), затем best__content (3)
-          if (item.id === 1) {
-            const imgPresent = updatedBase.some((i) => i.id === 2);
-            const children = imgPresent ? ["2", "3"] : ["3"];
-            return { ...item, children };
-          }
-          // Для best__content (id: 3): сортируем по order
-          if (item.id === 3) {
-            const siblings = Object.values(availableElements)
-              .filter((el) => el.parentId === 3)
-              .sort((a, b) => a.order - b.order)
-              .map((el) => el.id.toString());
-            const newChildren = siblings.filter((id) =>
-              updatedBase.some((item) => item.id.toString() === id)
-            );
-            return { ...item, children: newChildren };
-          }
+          const siblings = Object.values(availableElements)
+            .filter((el) => el.parentId === element.parentId)
+            .sort((a, b) => a.order - b.order)
+            .map((el) => el.id.toString());
+          const newChildren = siblings.filter((id) =>
+            updatedBase.some((item) => item.id.toString() === id)
+          );
+          return { ...item, children: newChildren };
         }
         return item;
       });
@@ -215,15 +209,10 @@ const Constructor = () => {
           onClick={() => {
             setResult("");
             setBase([
-              { id: 0, value: '<div class="best"></div>', children: ["1"] },
               {
-                id: 1,
-                value: '<div class="best__wrap"></div>',
-                children: ["3"],
-              },
-              {
-                id: 3,
-                value: '<div class="best__content"></div>',
+                id: 0,
+                value:
+                  '<form class="send send-form" id="send-form" action="#" method="post" name="send-form"></form>',
                 children: [],
               },
             ]);
@@ -247,17 +236,10 @@ const Constructor = () => {
               onClick={() => handleAddElement(key)}
               title={`Добавить или убрать ${key}`}
             >
-              {key === "img" ? (
-                <div className="imgs">
-                  <Image
-                    src="/assets/images/18.jpg"
-                    alt="18"
-                    width={160}
-                    height={160}
-                  />
-                </div>
-              ) : key === "svg" ? (
-                <Globe width={50} height={50} className="fill-blue-500" />
+              {key === "rating" ? (
+                <Globe width={50} height={50} className="fill-blue-500" /> // Заменить на SVG Star, если есть
+              ) : key === "select" ? (
+                <Globe width={50} height={50} className="fill-blue-500" /> // Заменить на SVG chevron-down, если есть
               ) : (
                 key
               )}
@@ -272,7 +254,7 @@ const Constructor = () => {
           title="Кликните, чтобы скопировать результат и вернуться на главную"
         >
           <TagTree tags={[result]} />
-          <pre>{result}</pre>
+          {/* <pre>{result}</pre> */}
         </div>
       </div>
     </div>

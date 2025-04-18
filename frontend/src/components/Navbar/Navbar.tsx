@@ -49,6 +49,9 @@ const Navbar: React.FC = () => {
         <Link href="/constructor" className="text-white text-lg font-bold">
           Constructor
         </Link>
+        <Link href="/form-constructor" className="text-white text-lg font-bold">
+          Form
+        </Link>
       </div>
     </nav>
   );
