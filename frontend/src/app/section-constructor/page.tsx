@@ -2,102 +2,166 @@
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import Globe from "../../../public/globe.svg";
 import { useStateContext } from "@/components/StateProvider";
 import { useRouter } from "next/navigation";
 import TagTree from "@/components/TagTree/TagTree";
 import htmlToScss from "@/app/utils/htmlToScss";
 import htmlToPug from "@/app/utils/htmlToPug";
+
 interface Item {
   id: number;
   value: string;
   children: string[];
 }
 
-// Определяем доступные элементы с порядком
-const availableElements: Record<
-  string,
-  {
-    id: number;
-    value: string;
-    children?: string[];
-    parentId: number;
-    order: number;
-  }
-> = {
-  img: {
-    id: 2,
-    value:
-      '<div class="best__img rel"><div class="imgs"><img src="" alt=""></div></div>',
-    parentId: 1, // Внутри best__wrap
-    order: 1,
+const templates = {
+  best: {
+    availableElements: {
+      img: {
+        id: 3,
+        value:
+          '<div class="best__img rel"><div class="imgs"><img src="" alt=""></div></div>',
+        parentId: 2,
+        order: 1,
+      },
+      svg: {
+        id: 5,
+        value: '<svg><use xlink:href="#flag"></use></svg>',
+        parentId: 4,
+        order: 1,
+      },
+      h2: {
+        id: 6,
+        value: "<h2></h2>",
+        parentId: 4,
+        order: 2,
+      },
+      h3: {
+        id: 7,
+        value: "<h3></h3>",
+        parentId: 4,
+        order: 3,
+      },
+      p: {
+        id: 8,
+        value: '<p class="best__text"></p>',
+        parentId: 4,
+        order: 4,
+      },
+      span: {
+        id: 9,
+        value: "<span></span>",
+        parentId: 4,
+        order: 5,
+      },
+      link: {
+        id: 10,
+        value: '<a class="best__link" href="#"></a>',
+        parentId: 4,
+        order: 6,
+      },
+      button1: {
+        id: 11,
+        value:
+          '<button class="btn btn-success but-wave" href="#!" type="button"></button>',
+        parentId: 4,
+        order: 7,
+      },
+      button2: {
+        id: 12,
+        value: '<button class="btn btn-blue" href="#!" type="button"></button>',
+        parentId: 4,
+        order: 8,
+      },
+    },
+    base: [
+      { id: 0, value: '<div class="best"></div>', children: ["1"] },
+      { id: 1, value: '<div class="container"></div>', children: ["2"] },
+      { id: 2, value: '<div class="best__wrap"></div>', children: ["4"] },
+      { id: 4, value: '<div class="best__content"></div>', children: [] },
+    ],
   },
-  svg: {
-    id: 4,
-    value: '<svg><use xlink:href="#flag"></use></svg>',
-    parentId: 3, // Внутри best__content
-    order: 1,
-  },
-  h2: {
-    id: 5,
-    value: "<h2></h2>",
-    parentId: 3, // Внутри best__content
-    order: 2,
-  },
-  h3: {
-    id: 6,
-    value: "<h3></h3>",
-    parentId: 3, // Внутри best__content
-    order: 3,
-  },
-  p: {
-    id: 7,
-    value: '<p class="best__text"></p>',
-    parentId: 3, // Внутри best__content
-    order: 4,
-  },
-  span: {
-    id: 8,
-    value: "<span></span>",
-    parentId: 3, // Внутри best__content
-    order: 5,
-  },
-  link: {
-    id: 9,
-    value: '<a class="best__link" href="#"></a>',
-    parentId: 3, // Внутри best__content
-    order: 6,
-  },
-  button1: {
-    id: 10,
-    value:
-      '<button class="btn btn-success but-wave" href="#!" type="button"></button>',
-    parentId: 3, // Внутри best__content
-    order: 7,
-  },
-  button2: {
-    id: 11,
-    value: '<button class="btn btn-blue" href="#!" type="button"></button>',
-    parentId: 3, // Внутри best__content
-    order: 8,
+  cards: {
+    availableElements: {
+      svg: {
+        id: 20,
+        value: '<svg><use xlink:href="#flag"></use></svg>',
+        parentId: 4,
+        order: 1,
+      },
+      decor: {
+        id: 21,
+        value: '<div class="card__decor"></div>',
+        parentId: 4,
+        order: 2,
+      },
+      bage: {
+        id: 22,
+        value: '<div class="card__bage"></div>',
+        parentId: 4,
+        order: 3,
+      },
+      img: {
+        id: 23,
+        value:
+          '<div class="card__img rel"><div class="imgs"><img src="" alt=""></div></div>',
+        parentId: 4,
+        order: 4,
+      },
+      h3: {
+        id: 24,
+        value: "<h3></h3>",
+        parentId: 4,
+        order: 5,
+      },
+      p: {
+        id: 25,
+        value: "<p></p>",
+        parentId: 4,
+        order: 6,
+      },
+      span: {
+        id: 26,
+        value: "<span></span>",
+        parentId: 4,
+        order: 7,
+      },
+      button: {
+        id: 27,
+        value:
+          '<button type="button" class="btn btn-success but-wave" name="text"></button>',
+        parentId: 4,
+        order: 8,
+      },
+    },
+    base: [
+      { id: 0, value: '<ul class="best__cards"></ul>', children: ["1"] },
+      { id: 1, value: "<li></li>", children: ["2"] },
+      { id: 2, value: '<div class="best__card card"></div>', children: ["3"] },
+      { id: 3, value: '<div class="card__wrap"></div>', children: ["4"] },
+      { id: 4, value: '<div class="card__content"></div>', children: [] },
+    ],
   },
 };
 
 const Constructor = () => {
-  const [result, setResult] = useState<string>("");
-  const [base, setBase] = useState<Item[]>([
-    { id: 0, value: '<div class="best"></div>', children: ["1"] },
-    { id: 1, value: '<div class="best__wrap"></div>', children: ["3"] },
-    { id: 3, value: '<div class="best__content"></div>', children: [] },
-  ]);
+  const [baseBest, setBaseBest] = useState<Item[]>(templates.best.base);
+  const [baseCards, setBaseCards] = useState<Item[]>(templates.cards.base);
+  const [resultBest, setResultBest] = useState<string>("");
+  const [resultCards, setResultCards] = useState<string>("");
   const router = useRouter();
   const { handlerSetTags } = useStateContext();
-  const CopyPug = useRef(null);
-  const CopyScss = useRef(null);
-  const CopyHtml = useRef(null);
+  const CopyPugBest = useRef<HTMLButtonElement>(null);
+  const CopyScssBest = useRef<HTMLButtonElement>(null);
+  const CopyHtmlBest = useRef<HTMLDivElement>(null);
+  const CopyPugCards = useRef<HTMLButtonElement>(null);
+  const CopyScssCards = useRef<HTMLButtonElement>(null);
+  const CopyHtmlCards = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    console.log("<====base====>", base);
-  }, [base]);
+    console.log("<====baseBest====>", baseBest);
+    console.log("<====baseCards====>", baseCards);
+  }, [baseBest, baseCards]);
 
   const renderBaseToString = (base: Item[]): string => {
     const itemMap = new Map<number, Item>(base.map((item) => [item.id, item]));
@@ -143,14 +207,19 @@ const Constructor = () => {
     return rootItems.map((item) => renderItem(item)).join("");
   };
 
-  const handleAddElement = (elementKey: string) => {
+  const handleAddElement = (
+    templateKey: "best" | "cards",
+    elementKey: string
+  ) => {
+    const setBase = templateKey === "best" ? setBaseBest : setBaseCards;
+    const base = templateKey === "best" ? baseBest : baseCards;
+
     setBase((prev) => {
-      const element = availableElements[elementKey];
+      const element = templates[templateKey].availableElements[elementKey];
       const hasElement = prev.some((item) => item.id === element.id);
       let updatedBase = [...prev];
 
       if (hasElement) {
-        // Удаляем элемент и его id из children родителя
         updatedBase = updatedBase.filter((item) => item.id !== element.id);
         updatedBase = updatedBase.map((item) => ({
           ...item,
@@ -159,7 +228,6 @@ const Constructor = () => {
           ),
         }));
       } else {
-        // Добавляем новый элемент
         updatedBase.push({
           id: element.id,
           value: element.value,
@@ -167,26 +235,18 @@ const Constructor = () => {
         });
       }
 
-      // Обновляем children родителя с учётом порядка
       updatedBase = updatedBase.map((item) => {
         if (item.id === element.parentId) {
-          // Для best__wrap (id: 1): img (2), затем best__content (3)
-          if (item.id === 1) {
-            const imgPresent = updatedBase.some((i) => i.id === 2);
-            const children = imgPresent ? ["2", "3"] : ["3"];
-            return { ...item, children };
-          }
-          // Для best__content (id: 3): сортируем по order
-          if (item.id === 3) {
-            const siblings = Object.values(availableElements)
-              .filter((el) => el.parentId === 3)
-              .sort((a, b) => a.order - b.order)
-              .map((el) => el.id.toString());
-            const newChildren = siblings.filter((id) =>
-              updatedBase.some((item) => item.id.toString() === id)
-            );
-            return { ...item, children: newChildren };
-          }
+          const siblings = Object.values(
+            templates[templateKey].availableElements
+          )
+            .filter((el) => el.parentId === item.id)
+            .sort((a, b) => a.order - b.order)
+            .map((el) => el.id.toString());
+          const newChildren = siblings.filter((id) =>
+            updatedBase.some((item) => item.id.toString() === id)
+          );
+          return { ...item, children: newChildren };
         }
         return item;
       });
@@ -195,248 +255,512 @@ const Constructor = () => {
     });
   };
 
-  const handlerResult = () => {
+  const handlerResult = (
+    templateKey: "best" | "cards",
+    result: string,
+    ref: React.RefObject<HTMLElement>
+  ) => {
     navigator.clipboard.writeText(result);
-    if (CopyHtml.current) {
-      CopyHtml.current.style.boxShadow = "0 0 10px red";
+    if (ref.current) {
+      ref.current.style.boxShadow = "0 0 10px red";
       setTimeout(() => {
-        if (CopyHtml.current) {
-          CopyHtml.current.style.boxShadow = "0 0 3px 0 gray";
+        if (ref.current) {
+          ref.current.style.boxShadow = "0 0 3px 0 gray";
         }
       }, 300);
     }
     handlerSetTags([result]);
     // router.push("/");
   };
-  const handlerScss = () => {
+
+  const handlerScss = (result: string) => {
     const scssOutput = htmlToScss(result);
     return scssOutput.scss;
   };
-  const handlerPug = () => {
+
+  const handlerPug = (result: string) => {
     const pugOutput = htmlToPug(result);
     return pugOutput;
   };
 
-  // const scssOutput = tags.map((tag) => htmlToScss(tag).scss).join("\n");
   return (
     <div>
-      <div className="flex gap-4 mb-2">
-        <button
-          onClick={() => {
-            setResult(renderBaseToString(base));
-          }}
-          className="bg-lime-400 w-200 h-10 border border-slate-800 flex justify-center items-center rounded-2xl"
-          title="Рендерить и показать результат"
-        >
-          <PlusIcon className="w-4 h-4" />
-        </button>
-        <button
-          className="bg-red-400 w-50 h-10 border border-slate-800 flex justify-center items-center rounded-2xl"
-          onClick={() => {
-            setResult("");
-            setBase([
-              { id: 0, value: '<div class="best"></div>', children: ["1"] },
-              {
-                id: 1,
-                value: '<div class="best__wrap"></div>',
-                children: ["3"],
-              },
-              {
-                id: 3,
-                value: '<div class="best__content"></div>',
-                children: [],
-              },
-            ]);
-          }}
-          title="Сбросить все элементы"
-        >
-          <TrashIcon className="w-4 h-4" />
-        </button>
-      </div>
-      <div className="grid grid-cols-[1fr_40%] gap-2">
-        <div className="bg-slate-200 grid grid-cols-[160px_1fr]">
-          <button
-            type="button"
-            className={`bg-slate-400 w-40 h-40 border border-slate-800 flex justify-center items-center relative ${
-              base.some((item) => item.id === availableElements.img.id)
-                ? "opacity-100 bg-green-200"
-                : "opacity-40"
-            }`}
-            onClick={() => handleAddElement("img")}
-            title="Добавить или убрать img"
-          >
-            <div className="imgs">
-              <Image
-                src="/assets/images/18.jpg"
-                alt="18"
-                width={160}
-                height={160}
-              />
+      <div className="flex flex-col gap-4">
+        {/* Best Section */}
+        <div>
+          <div className="flex gap-4 mb-2">
+            <button
+              onClick={() => {
+                setResultBest(renderBaseToString(baseBest));
+              }}
+              className="bg-lime-400 w-200 h-10 border border-slate-800 flex justify-center items-center rounded-2xl"
+              title="Рендерить и показать результат (Best)"
+            >
+              <PlusIcon className="w-4 h-4" />
+            </button>
+            <button
+              className="bg-red-400 w-50 h-10 border border-slate-800 flex justify-center items-center rounded-2xl"
+              onClick={() => {
+                setResultBest("");
+                setBaseBest(templates.best.base);
+              }}
+              title="Сбросить все элементы (Best)"
+            >
+              <TrashIcon className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="grid grid-cols-[1fr_40%] gap-2">
+            <div className="bg-slate-200 grid grid-cols-[160px_1fr]">
+              <button
+                type="button"
+                className={`bg-slate-400 w-40 h-40 border border-slate-800 flex justify-center items-center relative ${
+                  baseBest.some(
+                    (item) =>
+                      item.id === templates.best.availableElements.img.id
+                  )
+                    ? "opacity-100 bg-green-200"
+                    : "opacity-40"
+                }`}
+                onClick={() => handleAddElement("best", "img")}
+                title="Добавить или убрать img"
+              >
+                <div className="imgs">
+                  <Image
+                    src="/assets/images/18.jpg"
+                    alt="18"
+                    width={160}
+                    height={160}
+                  />
+                </div>
+              </button>
+              <div className="flex flex-col">
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseBest.some(
+                      (item) =>
+                        item.id === templates.best.availableElements.svg.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("best", "svg")}
+                  title="Добавить или убрать svg"
+                >
+                  <Image
+                    src="/globe.svg"
+                    alt="globe"
+                    width={50}
+                    height={40}
+                    className="fill-blue-500"
+                  />
+                </button>
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseBest.some(
+                      (item) =>
+                        item.id === templates.best.availableElements.h2.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("best", "h2")}
+                  title="Добавить или убрать h2"
+                >
+                  h2
+                </button>
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseBest.some(
+                      (item) =>
+                        item.id === templates.best.availableElements.h3.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("best", "h3")}
+                  title="Добавить или убрать h3"
+                >
+                  h3
+                </button>
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseBest.some(
+                      (item) =>
+                        item.id === templates.best.availableElements.p.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("best", "p")}
+                  title="Добавить или убрать p"
+                >
+                  p
+                </button>
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseBest.some(
+                      (item) =>
+                        item.id === templates.best.availableElements.span.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("best", "span")}
+                  title="Добавить или убрать span"
+                >
+                  span
+                </button>
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseBest.some(
+                      (item) =>
+                        item.id === templates.best.availableElements.link.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("best", "link")}
+                  title="Добавить или убрать link"
+                >
+                  a
+                </button>
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseBest.some(
+                      (item) =>
+                        item.id === templates.best.availableElements.button1.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("best", "button1")}
+                  title="Добавить или убрать button1"
+                >
+                  button-success
+                </button>
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseBest.some(
+                      (item) =>
+                        item.id === templates.best.availableElements.button2.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("best", "button2")}
+                  title="Добавить или убрать button2"
+                >
+                  button-blue
+                </button>
+              </div>
             </div>
-          </button>
-          <div className="flex flex-col">
-            <button
-              type="button"
-              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
-                base.some((item) => item.id === availableElements.svg.id)
-                  ? "opacity-100 bg-green-200"
-                  : "opacity-40"
-              }`}
-              onClick={() => handleAddElement("svg")}
-              title="Добавить или убрать svg"
-            >
-              <Globe width={50} height={40} className="fill-blue-500" />
-            </button>
-            <button
-              type="button"
-              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
-                base.some((item) => item.id === availableElements.h2.id)
-                  ? "opacity-100 bg-green-200"
-                  : "opacity-40"
-              }`}
-              onClick={() => handleAddElement("h2")}
-              title="Добавить или убрать h2"
-            >
-              h2
-            </button>
-            <button
-              type="button"
-              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
-                base.some((item) => item.id === availableElements.h3.id)
-                  ? "opacity-100 bg-green-200"
-                  : "opacity-40"
-              }`}
-              onClick={() => handleAddElement("h3")}
-              title="Добавить или убрать h3"
-            >
-              h3
-            </button>
-            <button
-              type="button"
-              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
-                base.some((item) => item.id === availableElements.p.id)
-                  ? "opacity-100 bg-green-200"
-                  : "opacity-40"
-              }`}
-              onClick={() => handleAddElement("p")}
-              title="Добавить или убрать p"
-            >
-              p
-            </button>
-            <button
-              type="button"
-              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
-                base.some((item) => item.id === availableElements.span.id)
-                  ? "opacity-100 bg-green-200"
-                  : "opacity-40"
-              }`}
-              onClick={() => handleAddElement("span")}
-              title="Добавить или убрать span"
-            >
-              span
-            </button>
-            <button
-              type="button"
-              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
-                base.some((item) => item.id === availableElements.link.id)
-                  ? "opacity-100 bg-green-200"
-                  : "opacity-40"
-              }`}
-              onClick={() => handleAddElement("link")}
-              title="Добавить или убрать link"
-            >
-              a
-            </button>
-            <button
-              type="button"
-              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
-                base.some((item) => item.id === availableElements.button1.id)
-                  ? "opacity-100 bg-green-200"
-                  : "opacity-40"
-              }`}
-              onClick={() => handleAddElement("button1")}
-              title="Добавить или убрать button1"
-            >
-              button-success
-            </button>
-            <button
-              type="button"
-              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
-                base.some((item) => item.id === availableElements.button2.id)
-                  ? "opacity-100 bg-green-200"
-                  : "opacity-40"
-              }`}
-              onClick={() => handleAddElement("button2")}
-              title="Добавить или убрать button2"
-            >
-              button-blue
-            </button>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <div
+                  ref={CopyHtmlBest}
+                  className="rounded-full shadow hover:shadow-red-800 transition-all duration-200 ease-in-out"
+                  onClick={() => {
+                    handlerResult("best", resultBest, CopyHtmlBest);
+                  }}
+                >
+                  <Image
+                    src="https://raw.githubusercontent.com/devicons/devicon/master/icons/html5/html5-original-wordmark.svg"
+                    alt="html"
+                    width={30}
+                    height={30}
+                    className="p-1"
+                  />
+                </div>
+                <button
+                  ref={CopyPugBest}
+                  type="button"
+                  onClick={() => {
+                    if (CopyPugBest.current) {
+                      CopyPugBest.current.style.boxShadow = "0 0 10px blue";
+                      setTimeout(() => {
+                        if (CopyPugBest.current) {
+                          CopyPugBest.current.style.boxShadow = "none";
+                        }
+                      }, 300);
+                    }
+                    navigator.clipboard.writeText(handlerPug(resultBest));
+                  }}
+                  className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-purple-600 transition-all duration-200 ease-in-out overflow-hidden"
+                >
+                  <Image src="/pug.svg" alt="pug" width={30} height={30} />
+                </button>
+                <button
+                  ref={CopyScssBest}
+                  type="button"
+                  onClick={() => {
+                    if (CopyScssBest.current) {
+                      CopyScssBest.current.style.boxShadow = "0 0 10px red";
+                      setTimeout(() => {
+                        if (CopyScssBest.current) {
+                          CopyScssBest.current.style.boxShadow = "none";
+                        }
+                      }, 300);
+                    }
+                    navigator.clipboard.writeText(handlerScss(resultBest));
+                  }}
+                  className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-red-600 transition-all duration-200 ease-in-out overflow-hidden"
+                >
+                  <Image
+                    src="https://raw.githubusercontent.com/devicons/devicon/master/icons/sass/sass-original.svg"
+                    alt="sass"
+                    width={25}
+                    height={25}
+                  />
+                </button>
+              </div>
+              <div
+                className="border-slate-800 border p-4"
+                title="Кликните, чтобы скопировать результат и вернуться на главную"
+              >
+                <TagTree tags={[resultBest]} />
+              </div>
+            </div>
           </div>
         </div>
-        <div className="flex  flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <div
-              ref={CopyHtml}
-              className="rounded-full  shadow hover:shadow-red-800 transition-all duration-200 ease-in-out "
-              onClick={() => {
-                handlerResult();
-              }}
-            >
-              <Image
-                src="https://raw.githubusercontent.com/devicons/devicon/master/icons/html5/html5-original-wordmark.svg"
-                alt="pug"
-                width={30}
-                height={30}
-                className="p-1"
-              />
-            </div>
+
+        {/* Separator */}
+        <hr className="my-4 border-slate-400" />
+
+        {/* Cards Section */}
+        <div>
+          <div className="flex gap-4 mb-2">
             <button
-              ref={CopyPug}
-              type="button"
               onClick={() => {
-                if (CopyPug.current) {
-                  CopyPug.current.style.boxShadow = "0 0 10px blue";
-                  setTimeout(() => {
-                    if (CopyPug.current) {
-                      CopyPug.current.style.boxShadow = "none";
-                    }
-                  }, 300);
-                }
-                navigator.clipboard.writeText(handlerPug());
+                setResultCards(renderBaseToString(baseCards));
               }}
-              className="w-8 h-8  rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-purple-600 transition-all duration-200 ease-in-out overflow-hidden"
+              className="bg-lime-400 w-200 h-10 border border-slate-800 flex justify-center items-center rounded-2xl"
+              title="Рендерить и показать результат (Cards)"
             >
-              <Image src="/pug.svg" alt="pug" width={30} height={30} />
+              <PlusIcon className="w-4 h-4" />
             </button>
             <button
-              ref={CopyScss}
-              type="button"
+              className="bg-red-400 w-50 h-10 border border-slate-800 flex justify-center items-center rounded-2xl"
               onClick={() => {
-                if (CopyScss.current) {
-                  CopyScss.current.style.boxShadow = "0 0 10px red";
-                  setTimeout(() => {
-                    if (CopyScss.current) {
-                      CopyScss.current.style.boxShadow = "none";
-                    }
-                  }, 300);
-                }
-                navigator.clipboard.writeText(handlerScss());
+                setResultCards("");
+                setBaseCards(templates.cards.base);
               }}
-              className="w-8 h-8  rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-red-600 transition-all duration-200 ease-in-out overflow-hidden"
+              title="Сбросить все элементы (Cards)"
             >
-              <Image
-                src="https://raw.githubusercontent.com/devicons/devicon/master/icons/sass/sass-original.svg"
-                alt="sass"
-                width={25}
-                height={25}
-              />
+              <TrashIcon className="w-4 h-4" />
             </button>
           </div>
-          <div
-            className="border-slate-800 border p-4"
-            title="Кликните, чтобы скопировать результат и вернуться на главную"
-          >
-            <TagTree tags={[result]} />
+          <div className="grid grid-cols-[1fr_40%] gap-2">
+            <div className="bg-slate-200 grid grid-cols-[160px_1fr]">
+              <button
+                type="button"
+                className={`bg-slate-400 w-40 h-40 border border-slate-800 flex justify-center items-center relative ${
+                  baseCards.some(
+                    (item) =>
+                      item.id === templates.cards.availableElements.img.id
+                  )
+                    ? "opacity-100 bg-green-200"
+                    : "opacity-40"
+                }`}
+                onClick={() => handleAddElement("cards", "img")}
+                title="Добавить или убрать img"
+              >
+                <div className="imgs">
+                  <Image
+                    src="/assets/images/18.jpg"
+                    alt="18"
+                    width={160}
+                    height={160}
+                  />
+                </div>
+              </button>
+              <div className="flex flex-col">
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseCards.some(
+                      (item) =>
+                        item.id === templates.cards.availableElements.svg.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("cards", "svg")}
+                  title="Добавить или убрать svg"
+                >
+                  <Image
+                    src="/globe.svg"
+                    alt="globe"
+                    width={50}
+                    height={40}
+                    className="fill-blue-500"
+                  />
+                </button>
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseCards.some(
+                      (item) =>
+                        item.id === templates.cards.availableElements.decor.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("cards", "decor")}
+                  title="Добавить или убрать decor"
+                >
+                  decor
+                </button>
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseCards.some(
+                      (item) =>
+                        item.id === templates.cards.availableElements.bage.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("cards", "bage")}
+                  title="Добавить или убрать bage"
+                >
+                  bage
+                </button>
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseCards.some(
+                      (item) =>
+                        item.id === templates.cards.availableElements.h3.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("cards", "h3")}
+                  title="Добавить или убрать h3"
+                >
+                  h3
+                </button>
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseCards.some(
+                      (item) =>
+                        item.id === templates.cards.availableElements.p.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("cards", "p")}
+                  title="Добавить или убрать p"
+                >
+                  p
+                </button>
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseCards.some(
+                      (item) =>
+                        item.id === templates.cards.availableElements.span.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("cards", "span")}
+                  title="Добавить или убрать span"
+                >
+                  span
+                </button>
+                <button
+                  type="button"
+                  className={`bg-slate-400 w-40 border border-slate-800 flex justify-center items-center relative ${
+                    baseCards.some(
+                      (item) =>
+                        item.id === templates.cards.availableElements.button.id
+                    )
+                      ? "opacity-100 bg-green-200"
+                      : "opacity-40"
+                  }`}
+                  onClick={() => handleAddElement("cards", "button")}
+                  title="Добавить или убрать button"
+                >
+                  button-success
+                </button>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <div
+                  ref={CopyHtmlCards}
+                  className="rounded-full shadow hover:shadow-red-800 transition-all duration-200 ease-in-out"
+                  onClick={() => {
+                    handlerResult("cards", resultCards, CopyHtmlCards);
+                  }}
+                >
+                  <Image
+                    src="https://raw.githubusercontent.com/devicons/devicon/master/icons/html5/html5-original-wordmark.svg"
+                    alt="html"
+                    width={30}
+                    height={30}
+                    className="p-1"
+                  />
+                </div>
+                <button
+                  ref={CopyPugCards}
+                  type="button"
+                  onClick={() => {
+                    if (CopyPugCards.current) {
+                      CopyPugCards.current.style.boxShadow = "0 0 10px blue";
+                      setTimeout(() => {
+                        if (CopyPugCards.current) {
+                          CopyPugCards.current.style.boxShadow = "none";
+                        }
+                      }, 300);
+                    }
+                    navigator.clipboard.writeText(handlerPug(resultCards));
+                  }}
+                  className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-purple-600 transition-all duration-200 ease-in-out overflow-hidden"
+                >
+                  <Image src="/pug.svg" alt="pug" width={30} height={30} />
+                </button>
+                <button
+                  ref={CopyScssCards}
+                  type="button"
+                  onClick={() => {
+                    if (CopyScssCards.current) {
+                      CopyScssCards.current.style.boxShadow = "0 0 10px red";
+                      setTimeout(() => {
+                        if (CopyScssCards.current) {
+                          CopyScssCards.current.style.boxShadow = "none";
+                        }
+                      }, 300);
+                    }
+                    navigator.clipboard.writeText(handlerScss(resultCards));
+                  }}
+                  className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-red-600 transition-all duration-200 ease-in-out overflow-hidden"
+                >
+                  <Image
+                    src="https://raw.githubusercontent.com/devicons/devicon/master/icons/sass/sass-original.svg"
+                    alt="sass"
+                    width={25}
+                    height={25}
+                  />
+                </button>
+              </div>
+              <div
+                className="border-slate-800 border p-4"
+                title="Кликните, чтобы скопировать результат и вернуться на главную"
+              >
+                <TagTree tags={[resultCards]} />
+              </div>
+            </div>
           </div>
         </div>
       </div>
