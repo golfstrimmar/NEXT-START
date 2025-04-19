@@ -40,10 +40,7 @@ const Select: React.FC<SelectProps> = ({ setSortOrder, selectItems }) => {
     setSortOrder(item.value); // в родителя отправляем value
     setActive(false);
   };
-  // const [temp, setTemp] = useState(" ")
-  // useEffect(() => {
-  //     console.log('=====temp=====',temp)
-  // }, [temp]);
+
   return (
     <>
       <div

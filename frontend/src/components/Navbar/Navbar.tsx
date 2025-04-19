@@ -46,7 +46,10 @@ const Navbar: React.FC = () => {
         <Link href="/convertor" className="text-white text-lg font-bold">
           Convertor
         </Link>
-        <Link href="/constructor" className="text-white text-lg font-bold">
+        <Link
+          href="/section-constructor"
+          className="text-white text-lg font-bold"
+        >
           Section
         </Link>
         <Link href="/form-constructor" className="text-white text-lg font-bold">
