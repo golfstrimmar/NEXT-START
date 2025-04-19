@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import styles from "./Plaza.module.scss";
 import { useStateContext } from "@/components/StateProvider";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
-
+import Image from "next/image";
 import {
   XMarkIcon,
   DocumentDuplicateIcon,
@@ -456,7 +456,13 @@ const Plaza = () => {
               onClick={handlerCopy}
               className="w-8 h-8 bg-cyan-500 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-cyan-600 transition-all duration-200 ease-in-out overflow-hidden"
             >
-              <DocumentDuplicateIcon className="w-4 h-4 text-white" />
+              <Image
+                src="https://raw.githubusercontent.com/devicons/devicon/master/icons/html5/html5-original-wordmark.svg"
+                alt="pug"
+                width={30}
+                height={30}
+                className="p-1"
+              />
             </button>
             <button
               ref={CopyPug}
@@ -464,7 +470,7 @@ const Plaza = () => {
               onClick={handlerCopyPug}
               className="w-8 h-8 bg-purple-500 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-purple-600 transition-all duration-200 ease-in-out overflow-hidden"
             >
-              <span className="text-white text-xs">Pug</span>
+              <Image src="/pug.svg" alt="pug" width={30} height={30} />
             </button>
             <button
               ref={CopyScss}
@@ -472,7 +478,12 @@ const Plaza = () => {
               onClick={handlerCopyScss}
               className="w-8 h-8 bg-green-500 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-green-600 transition-all duration-200 ease-in-out overflow-hidden"
             >
-              <span className="text-white text-[10px]">SCSS</span>
+              <Image
+                src="https://raw.githubusercontent.com/devicons/devicon/master/icons/sass/sass-original.svg"
+                alt="sass"
+                width={25}
+                height={25}
+              />
             </button>
             <button
               type="button"

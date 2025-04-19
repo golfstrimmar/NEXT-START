@@ -1,11 +1,12 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import Globe from "../../../public/globe.svg"; // Заменить на твой SVG для Star или chevron-down, если нужно
 import { useStateContext } from "@/components/StateProvider";
 import { useRouter } from "next/navigation";
 import TagTree from "@/components/TagTree/TagTree";
+import htmlToScss from "@/app/utils/htmlToScss";
+import htmlToPug from "@/app/utils/htmlToPug";
 
 interface Item {
   id: number;
@@ -13,7 +14,6 @@ interface Item {
   children: string[];
 }
 
-// Определяем доступные элементы с порядком
 const availableElements: Record<
   string,
   {
@@ -28,56 +28,56 @@ const availableElements: Record<
     id: 1,
     value:
       '<div class="send__linia input-field text-field"><input id="firstname" type="text" name="name" value="" placeholder="Denzel Washington"><label class="text-field__label" for="name"></label><span></span></div>',
-    parentId: 0, // Внутри form
+    parentId: 0,
     order: 1,
   },
   inputEmail: {
     id: 2,
     value:
       '<div class="send__linia input-field text-field"><input id="email" type="email" name="email" value="" placeholder="Denzel Washington"><label class="text-field__label" for="email"></label><span></span></div>',
-    parentId: 0, // Внутри form
+    parentId: 0,
     order: 2,
   },
   inputTel: {
     id: 3,
     value:
       '<div class="send__linia input-field text-field"><input id="tel" type="tel" name="tel" value="" placeholder="Denzel Washington"><label class="text-field__label" for="tel"></label><span></span></div>',
-    parentId: 0, // Внутри form
+    parentId: 0,
     order: 3,
   },
   textarea: {
     id: 4,
     value:
-      '<div class="send__linia textarea-field text-field"><textarea id="textarea4" name="textarea4" row="20" placeholder="Введите текст"></textarea><label for="textarea4"></label></div>',
-    parentId: 0, // Внутри form
+      '<div class="send__linia textarea-field text-field"><textarea id="textarea4" name="textarea4" rows="20" placeholder="Введите текст"></textarea><label for="textarea4"></label></div>',
+    parentId: 0,
     order: 4,
   },
   rating: {
     id: 5,
     value:
       '<div class="send__linia"><p></p><fieldset class="fildset-rating"><div class="fildset-rating__items"><input type="radio" id="ratingForm5" name="ratingForm" value="5"><label for="ratingForm5"><svg><use xlink:href="#Star"></use></svg></label><input type="radio" id="ratingForm4" name="ratingForm" value="4"><label for="ratingForm4"><svg><use xlink:href="#Star"></use></svg></label><input type="radio" id="ratingForm3" name="ratingForm" value="3"><label for="ratingForm3"><svg><use xlink:href="#Star"></use></svg></label><input type="radio" id="ratingForm2" name="ratingForm" value="2"><label for="ratingForm2"><svg><use xlink:href="#Star"></use></svg></label><input type="radio" id="ratingForm1" name="ratingForm" value="1"><label for="ratingForm1"><svg><use xlink:href="#Star"></use></svg></label></div></fieldset></div>',
-    parentId: 0, // Внутри form
+    parentId: 0,
     order: 5,
   },
   select: {
     id: 6,
     value:
       '<div class="send__linia select" id="wal"><button class="dropdown-button"><span></span><input type="hidden" name="place"><svg class="icon"><use xlink:href="#chevron-down"></use></svg></button><ul class="dropdown-list"><li class="dropdown-list__item" data-value="Notes"></li><li class="dropdown-list__item" data-value="Photo"></li><li class="dropdown-list__item" data-value="Dictionary"></li></ul></div>',
-    parentId: 0, // Внутри form
+    parentId: 0,
     order: 6,
   },
   checkbox: {
     id: 7,
     value:
       '<div class="fildset-checkbox"><div class="form-check"><input id="agree" type="checkbox" name="agree"><label for="agree"></label></div></div>',
-    parentId: 0, // Внутри form
+    parentId: 0,
     order: 7,
   },
   submitButton: {
     id: 8,
     value:
       '<p class="but-wave"><button class="btn btn-success" type="submit"></button></p>',
-    parentId: 0, // Внутри form
+    parentId: 0,
     order: 8,
   },
 };
@@ -94,6 +94,9 @@ const Constructor = () => {
   ]);
   const router = useRouter();
   const { handlerSetTags } = useStateContext();
+  const CopyHtml = useRef(null);
+  const CopyPug = useRef(null);
+  const CopyScss = useRef(null);
 
   useEffect(() => {
     console.log("<====base====>", base);
@@ -150,7 +153,6 @@ const Constructor = () => {
       let updatedBase = [...prev];
 
       if (hasElement) {
-        // Удаляем элемент и его id из children родителя
         updatedBase = updatedBase.filter((item) => item.id !== element.id);
         updatedBase = updatedBase.map((item) => ({
           ...item,
@@ -159,7 +161,6 @@ const Constructor = () => {
           ),
         }));
       } else {
-        // Добавляем новый элемент
         updatedBase.push({
           id: element.id,
           value: element.value,
@@ -167,7 +168,6 @@ const Constructor = () => {
         });
       }
 
-      // Обновляем children родителя с учётом порядка
       updatedBase = updatedBase.map((item) => {
         if (item.id === element.parentId) {
           const siblings = Object.values(availableElements)
@@ -188,8 +188,26 @@ const Constructor = () => {
 
   const handlerResult = () => {
     navigator.clipboard.writeText(result);
+    if (CopyHtml.current) {
+      CopyHtml.current.style.boxShadow = "0 0 10px red";
+      setTimeout(() => {
+        if (CopyHtml.current) {
+          CopyHtml.current.style.boxShadow = "none";
+        }
+      }, 300);
+    }
     handlerSetTags([result]);
     router.push("/");
+  };
+
+  const handlerScss = () => {
+    const scssOutput = htmlToScss(result);
+    return scssOutput.scss;
+  };
+
+  const handlerPug = () => {
+    const pugOutput = htmlToPug(result);
+    return pugOutput;
   };
 
   return (
@@ -222,39 +240,187 @@ const Constructor = () => {
           <TrashIcon className="w-4 h-4" />
         </button>
       </div>
-      <div className="grid grid-cols-[1fr_20%_20%]">
+      <div className="grid grid-cols-[1fr_40%] gap-2">
         <div className="bg-slate-200 grid grid-cols-[160px_1fr]">
-          {Object.entries(availableElements).map(([key, element]) => (
+          <div className="flex flex-col">
             <button
-              key={key}
               type="button"
-              className={`bg-slate-400 w-40 h-40 border border-slate-800 flex justify-center items-center relative ${
-                base.some((item) => item.id === element.id)
+              className={`bg-slate-400 w-40 h-8 border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.inputName.id)
                   ? "opacity-100 bg-green-200"
                   : "opacity-40"
               }`}
-              onClick={() => handleAddElement(key)}
-              title={`Добавить или убрать ${key}`}
+              onClick={() => handleAddElement("inputName")}
+              title="Добавить или убрать inputName"
             >
-              {key === "rating" ? (
-                <Globe width={50} height={50} className="fill-blue-500" /> // Заменить на SVG Star, если есть
-              ) : key === "select" ? (
-                <Globe width={50} height={50} className="fill-blue-500" /> // Заменить на SVG chevron-down, если есть
-              ) : (
-                key
-              )}
+              Name
             </button>
-          ))}
+            <button
+              type="button"
+              className={`bg-slate-400 w-40 h-8 border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.inputEmail.id)
+                  ? "opacity-100 bg-green-200"
+                  : "opacity-40"
+              }`}
+              onClick={() => handleAddElement("inputEmail")}
+              title="Добавить или убрать inputEmail"
+            >
+              Email
+            </button>
+            <button
+              type="button"
+              className={`bg-slate-400 w-40 h-8 border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.inputTel.id)
+                  ? "opacity-100 bg-green-200"
+                  : "opacity-40"
+              }`}
+              onClick={() => handleAddElement("inputTel")}
+              title="Добавить или убрать inputTel"
+            >
+              Tel
+            </button>
+            <button
+              type="button"
+              className={`bg-slate-400 w-40 h-8 border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.textarea.id)
+                  ? "opacity-100 bg-green-200"
+                  : "opacity-40"
+              }`}
+              onClick={() => handleAddElement("textarea")}
+              title="Добавить или убрать textarea"
+            >
+              textarea
+            </button>
+            <button
+              type="button"
+              className={`bg-slate-400 w-40 h-8 border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.rating.id)
+                  ? "opacity-100 bg-green-200"
+                  : "opacity-40"
+              }`}
+              onClick={() => handleAddElement("rating")}
+              title="Добавить или убрать rating"
+            >
+              <Image
+                src="/Star.svg" // Замени на свой SVG для Star
+                alt="star"
+                width={20}
+                height={20}
+                className="fill-blue-500"
+              />
+            </button>
+            <button
+              type="button"
+              className={`bg-slate-400 w-40 h-8 border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.select.id)
+                  ? "opacity-100 bg-green-200"
+                  : "opacity-40"
+              }`}
+              onClick={() => handleAddElement("select")}
+              title="Добавить или убрать select"
+            >
+              {/* <Image
+                src="/assets/svg/chevron-down.svg" // Замени на свой SVG для chevron-down
+                alt="chevron-down"
+                width={50}
+                height={50}
+                className="fill-blue-500"
+              /> */}
+              select
+            </button>
+            <button
+              type="button"
+              className={`bg-slate-400 w-40 h-8 border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.checkbox.id)
+                  ? "opacity-100 bg-green-200"
+                  : "opacity-40"
+              }`}
+              onClick={() => handleAddElement("checkbox")}
+              title="Добавить или убрать checkbox"
+            >
+              checkbox
+            </button>
+            <button
+              type="button"
+              className={`bg-slate-400 w-40 h-8 border border-slate-800 flex justify-center items-center relative ${
+                base.some(
+                  (item) => item.id === availableElements.submitButton.id
+                )
+                  ? "opacity-100 bg-green-200"
+                  : "opacity-40"
+              }`}
+              onClick={() => handleAddElement("submitButton")}
+              title="Добавить или убрать submitButton"
+            >
+              submitButton
+            </button>
+          </div>
         </div>
-        <div
-          className="border-slate-800 border p-4"
-          onClick={() => {
-            handlerResult();
-          }}
-          title="Кликните, чтобы скопировать результат и вернуться на главную"
-        >
-          <TagTree tags={[result]} />
-          {/* <pre>{result}</pre> */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <div
+              ref={CopyHtml}
+              className="rounded-full shadow hover:shadow-red-800 transition-all duration-200 ease-in-out"
+              onClick={() => {
+                handlerResult();
+              }}
+            >
+              <Image
+                src="https://raw.githubusercontent.com/devicons/devicon/master/icons/html5/html5-original-wordmark.svg"
+                alt="html"
+                width={30}
+                height={30}
+                className="p-1"
+              />
+            </div>
+            <button
+              ref={CopyPug}
+              type="button"
+              onClick={() => {
+                if (CopyPug.current) {
+                  CopyPug.current.style.boxShadow = "0 0 10px blue";
+                  setTimeout(() => {
+                    if (CopyPug.current) {
+                      CopyPug.current.style.boxShadow = "none";
+                    }
+                  }, 300);
+                }
+                navigator.clipboard.writeText(handlerPug());
+              }}
+              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-purple-600 transition-all duration-200 ease-in-out overflow-hidden"
+            >
+              <Image src="/pug.svg" alt="pug" width={30} height={30} />
+            </button>
+            <button
+              ref={CopyScss}
+              type="button"
+              onClick={() => {
+                if (CopyScss.current) {
+                  CopyScss.current.style.boxShadow = "0 0 10px red";
+                  setTimeout(() => {
+                    if (CopyScss.current) {
+                      CopyScss.current.style.boxShadow = "none";
+                    }
+                  }, 300);
+                }
+                navigator.clipboard.writeText(handlerScss());
+              }}
+              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-red-600 transition-all duration-200 ease-in-out overflow-hidden"
+            >
+              <Image
+                src="https://raw.githubusercontent.com/devicons/devicon/master/icons/sass/sass-original.svg"
+                alt="sass"
+                width={25}
+                height={25}
+              />
+            </button>
+          </div>
+          <div
+            className="border-slate-800 border p-4"
+            title="Кликните, чтобы скопировать результат и вернуться на главную"
+          >
+            <TagTree tags={[result]} />
+          </div>
         </div>
       </div>
     </div>

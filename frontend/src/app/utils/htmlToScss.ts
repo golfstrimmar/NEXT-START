@@ -173,7 +173,7 @@ function htmlToScss(html: string): ScssResult {
   nodes.forEach((node) => processNode(node, 0));
 
   return {
-    scss: scssOutput.trim() || "/* Пустой SCSS */",
+    scss: scssOutput.trim() || "",
     errors,
     domTree,
     isValid: true,

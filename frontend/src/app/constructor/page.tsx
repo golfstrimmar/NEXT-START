@@ -1,12 +1,13 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import Globe from "../../../public/globe.svg";
 import { useStateContext } from "@/components/StateProvider";
 import { useRouter } from "next/navigation";
 import TagTree from "@/components/TagTree/TagTree";
-
+import htmlToScss from "@/app/utils/htmlToScss";
+import htmlToPug from "@/app/utils/htmlToPug";
 interface Item {
   id: number;
   value: string;
@@ -91,7 +92,9 @@ const Constructor = () => {
   ]);
   const router = useRouter();
   const { handlerSetTags } = useStateContext();
-
+  const CopyPug = useRef(null);
+  const CopyScss = useRef(null);
+  const CopyHtml = useRef(null);
   useEffect(() => {
     console.log("<====base====>", base);
   }, [base]);
@@ -194,10 +197,27 @@ const Constructor = () => {
 
   const handlerResult = () => {
     navigator.clipboard.writeText(result);
+    if (CopyHtml.current) {
+      CopyHtml.current.style.boxShadow = "0 0 10px red";
+      setTimeout(() => {
+        if (CopyHtml.current) {
+          CopyHtml.current.style.boxShadow = "0 0 3px 0 gray";
+        }
+      }, 300);
+    }
     handlerSetTags([result]);
-    router.push("/");
+    // router.push("/");
+  };
+  const handlerScss = () => {
+    const scssOutput = htmlToScss(result);
+    return scssOutput.scss;
+  };
+  const handlerPug = () => {
+    const pugOutput = htmlToPug(result);
+    return pugOutput;
   };
 
+  // const scssOutput = tags.map((tag) => htmlToScss(tag).scss).join("\n");
   return (
     <div>
       <div className="flex gap-4 mb-2">
@@ -233,7 +253,7 @@ const Constructor = () => {
           <TrashIcon className="w-4 h-4" />
         </button>
       </div>
-      <div className="grid grid-cols-[1fr_20%_20%]">
+      <div className="grid grid-cols-[1fr_40%] gap-2">
         <div className="bg-slate-200 grid grid-cols-[160px_1fr]">
           <button
             type="button"
@@ -353,14 +373,71 @@ const Constructor = () => {
             </button>
           </div>
         </div>
-        <div
-          className="border-slate-800 border p-4"
-          onClick={() => {
-            handlerResult();
-          }}
-          title="Кликните, чтобы скопировать результат и вернуться на главную"
-        >
-          <TagTree tags={[result]} />
+        <div className="flex  flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <div
+              ref={CopyHtml}
+              className="rounded-full  shadow hover:shadow-red-800 transition-all duration-200 ease-in-out "
+              onClick={() => {
+                handlerResult();
+              }}
+            >
+              <Image
+                src="https://raw.githubusercontent.com/devicons/devicon/master/icons/html5/html5-original-wordmark.svg"
+                alt="pug"
+                width={30}
+                height={30}
+                className="p-1"
+              />
+            </div>
+            <button
+              ref={CopyPug}
+              type="button"
+              onClick={() => {
+                if (CopyPug.current) {
+                  CopyPug.current.style.boxShadow = "0 0 10px blue";
+                  setTimeout(() => {
+                    if (CopyPug.current) {
+                      CopyPug.current.style.boxShadow = "none";
+                    }
+                  }, 300);
+                }
+                navigator.clipboard.writeText(handlerPug());
+              }}
+              className="w-8 h-8  rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-purple-600 transition-all duration-200 ease-in-out overflow-hidden"
+            >
+              <Image src="/pug.svg" alt="pug" width={30} height={30} />
+            </button>
+            <button
+              ref={CopyScss}
+              type="button"
+              onClick={() => {
+                if (CopyScss.current) {
+                  CopyScss.current.style.boxShadow = "0 0 10px red";
+                  setTimeout(() => {
+                    if (CopyScss.current) {
+                      CopyScss.current.style.boxShadow = "none";
+                    }
+                  }, 300);
+                }
+                navigator.clipboard.writeText(handlerScss());
+              }}
+              className="w-8 h-8  rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-red-600 transition-all duration-200 ease-in-out overflow-hidden"
+            >
+              <Image
+                src="https://raw.githubusercontent.com/devicons/devicon/master/icons/sass/sass-original.svg"
+                alt="sass"
+                width={25}
+                height={25}
+              />
+            </button>
+          </div>
+          <div
+            className="border-slate-800 border p-4"
+            title="Кликните, чтобы скопировать результат и вернуться на главную"
+          >
+            <TagTree tags={[result]} />
+          </div>
         </div>
       </div>
     </div>
