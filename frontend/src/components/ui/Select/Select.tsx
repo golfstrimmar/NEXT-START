@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from "react";
 import "@/scss/common/colors.scss";
-import Shevron from "@/assets/svg/chevron-down.svg";
+import Shevron from "../../../public/assets/svg/chevron-down.svg";
 import styles from "./Select.module.scss";
 
 // Тип элемента
