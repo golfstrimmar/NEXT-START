@@ -415,6 +415,7 @@ const Plaza = () => {
   return (
     <div className="flex">
       {error && <ModalMessage message={error} open={showModal} />}
+
       <div className="max-w-1/4 p-4">
         <LocalSnipets
           snipets={snipets}
