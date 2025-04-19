@@ -34,7 +34,7 @@ export default function Home() {
       <div>
         {/* <HomeImg className="inline-block mr-2 w-8 h-8"></HomeImg> */}
 
-        <div className="grid grid-cols-[1fr_25%] gap-2">
+        <div className="grid grid-cols-[3fr_2fr] gap-2">
           {/* {error && <ModalMessage message={error} open={openModal} />} */}
 
           <Plaza />

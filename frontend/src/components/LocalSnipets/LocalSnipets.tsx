@@ -172,6 +172,34 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
         snipOpen ? "relative translate-x-0" : "translate-x-[-150%]"
       }`}
     >
+      <Input
+        typeInput="text"
+        data="snippet"
+        value={snipets}
+        onChange={(e) => {
+          // setStoredSnipets(e.target.value);
+          setSnipets(e.target.value);
+        }}
+      />
+      <br />
+      <Input
+        typeInput="text"
+        data="category"
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+      />
+      {error.length > 0 && <p className="text-red-500">{error}</p>}
+      <button
+        type="button"
+        onClick={copySnipet}
+        disabled={
+          (typeof snipets === "string" && snipets.trim() === "") ||
+          (Array.isArray(snipets) && snipets.length === 0)
+        }
+        className="my-2 p-4 h-8 bg-blue-500 rounded-[5px] border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out text-white"
+      >
+        Save Snipet
+      </button>
       <div className="my-2 flex flex-col gap-2">
         {/* Секция для категории "local" */}
         {categories.includes("local") && (
@@ -250,34 +278,7 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
           <p>Нет категорий</p>
         ) : null}
       </div>
-      <Input
-        typeInput="text"
-        data="snippet"
-        value={snipets}
-        onChange={(e) => {
-          // setStoredSnipets(e.target.value);
-          setSnipets(e.target.value);
-        }}
-      />
-      <br />
-      <Input
-        typeInput="text"
-        data="category"
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-      />
-      {error.length > 0 && <p className="text-red-500">{error}</p>}
-      <button
-        type="button"
-        onClick={copySnipet}
-        disabled={
-          (typeof snipets === "string" && snipets.trim() === "") ||
-          (Array.isArray(snipets) && snipets.length === 0)
-        }
-        className="my-2 p-4 h-8 bg-blue-500 rounded-[5px] border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out text-white"
-      >
-        Save Snipet
-      </button>
+
       {isModalOpen && (
         <div className="fixed inset-0 top-0 flex justify-center bg-black bg-opacity-50 z-2000">
           <div className="bg-red-100 p-4 rounded shadow-lg max-w-sm w-full">
