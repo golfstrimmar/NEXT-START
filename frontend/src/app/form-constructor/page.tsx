@@ -197,7 +197,7 @@ const Constructor = () => {
       }, 300);
     }
     handlerSetTags([result]);
-    router.push("/");
+    // router.push("/");
   };
 
   const handlerScss = () => {
