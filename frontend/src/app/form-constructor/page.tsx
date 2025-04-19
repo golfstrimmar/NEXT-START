@@ -199,13 +199,13 @@ const Constructor = () => {
           onClick={() => {
             setResult(renderBaseToString(base));
           }}
-          className="bg-lime-400 w-10 h-6 border border-slate-800 flex justify-center items-center rounded-2xl"
+          className="bg-lime-400 w-200 h-10 border border-slate-800 flex justify-center items-center rounded-2xl"
           title="Рендерить и показать результат"
         >
           <PlusIcon className="w-4 h-4" />
         </button>
         <button
-          className="bg-red-400 w-10 h-6 border border-slate-800 flex justify-center items-center rounded-2xl"
+          className="bg-red-400 w-50 h-10 border border-slate-800 flex justify-center items-center rounded-2xl"
           onClick={() => {
             setResult("");
             setBase([

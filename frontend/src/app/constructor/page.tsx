@@ -205,13 +205,13 @@ const Constructor = () => {
           onClick={() => {
             setResult(renderBaseToString(base));
           }}
-          className="bg-lime-400 w-10 h-6 border border-slate-800 flex justify-center items-center rounded-2xl"
+          className="bg-lime-400 w-200 h-10 border border-slate-800 flex justify-center items-center rounded-2xl"
           title="Рендерить и показать результат"
         >
           <PlusIcon className="w-4 h-4" />
         </button>
         <button
-          className="bg-red-400 w-10 h-6 border border-slate-800 flex justify-center items-center rounded-2xl"
+          className="bg-red-400 w-50 h-10 border border-slate-800 flex justify-center items-center rounded-2xl"
           onClick={() => {
             setResult("");
             setBase([
@@ -235,34 +235,123 @@ const Constructor = () => {
       </div>
       <div className="grid grid-cols-[1fr_20%_20%]">
         <div className="bg-slate-200 grid grid-cols-[160px_1fr]">
-          {Object.entries(availableElements).map(([key, element]) => (
+          <button
+            type="button"
+            className={`bg-slate-400 w-40 h-40 border border-slate-800 flex justify-center items-center relative ${
+              base.some((item) => item.id === availableElements.img.id)
+                ? "opacity-100 bg-green-200"
+                : "opacity-40"
+            }`}
+            onClick={() => handleAddElement("img")}
+            title="Добавить или убрать img"
+          >
+            <div className="imgs">
+              <Image
+                src="/assets/images/18.jpg"
+                alt="18"
+                width={160}
+                height={160}
+              />
+            </div>
+          </button>
+          <div className="flex flex-col">
             <button
-              key={key}
               type="button"
-              className={`bg-slate-400 w-40 h-40 border border-slate-800 flex justify-center items-center relative ${
-                base.some((item) => item.id === element.id)
+              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.svg.id)
                   ? "opacity-100 bg-green-200"
                   : "opacity-40"
               }`}
-              onClick={() => handleAddElement(key)}
-              title={`Добавить или убрать ${key}`}
+              onClick={() => handleAddElement("svg")}
+              title="Добавить или убрать svg"
             >
-              {key === "img" ? (
-                <div className="imgs">
-                  <Image
-                    src="/assets/images/18.jpg"
-                    alt="18"
-                    width={160}
-                    height={160}
-                  />
-                </div>
-              ) : key === "svg" ? (
-                <Globe width={50} height={50} className="fill-blue-500" />
-              ) : (
-                key
-              )}
+              <Globe width={50} height={40} className="fill-blue-500" />
             </button>
-          ))}
+            <button
+              type="button"
+              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.h2.id)
+                  ? "opacity-100 bg-green-200"
+                  : "opacity-40"
+              }`}
+              onClick={() => handleAddElement("h2")}
+              title="Добавить или убрать h2"
+            >
+              h2
+            </button>
+            <button
+              type="button"
+              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.h3.id)
+                  ? "opacity-100 bg-green-200"
+                  : "opacity-40"
+              }`}
+              onClick={() => handleAddElement("h3")}
+              title="Добавить или убрать h3"
+            >
+              h3
+            </button>
+            <button
+              type="button"
+              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.p.id)
+                  ? "opacity-100 bg-green-200"
+                  : "opacity-40"
+              }`}
+              onClick={() => handleAddElement("p")}
+              title="Добавить или убрать p"
+            >
+              p
+            </button>
+            <button
+              type="button"
+              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.span.id)
+                  ? "opacity-100 bg-green-200"
+                  : "opacity-40"
+              }`}
+              onClick={() => handleAddElement("span")}
+              title="Добавить или убрать span"
+            >
+              span
+            </button>
+            <button
+              type="button"
+              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.link.id)
+                  ? "opacity-100 bg-green-200"
+                  : "opacity-40"
+              }`}
+              onClick={() => handleAddElement("link")}
+              title="Добавить или убрать link"
+            >
+              a
+            </button>
+            <button
+              type="button"
+              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.button1.id)
+                  ? "opacity-100 bg-green-200"
+                  : "opacity-40"
+              }`}
+              onClick={() => handleAddElement("button1")}
+              title="Добавить или убрать button1"
+            >
+              button-success
+            </button>
+            <button
+              type="button"
+              className={`bg-slate-400 w-40  border border-slate-800 flex justify-center items-center relative ${
+                base.some((item) => item.id === availableElements.button2.id)
+                  ? "opacity-100 bg-green-200"
+                  : "opacity-40"
+              }`}
+              onClick={() => handleAddElement("button2")}
+              title="Добавить или убрать button2"
+            >
+              button-blue
+            </button>
+          </div>
         </div>
         <div
           className="border-slate-800 border p-4"
@@ -272,7 +361,6 @@ const Constructor = () => {
           title="Кликните, чтобы скопировать результат и вернуться на главную"
         >
           <TagTree tags={[result]} />
-          <pre>{result}</pre>
         </div>
       </div>
     </div>
