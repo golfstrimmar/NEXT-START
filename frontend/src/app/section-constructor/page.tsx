@@ -288,6 +288,7 @@ const Constructor = () => {
       <div className="flex flex-col gap-4">
         {/* Best Section */}
         <div>
+          <h2 className="text-2xl font-bold mb-4"> Section</h2>
           <div className="flex gap-4 mb-2">
             <button
               onClick={() => {
@@ -309,6 +310,7 @@ const Constructor = () => {
               <TrashIcon className="w-4 h-4" />
             </button>
           </div>
+
           <div className="grid grid-cols-[1fr_40%] gap-2">
             <div className="bg-slate-200 grid grid-cols-[160px_1fr]">
               <button
@@ -536,6 +538,7 @@ const Constructor = () => {
 
         {/* Cards Section */}
         <div>
+          <h2 className="text-2xl font-bold mb-4">Cards</h2>
           <div className="flex gap-4 mb-2">
             <button
               onClick={() => {
