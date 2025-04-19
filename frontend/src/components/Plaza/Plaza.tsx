@@ -97,8 +97,18 @@ const Plaza = () => {
 
     const attributes: Record<string, string> = {};
     const classNames = [className, subClassName, extraClass].filter(Boolean);
+    const regex = /__/g;
+
     if (classNames.length > 0) {
-      attributes.class = classNames.join("");
+      const processedClasses = classNames.map((foo: string) => {
+        if (regex.test(foo)) {
+          return foo;
+        } else {
+          return " " + foo;
+        }
+      });
+
+      attributes.class = processedClasses.join("");
     }
 
     const tagLower = tag?.toLowerCase().trim();
@@ -120,7 +130,7 @@ const Plaza = () => {
       }
       attrList.push('src=""');
       attrList.push('alt=""');
-      const attrString = attrList.join(" ");
+      const attrString = attrList.join("");
       const result = `<img ${attrString}/>`;
       return result;
     }
@@ -134,11 +144,11 @@ const Plaza = () => {
     const attrString = attrList.join("");
 
     if (selfClosingTags.includes(tagLower)) {
-      const result = `<${tagLower}${attrString ? ` ${attrString}` : ""}>`;
+      const result = `<${tagLower}${attrString ? ` ${attrString}` : " "}>`;
       return result;
     } else {
       const result = `<${tagLower}${
-        attrString ? ` ${attrString}` : ""
+        attrString ? ` ${attrString}` : " "
       }>${content}</${tagLower}>`;
 
       return result;
