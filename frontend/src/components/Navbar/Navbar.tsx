@@ -38,22 +38,49 @@ const Navbar: React.FC = () => {
     };
   }, []);
   return (
-    <nav className="fixed top-0 left-0 w-full bg-blue-700 p-4 shadow-md z-50">
-      <div className="container mx-auto flex  items-center gap-4">
-        <Link href="/" className="text-white text-lg font-bold">
+    <nav className="fixed top-0 left-0 w-full  bg-blue-700 px-4 shadow-md z-50">
+      <div className="container mx-auto flex   h-full items-center gap-4">
+        <Link
+          href="/"
+          className={`text-white text-lg py-4 font-bold ${
+            activeLink === "/" ? "border-b-1 border-white" : ""
+          }`}
+        >
           Robotic
         </Link>
-        <Link href="/convertor" className="text-white text-lg font-bold">
+        <Link
+          href="/convertor"
+          className={`text-white text-lg py-4 font-bold ${
+            activeLink === "/convertor" ? "border-b-1 border-white" : ""
+          }`}
+        >
           Convertor
         </Link>
         <Link
           href="/section-constructor"
-          className="text-white text-lg font-bold"
+          className={`text-white text-lg py-4 font-bold ${
+            activeLink === "/section-constructor"
+              ? "border-b-1 border-white"
+              : ""
+          }`}
         >
           Section
         </Link>
-        <Link href="/form-constructor" className="text-white text-lg font-bold">
+        <Link
+          href="/form-constructor"
+          className={`text-white text-lg py-4 font-bold ${
+            activeLink === "/form-constructor" ? "border-b-1 border-white" : ""
+          }`}
+        >
           Form
+        </Link>
+        <Link
+          href="/next"
+          className={`text-white text-lg py-4 font-bold h-full ${
+            activeLink === "/next" ? "border-b-1 border-white" : ""
+          }`}
+        >
+          Next
         </Link>
       </div>
     </nav>
