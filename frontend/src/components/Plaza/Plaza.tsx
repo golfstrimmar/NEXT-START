@@ -34,6 +34,7 @@ const Plaza = () => {
   } = useStateContext();
   const [tags, setTags] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
+  const [selectedStones, setSelectedStones] = useState<number[]>([]);
   const [validationErrors, setValidationErrors] = useState<
     { index: number; message: string }[]
   >([]);
@@ -87,7 +88,6 @@ const Plaza = () => {
 
   useEffect(() => {
     if (providerTags.length > 0) {
-      // console.log("<====providerTags====>", providerTags);
       setTags(providerTags);
     }
   }, [providerTags]);
@@ -155,12 +155,6 @@ const Plaza = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (lastTags.length > 0) {
-  //     console.log("<====lastTags====>", lastTags);
-  //   }
-  // }, [lastTags]);
-
   const moveReturn = () => {
     if (lastTags.length > 0) {
       setTags(lastTags);
@@ -186,12 +180,17 @@ const Plaza = () => {
   }, [stone, setStone]);
 
   useEffect(() => {
-    console.log("<====stones 189====>", stones);
+    console.log("<====stones====>", stones);
+    // Синхронизируем tags с stones
+    const html = convertStonesToHtml(stones);
+    const tagArray = html.split(/(?=<)/).filter(Boolean);
+    setTags(tagArray);
   }, [stones]);
 
   useEffect(() => {
-    // console.log("<====tags====>", tags);
-    const errors = tags
+    const html = convertStonesToHtml(stones);
+    const tagArray = html.split(/(?=<)/).filter(Boolean);
+    const errors = tagArray
       .map((tag, index) => {
         const { errors } = htmlToScss(tag);
         return errors.map((error) => ({
@@ -201,10 +200,20 @@ const Plaza = () => {
       })
       .flat();
     setValidationErrors(errors);
-  }, [tags]);
+  }, [stones]);
 
   const handleSelectTag = (index: number) => {
     setSelectedTags((prevSelected) => {
+      const isSelected = prevSelected.includes(index);
+      const updatedSelected = isSelected
+        ? prevSelected.filter((i) => i !== index)
+        : [...prevSelected, index];
+      return updatedSelected;
+    });
+  };
+
+  const handleSelectStone = (index: number) => {
+    setSelectedStones((prevSelected) => {
       const isSelected = prevSelected.includes(index);
       const updatedSelected = isSelected
         ? prevSelected.filter((i) => i !== index)
@@ -227,48 +236,72 @@ const Plaza = () => {
     }
   };
 
+  const getSubtreeIndices = (index: number, stones: Stone[]): number[] => {
+    const stone = stones[index];
+    if (!stone) return [];
+    const result: number[] = [index];
+    const children = stones
+      .map((s, i) => ({ stone: s, index: i }))
+      .filter(({ stone }) => stone.parentId === stone.id)
+      .map(({ index }) => index);
+    for (const childIndex of children) {
+      result.push(...getSubtreeIndices(childIndex, stones));
+    }
+    return result.sort((a, b) => a - b);
+  };
+
   const moveUp = () => {
-    if (selectedTags.length === 0 || selectedTags.some((i) => i === 0)) return;
+    if (selectedStones.length === 0) return;
 
-    const newTags = [...tags];
-    const newSelected: number[] = [];
+    setStones((prev) => {
+      const newStones = [...prev];
+      const newSelected: number[] = [];
 
-    selectedTags
-      .sort((a, b) => a - b)
-      .forEach((index) => {
-        [newTags[index - 1], newTags[index]] = [
-          newTags[index],
-          newTags[index - 1],
-        ];
-        newSelected.push(index - 1);
-      });
+      const sortedSelected = [...selectedStones].sort((a, b) => a - b);
 
-    setTags(newTags);
-    setSelectedTags(newSelected);
+      for (const index of sortedSelected) {
+        const subtreeIndices = getSubtreeIndices(index, newStones);
+        const minIndex = Math.min(...subtreeIndices);
+        if (minIndex === 0) continue;
+
+        const subtree = subtreeIndices.map((i) => newStones[i]);
+        subtreeIndices
+          .sort((a, b) => b - a)
+          .forEach((i) => newStones.splice(i, 1));
+        newStones.splice(minIndex - 1, 0, ...subtree);
+        newSelected.push(minIndex - 1);
+      }
+
+      setSelectedStones(newSelected);
+      return newStones;
+    });
   };
 
   const moveDown = () => {
-    if (
-      selectedTags.length === 0 ||
-      selectedTags.some((i) => i === tags.length - 1)
-    )
-      return;
+    if (selectedStones.length === 0) return;
 
-    const newTags = [...tags];
-    const newSelected: number[] = [];
+    setStones((prev) => {
+      const newStones = [...prev];
+      const newSelected: number[] = [];
 
-    selectedTags
-      .sort((a, b) => b - a)
-      .forEach((index) => {
-        [newTags[index + 1], newTags[index]] = [
-          newTags[index],
-          newTags[index + 1],
-        ];
-        newSelected.push(index + 1);
-      });
+      const sortedSelected = [...selectedStones].sort((a, b) => b - a);
 
-    setTags(newTags);
-    setSelectedTags(newSelected);
+      for (const index of sortedSelected) {
+        const subtreeIndices = getSubtreeIndices(index, newStones);
+        const maxIndex = Math.max(...subtreeIndices);
+        if (maxIndex >= newStones.length - 1) continue;
+
+        const subtree = subtreeIndices.map((i) => newStones[i]);
+        subtreeIndices
+          .sort((a, b) => b - a)
+          .forEach((i) => newStones.splice(i, 1));
+        newStones.splice(maxIndex + 1, 0, ...subtree);
+        newSelected.push(maxIndex + 1 - (subtreeIndices.length - 1));
+      }
+
+      setSelectedStones(newSelected);
+      return newStones;
+    });
   };
 
   const getTagName = (tag: string): string => {
@@ -277,23 +310,27 @@ const Plaza = () => {
   };
 
   const handlerCopy = (e: React.MouseEvent<HTMLButtonElement>) => {
-    console.log("<====stones====>", stones.join(""));
-    console.log("<====convertStonesToHtml====>", convertStonesToHtml(stones));
     navigator.clipboard.writeText(convertStonesToHtml(stones));
-    // navigator.clipboard.writeText(tags.join(""));
-    // if (Duplicate.current) {
-    //   Duplicate.current.style.boxShadow = "0 0 10px cyan";
-    //   setTimeout(() => {
-    //     if (Duplicate.current) {
-    //       Duplicate.current.style.boxShadow = "none";
-    //     }
-    //   }, 300);
-    // }
+    if (Duplicate.current) {
+      Duplicate.current.style.boxShadow = "0 0 10px cyan";
+      setTimeout(() => {
+        if (Duplicate.current) {
+          Duplicate.current.style.boxShadow = "none";
+        }
+      }, 300);
+    }
   };
 
   const handlerCopyPug = () => {
-    const pugOutput = tags.map((tag) => htmlToPug(tag)).join("\n");
+    // const html = convertStonesToHtml(stones);
+    // const tagArray = html.split(/(?=<)/).filter(Boolean);
+    // const pugOutput = tagArray.map((tag) => htmlToPug(tag)).join("\n");
+    // navigator.clipboard.writeText(pugOutput);
+
+    const html = convertStonesToHtml(stones);
+    const pugOutput = htmlToPug(html);
     navigator.clipboard.writeText(pugOutput);
+
     if (CopyPug.current) {
       CopyPug.current.style.boxShadow = "0 0 10px blue";
       setTimeout(() => {
@@ -305,14 +342,27 @@ const Plaza = () => {
   };
 
   const handlerCopyScss = () => {
-    if (validationErrors.length > 0) {
-      alert(
-        "Невозможно конвертировать в SCSS из-за ошибок в HTML:\n" +
-          validationErrors.map((err) => `- ${err.message}`).join("\n")
-      );
-      return;
-    }
-    const scssOutput = tags.map((tag) => htmlToScss(tag).scss).join("\n");
+    const html = convertStonesToHtml(stones);
+    // const tagArray = html.split(/(?=<)/).filter(Boolean);
+    const tagArray = html;
+    // const errors = tagArray
+    //   .map((tag, index) => {
+    //     const { errors } = htmlToScss(tag);
+    //     return errors.map((error) => ({
+    //       index,
+    //       message: error.message,
+    //     }));
+    //   })
+    //   .flat();
+    // if (errors.length > 0) {
+    //   alert(
+    //     "Невозможно конвертировать в SCSS из-за ошибок в HTML:\n" +
+    //       errors.map((err) => `- ${err.message}`).join("\n")
+    //   );
+    //   return;
+    // }
+    // const scssOutput = tagArray.map((tag) => htmlToScss(tag).scss).join("\n");
+    const scssOutput = htmlToScss(tagArray).scss;
     navigator.clipboard.writeText(scssOutput);
     if (CopyScss.current) {
       CopyScss.current.style.boxShadow = "0 0 10px green";
@@ -329,6 +379,7 @@ const Plaza = () => {
     setStone([]);
     setStones([]);
     setSelectedTags([]);
+    setSelectedStones([]);
     setValidationErrors([]);
     if (Mark.current) {
       Mark.current.style.boxShadow = "0 0 10px red";
@@ -340,9 +391,101 @@ const Plaza = () => {
     }
   };
 
-  const StoneNode = ({ s }: { s: Stone }) => {
-    // console.log("Rendering StoneNode:", s);
+  // const handleDragStart = (
+  //   e: React.DragEvent<HTMLDivElement>,
+  //   index: number
+  // ) => {
+  //   e.dataTransfer.setData("text/plain", index.toString());
+  //   e.dataTransfer.effectAllowed = "move";
+  // };
 
+  // const handleDrop = (
+  //   e: React.DragEvent<HTMLDivElement>,
+  //   targetIndex: number
+  // ) => {
+  //   e.preventDefault();
+  //   const draggedIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+  //   if (draggedIndex === targetIndex) return;
+
+  //   const newTags = [...tags];
+  //   const draggedTag = newTags[draggedIndex];
+  //   const targetTag = newTags[targetIndex];
+
+  //   const draggedTagName = getTagName(draggedTag);
+  //   const targetTagName = getTagName(targetTag);
+
+  //   let errorMessage = "";
+  //   if (/^h[1-6]$/.test(targetTagName) && /^h[1-6]$/.test(draggedTagName)) {
+  //     errorMessage = `Недопустимая вложенность: <${draggedTagName}> не может быть внутри <${targetTagName}>`;
+  //   }
+  //   if (selfClosingTags.includes(targetTagName)) {
+  //     errorMessage = `Недопустимая вложенность: <${targetTagName}> не может содержать <${draggedTagName}>`;
+  //   }
+  //   if (
+  //     inlineElements.includes(targetTagName) &&
+  //     blockElements.includes(draggedTagName)
+  //   ) {
+  //     errorMessage = `Недопустимая вложенность: строчный <${targetTagName}> не может содержать блочный <${draggedTagName}>`;
+  //   }
+  //   if (draggedTagName === "li" && !["ul", "ol"].includes(targetTagName)) {
+  //     errorMessage = `Недопустимая вложенность: <li> должен быть внутри <ul> или <ol>, а не <${targetTagName}>`;
+  //   }
+  //   if (/^h[1-6]$/.test(targetTagName) && draggedTagName === "li") {
+  //     errorMessage = `Недопустимая вложенность: <${draggedTagName}> не может быть внутри заголовка <${targetTagName}>`;
+  //   }
+  //   if (
+  //     targetTagName === "p" &&
+  //     (draggedTagName === "p" || blockElements.includes(draggedTagName))
+  //   ) {
+  //     errorMessage = `Недопустимая вложенность: <p> не может содержать <${draggedTagName}>`;
+  //   }
+  //   const interactiveElements = ["a", "button", "input", "select", "textarea"];
+  //   if (targetTagName === "a" && interactiveElements.includes(draggedTagName)) {
+  //     errorMessage = `Недопустимая вложенность: <a> не может содержать <${draggedTagName}>`;
+  //   }
+  //   if (
+  //     targetTagName === "button" &&
+  //     interactiveElements.includes(draggedTagName)
+  //   ) {
+  //     errorMessage = `Недопустимая вложенность: <button> не может содержать <${draggedTagName}>`;
+  //   }
+  //   if (["dt", "dd"].includes(draggedTagName) && targetTagName !== "dl") {
+  //     errorMessage = `Недопустимая вложенность: <${draggedTagName}> должен быть внутри <dl>, а не <${targetTagName}>`;
+  //   }
+  //   if (draggedTagName === "figcaption" && targetTagName !== "figure") {
+  //     errorMessage = `Недопустимая вложенность: <figcaption> должен быть внутри <figure>, а не <${targetTagName}>`;
+  //   }
+  //   if (["td", "th"].includes(draggedTagName) && targetTagName !== "tr") {
+  //     errorMessage = `Недопустимая вложенность: <${draggedTagName}> должен быть внутри <tr>, а не <${targetTagName}>`;
+  //   }
+  //   if (
+  //     draggedTagName === "tr" &&
+  //     !["table", "tbody", "thead", "tfoot"].includes(targetTagName)
+  //   ) {
+  //     errorMessage = `Недопустимая вложенность: <tr> должен быть внутри <table>, <tbody>, <thead> или <tfoot>, а не <${targetTagName}>`;
+  //   }
+
+  //   if (errorMessage) {
+  //     setError(errorMessage);
+  //     setShowModal(true);
+  //     setTimeout(() => {
+  //       setShowModal(false);
+  //       setError("");
+  //     }, 1500);
+  //     return;
+  //   }
+
+  //   const updatedTargetTag = targetTag.replace(/>/, `>${draggedTag}`);
+  //   newTags[targetIndex] = updatedTargetTag;
+  //   newTags.splice(draggedIndex, 1);
+
+  //   setTags((prev) => {
+  //     handlerLastTags(prev);
+  //     return newTags;
+  //   });
+  // };
+
+  const StoneNode = ({ s }: { s: Stone }) => {
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
       e.dataTransfer.setData("text/plain", s.id.toString());
       e.dataTransfer.effectAllowed = "move";
@@ -361,10 +504,31 @@ const Plaza = () => {
       const draggedId = parseInt(e.dataTransfer.getData("text/plain"), 10);
       if (draggedId === s.id && !isRoot) return;
 
+      if (isRoot) {
+        setStones((prev) => {
+          const getSubtreeIds = (
+            stoneId: number,
+            stones: Stone[]
+          ): number[] => {
+            const result: number[] = [stoneId];
+            const children = stones.filter((s) => s.parentId === stoneId);
+            for (const child of children) {
+              result.push(...getSubtreeIds(child.id, stones));
+            }
+            return result;
+          };
+
+          const subtreeIds = getSubtreeIds(draggedId, prev);
+          const newStones = prev.filter(
+            (stone) => !subtreeIds.includes(stone.id)
+          );
+          return newStones;
+        });
+        return;
+      }
+
       const draggedStone = stones.find((stone) => stone.id === draggedId);
-      const targetStone = isRoot
-        ? null
-        : stones.find((stone) => stone.id === s.id);
+      const targetStone = stones.find((stone) => stone.id === s.id);
 
       if (!draggedStone) {
         console.error("Dragged stone not found:", draggedId);
@@ -447,7 +611,6 @@ const Plaza = () => {
       }
 
       setStones((prev) => {
-        // Функция для получения поддерева (родитель + все потомки)
         const getSubtree = (stoneId: number, stones: Stone[]): Stone[] => {
           const result: Stone[] = [];
           const stone = stones.find((s) => s.id === stoneId);
@@ -460,34 +623,23 @@ const Plaza = () => {
           return result;
         };
 
-        // Получаем поддерево перемещаемого элемента
         const subtree = getSubtree(draggedId, prev);
         const subtreeIds = subtree.map((s) => s.id);
 
-        // Удаляем поддерево из массива stones
         let newStones = prev.filter((stone) => !subtreeIds.includes(stone.id));
 
-        // Определяем новый уровень для перемещаемого элемента
-        const newLevel = isRoot ? 0 : targetStone ? targetStone.level + 1 : 0;
+        const newLevel = targetStone ? targetStone.level + 1 : 0;
         const levelOffset = newLevel - draggedStone.level;
 
-        // Обновляем уровни и parentId для элементов поддерева
         const updatedSubtree = subtree.map((stone) => ({
           ...stone,
           level: stone.level + levelOffset,
           parentId:
-            stone.id === draggedId
-              ? isRoot
-                ? null
-                : targetStone?.id ?? null
-              : stone.parentId,
+            stone.id === draggedId ? targetStone?.id ?? null : stone.parentId,
         }));
 
-        // Находим точку вставки
         let insertIndex: number;
-        if (isRoot) {
-          insertIndex = newStones.length;
-        } else if (targetStone && targetStone.id) {
+        if (targetStone && targetStone.id) {
           const targetIndex = newStones.findIndex(
             (stone) => stone.id === targetStone.id
           );
@@ -495,7 +647,6 @@ const Plaza = () => {
             console.error("Целевой элемент не найден в newStones");
             return prev;
           }
-          // Находим индекс последнего потомка целевого элемента
           const lastChildIndex = newStones
             .slice(targetIndex + 1)
             .findIndex((stone) => stone.level <= targetStone.level);
@@ -507,22 +658,32 @@ const Plaza = () => {
           insertIndex = newStones.length;
         }
 
-        // Вставляем обновленное поддерево в новую позицию
         newStones.splice(insertIndex, 0, ...updatedSubtree);
-
         return newStones;
       });
     };
 
     return (
       <div
-        className="rounded border border-red-300 bg-transparent flex items-center gap-2"
+        className={`rounded border border-red-300 flex justify-between items-center gap-2 bg-slate-200 ${
+          selectedStones.includes(
+            stones.findIndex((stone) => stone.id === s.id)
+          )
+            ? styles.selected
+            : ""
+        }`}
         style={{ marginLeft: `${s.level * 20}px` }}
         draggable
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDrop={(e) => handleDrop(e, false)}
+        onClick={(event) => {
+          const index = stones.findIndex((stone) => stone.id === s.id);
+          handleSelectStone(index);
+          handleClick(event);
+        }}
       >
+        <p className="text-sm">{s.content}</p>
         <button
           type="button"
           onClick={() =>
@@ -536,115 +697,13 @@ const Plaza = () => {
           }
           className="p-1 bg-gray-200 text-gray-500 text-sm rounded hover:bg-gray-300"
         >
-          <ArrowUpIcon width={8} height={8} />
+          <XMarkIcon width={8} height={8} />
         </button>
-        <p className="text-sm">{s.content}</p>
       </div>
     );
   };
 
-  const handleDragStart = (
-    e: React.DragEvent<HTMLDivElement>,
-    index: number
-  ) => {
-    e.dataTransfer.setData("text/plain", index.toString());
-    e.dataTransfer.effectAllowed = "move";
-  };
-
-  const handleDrop = (
-    e: React.DragEvent<HTMLDivElement>,
-    targetIndex: number
-  ) => {
-    e.preventDefault();
-    const draggedIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
-    if (draggedIndex === targetIndex) return;
-
-    const newTags = [...tags];
-    const draggedTag = newTags[draggedIndex];
-    const targetTag = newTags[targetIndex];
-
-    const draggedTagName = getTagName(draggedTag);
-    const targetTagName = getTagName(targetTag);
-
-    let errorMessage = "";
-    if (/^h[1-6]$/.test(targetTagName) && /^h[1-6]$/.test(draggedTagName)) {
-      errorMessage = `Недопустимая вложенность: <${draggedTagName}> не может быть внутри <${targetTagName}>`;
-    }
-    if (selfClosingTags.includes(targetTagName)) {
-      errorMessage = `Недопустимая вложенность: <${targetTagName}> не может содержать <${draggedTagName}>`;
-    }
-    if (
-      inlineElements.includes(targetTagName) &&
-      blockElements.includes(draggedTagName)
-    ) {
-      errorMessage = `Недопустимая вложенность: строчный <${targetTagName}> не может содержать блочный <${draggedTagName}>`;
-    }
-    if (draggedTagName === "li" && !["ul", "ol"].includes(targetTagName)) {
-      errorMessage = `Недопустимая вложенность: <li> должен быть внутри <ul> или <ol>, а не <${targetTagName}>`;
-    }
-    if (/^h[1-6]$/.test(targetTagName) && draggedTagName === "li") {
-      errorMessage = `Недопустимая вложенность: <${draggedTagName}> не может быть внутри заголовка <${targetTagName}>`;
-    }
-    if (
-      targetTagName === "p" &&
-      (draggedTagName === "p" || blockElements.includes(draggedTagName))
-    ) {
-      errorMessage = `Недопустимая вложенность: <p> не может содержать <${draggedTagName}>`;
-    }
-    const interactiveElements = ["a", "button", "input", "select", "textarea"];
-    if (targetTagName === "a" && interactiveElements.includes(draggedTagName)) {
-      errorMessage = `Недопустимая вложенность: <a> не может содержать <${draggedTagName}>`;
-    }
-    if (
-      targetTagName === "button" &&
-      interactiveElements.includes(draggedTagName)
-    ) {
-      errorMessage = `Недопустимая вложенность: <button> не может содержать <${draggedTagName}>`;
-    }
-    if (["dt", "dd"].includes(draggedTagName) && targetTagName !== "dl") {
-      errorMessage = `Недопустимая вложенность: <${draggedTagName}> должен быть внутри <dl>, а не <${targetTagName}>`;
-    }
-    if (draggedTagName === "figcaption" && targetTagName !== "figure") {
-      errorMessage = `Недопустимая вложенность: <figcaption> должен быть внутри <figure>, а не <${targetTagName}>`;
-    }
-    if (["td", "th"].includes(draggedTagName) && targetTagName !== "tr") {
-      errorMessage = `Недопустимая вложенность: <${draggedTagName}> должен быть внутри <tr>, а не <${targetTagName}>`;
-    }
-    if (
-      draggedTagName === "tr" &&
-      !["table", "tbody", "thead", "tfoot"].includes(targetTagName)
-    ) {
-      errorMessage = `Недопустимая вложенность: <tr> должен быть внутри <table>, <tbody>, <thead> или <tfoot>, а не <${targetTagName}>`;
-    }
-
-    if (errorMessage) {
-      setError(errorMessage);
-      setShowModal(true);
-      setTimeout(() => {
-        setShowModal(false);
-        setError("");
-      }, 1500);
-      return;
-    }
-
-    const updatedTargetTag = targetTag.replace(/>/, `>${draggedTag}`);
-    newTags[targetIndex] = updatedTargetTag;
-    newTags.splice(draggedIndex, 1);
-
-    setTags((prev) => {
-      handlerLastTags(prev);
-      return newTags;
-    });
-  };
-  // interface Stone {
-  //   id: number;
-  //   content: string;
-  //   level: number;
-  //   parentId: number | null;
-  // }
-
   const convertStonesToHtml = (stones: Stone[]): string => {
-    // Функция для извлечения имени тега и атрибутов из content
     const parseTag = (
       content: string
     ): { tag: string; attributes: string; isSelfClosing: boolean } => {
@@ -654,30 +713,6 @@ const Plaza = () => {
       }
       const tag = tagMatch[1].toLowerCase();
       const attributes = tagMatch[2].trim();
-      const selfClosingTags = [
-        "area",
-        "base",
-        "br",
-        "col",
-        "embed",
-        "hr",
-        "img",
-        "input",
-        "link",
-        "meta",
-        "param",
-        "source",
-        "track",
-        "wbr",
-        "svg",
-        "path",
-        "rect",
-        "circle",
-        "line",
-        "polyline",
-        "polygon",
-        "use",
-      ];
       const isSelfClosing = selfClosingTags.includes(tag);
       return { tag, attributes, isSelfClosing };
     };
@@ -698,21 +733,17 @@ const Plaza = () => {
         return "";
       }
 
-      // Находим всех детей текущего элемента
       const children = stones.filter((s) => s.parentId === stoneId);
       let childrenHtml = "";
 
-      // Рекурсивно строим HTML для каждого дочернего элемента
       for (const child of children) {
         childrenHtml += buildHtml(child.id, stones, processed);
       }
 
-      // Если тег самозакрывающийся, возвращаем его без содержимого
       if (isSelfClosing) {
         return `<${tag}${attributes ? ` ${attributes}` : ""}>`;
       }
 
-      // Формируем полный HTML-тег с детьми
       return `<${tag}${
         attributes ? ` ${attributes}` : ""
       }>${childrenHtml}</${tag}>`;
@@ -740,7 +771,6 @@ const Plaza = () => {
     }
 
     setStones((prev) => {
-      // Функция для получения поддерева
       const getSubtree = (stoneId: number, stones: Stone[]): Stone[] => {
         const result: Stone[] = [];
         const stone = stones.find((s) => s.id === stoneId);
@@ -753,14 +783,11 @@ const Plaza = () => {
         return result;
       };
 
-      // Получаем поддерево перемещаемого элемента
       const subtree = getSubtree(draggedId, prev);
       const subtreeIds = subtree.map((s) => s.id);
 
-      // Удаляем поддерево из массива
       let newStones = prev.filter((stone) => !subtreeIds.includes(stone.id));
 
-      // Обновляем уровни для корневого перемещения
       const levelOffset = 0 - draggedStone.level;
       const updatedSubtree = subtree.map((stone) => ({
         ...stone,
@@ -768,9 +795,7 @@ const Plaza = () => {
         parentId: stone.id === draggedId ? null : stone.parentId,
       }));
 
-      // Вставляем поддерево в конец
       newStones.push(...updatedSubtree);
-
       return newStones;
     });
   };
@@ -823,7 +848,7 @@ const Plaza = () => {
             >
               <Image
                 src="https://raw.githubusercontent.com/devicons/devicon/master/icons/html5/html5-original-wordmark.svg"
-                alt="pug"
+                alt="html"
                 width={30}
                 height={30}
                 className="p-1"
@@ -853,9 +878,7 @@ const Plaza = () => {
             <button
               type="button"
               onClick={moveUp}
-              disabled={
-                selectedTags.length === 0 || selectedTags.some((i) => i === 0)
-              }
+              disabled={selectedStones.length === 0}
               className="w-8 h-8 bg-blue-500 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out"
             >
               <ArrowUpIcon className="w-4 h-4 text-white" />
@@ -863,10 +886,7 @@ const Plaza = () => {
             <button
               type="button"
               onClick={moveDown}
-              disabled={
-                selectedTags.length === 0 ||
-                selectedTags.some((i) => i === tags.length - 1)
-              }
+              disabled={selectedStones.length === 0}
               className="w-8 h-8 bg-blue-500 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out"
             >
               <ArrowDownIcon className="w-4 h-4 text-white" />
@@ -882,11 +902,11 @@ const Plaza = () => {
           </div>
           <div className="plaza rounded border border-zinc-300">
             <div
-              className="p-2 bg-gray-200 text-center text-gray-500 cursor-move mb-2"
+              className="p-2 bg-blue-300 flex justify-center text-gray-500 cursor-move mb-2"
               onDragOver={handleDragOver}
               onDrop={handleRootDrop}
             >
-              Перетащите сюда для корневого уровня
+              <ArrowUpIcon className="w-6 h-6 text-blue-700" />
             </div>
             <div>
               {stones.map((s) => (

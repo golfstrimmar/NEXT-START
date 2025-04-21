@@ -33,7 +33,7 @@ export default function RootLayout({
         {/* <GoogleOAuthProvider clientId={googleClientId}> */}
         <StateProvider>
           <Navbar />
-          <main className=" py-[100px] px-2 lg:px-4 mx-auto">
+          <main className=" py-[60px] px-2 lg:px-4 mx-auto">
             <div className=" px-2 md:p-0">{children}</div>
           </main>
         </StateProvider>
