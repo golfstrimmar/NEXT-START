@@ -31,13 +31,13 @@ const TagTree: React.FC<{ tags?: string[] }> = ({ tags = [] }) => {
 
   const parseTagsToTree = (tags: string[]): TagNode[] => {
     if (typeof window === "undefined" || !window.DOMParser) {
-      console.log("DOMParser недоступен");
+      // console.log("DOMParser недоступен");
       return [];
     }
 
     // Проверка, является ли tags массивом
     if (!Array.isArray(tags)) {
-      console.error("Проп tags должен быть массивом строк, получено:", tags);
+      // console.error("Проп tags должен быть массивом строк, получено:", tags);
       return [];
     }
 
@@ -47,7 +47,7 @@ const TagTree: React.FC<{ tags?: string[] }> = ({ tags = [] }) => {
     tags.forEach((tag, index) => {
       // Пропускаем пустые или невалидные строки
       if (!tag || typeof tag !== "string" || tag.trim() === "") {
-        console.warn(`Пропущен невалидный тег на индексе ${index}:`, tag);
+        // console.warn(`Пропущен невалидный тег на индексе ${index}:`, tag);
         return;
       }
 
@@ -67,11 +67,11 @@ const TagTree: React.FC<{ tags?: string[] }> = ({ tags = [] }) => {
           parseString = `<div>${tag}</div>`;
         }
 
-        console.log(`Parsing tag: ${parseString}, mimeType: ${mimeType}`);
+        // console.log(`Parsing tag: ${parseString}, mimeType: ${mimeType}`);
 
         // Парсим тег
         let doc = parser.parseFromString(parseString, mimeType);
-        console.log("Parsed document:", doc);
+        // console.log("Parsed document:", doc);
 
         // Если XML-парсинг не удался, пробуем text/html как fallback
         if (isSvg && doc.parseError) {
@@ -79,7 +79,7 @@ const TagTree: React.FC<{ tags?: string[] }> = ({ tags = [] }) => {
           mimeType = "text/html";
           parseString = `<div>${tag}</div>`;
           doc = parser.parseFromString(parseString, mimeType);
-          console.log("Fallback parsed document:", doc);
+          // console.log("Fallback parsed document:", doc);
         }
 
         // Для SVG используем documentElement, для HTML — первый дочерний элемент
