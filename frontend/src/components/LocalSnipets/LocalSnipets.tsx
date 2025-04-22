@@ -378,8 +378,8 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
 
   return (
     <div
-      className={`p-2 absolute l-0 transform transition-all duration-200 ease-in-out bg-gray-200 ${
-        snipOpen ? "relative translate-x-0" : "translate-x-[-150%]"
+      className={`p-2 mt-14  l-0 transform transition-all duration-200 ease-in-out bg-gray-200 min-w-[300px]   z-50 ${
+        snipOpen ? " translate-x-0 " : "absolute translate-x-[-150%]"
       }`}
     >
       <Input

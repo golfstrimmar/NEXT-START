@@ -114,14 +114,14 @@ const Plaza = () => {
       }
       attrList.push('src=""');
       attrList.push('alt=""');
-      const attrString = attrList.join("");
+      const attrString = attrList.join(" ");
       return `<img ${attrString}/>`;
     }
 
     const attrList: string[] = [];
     for (const [key, value] of Object.entries(attributes)) {
       if (!attrList.some((attr) => attr.startsWith(`${key}=`))) {
-        attrList.push(value !== "" ? `${key}="${value}"` : key);
+        attrList.push(value !== "" ? `${key}="${value}"` + " " : key + " ");
       }
     }
     const attrString = attrList.join("");
@@ -484,7 +484,7 @@ const Plaza = () => {
 
     return (
       <div
-        className={`rounded border border-red-300 flex justify-between items-center gap-2 bg-slate-200 ${
+        className={`rounded border border-red-300 flex  items-center gap-2 bg-slate-200 ${
           selectedStones.includes(
             stones.findIndex((stone) => stone.id === s.id)
           )
@@ -502,7 +502,6 @@ const Plaza = () => {
           handleClick(event);
         }}
       >
-        <p className="text-sm">{s.content}</p>
         <button
           type="button"
           onClick={() =>
@@ -518,6 +517,7 @@ const Plaza = () => {
         >
           <XMarkIcon width={8} height={8} />
         </button>
+        <p className="text-sm">{s.content}</p>
       </div>
     );
   };
@@ -625,9 +625,9 @@ const Plaza = () => {
   };
 
   return (
-    <div className="flex">
+    <div className="grid grid-cols-[max-content_1fr] ">
       {error && <ModalMessage message={error} open={showModal} />}
-      <div className="max-w-1/4 p-4">
+      <div className="max-w-[300px]">
         <LocalSnipets
           snipets={snipets}
           setSnipets={setSnipets}
