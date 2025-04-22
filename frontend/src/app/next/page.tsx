@@ -53,7 +53,7 @@ const NextPage = () => {
     }
   }, [actItem]);
   return (
-    <div className="grid grid-cols-[30%_60%] px-2 ">
+    <div className="grid grid-cols-[30%_60%] px-2 m-8">
       <div className={styles.sidebar}>
         <div className="flex justify-end items-center border border-slate-400">
           <button
