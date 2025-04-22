@@ -9,9 +9,7 @@ import {
   DocumentDuplicateIcon,
   ArrowUpIcon,
   ArrowDownIcon,
-  ArrowUturnLeftIcon,
 } from "@heroicons/react/24/outline";
-import TagTree from "@/components/TagTree/TagTree";
 import htmlToPug from "@/app/utils/htmlToPug";
 import htmlToScss from "@/app/utils/htmlToScss";
 import LocalSnipets from "@/components/LocalSnipets/LocalSnipets";
@@ -24,30 +22,18 @@ interface Stone {
 }
 
 const Plaza = () => {
-  const {
-    stone,
-    setStone,
-    handlerLastTags,
-    lastTags,
-    handlerSetTags,
-    providerTags,
-  } = useStateContext();
-  const [tags, setTags] = useState<string[]>([]);
-  const [selectedTags, setSelectedTags] = useState<number[]>([]);
+  const { stone, setStone } = useStateContext();
   const [selectedStones, setSelectedStones] = useState<number[]>([]);
-  const [validationErrors, setValidationErrors] = useState<
-    { index: number; message: string }[]
-  >([]);
-  const Duplicate = useRef(null);
-  const Mark = useRef(null);
-  const CopyPug = useRef(null);
-  const CopyScss = useRef(null);
   const [storedSnipets, setStoredSnipets] = useState([]);
   const [snipets, setSnipets] = useState("");
   const [snipOpen, setSnipOpen] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [stones, setStones] = useState<Stone[]>([]);
+  const Duplicate = useRef(null);
+  const Mark = useRef(null);
+  const CopyPug = useRef(null);
+  const CopyScss = useRef(null);
   const selfClosingTags = [
     "area",
     "base",
@@ -63,14 +49,14 @@ const Plaza = () => {
     "source",
     "track",
     "wbr",
-    "svg",
-    "path",
-    "rect",
-    "circle",
-    "line",
-    "polyline",
-    "polygon",
-    "use",
+    // "svg",
+    // "path",
+    // "rect",
+    // "circle",
+    // "line",
+    // "polyline",
+    // "polygon",
+    // "use",
   ];
   const inlineElements = ["span", "a", "b", "i", "strong", "em"];
   const blockElements = [
@@ -85,12 +71,6 @@ const Plaza = () => {
     "section",
     "article",
   ];
-
-  useEffect(() => {
-    if (providerTags.length > 0) {
-      setTags(providerTags);
-    }
-  }, [providerTags]);
 
   const createTagFromArray = (item: {
     tag: string;
@@ -155,17 +135,10 @@ const Plaza = () => {
     }
   };
 
-  const moveReturn = () => {
-    if (lastTags.length > 0) {
-      setTags(lastTags);
-    }
-  };
-
   useEffect(() => {
     if (stone.length > 0) {
       const lastStone = stone[stone.length - 1];
       const generatedTag = createTagFromArray(lastStone);
-      setTags((prev) => [...prev, generatedTag]);
       setStones((prev) => [
         ...prev,
         {
@@ -179,39 +152,6 @@ const Plaza = () => {
     }
   }, [stone, setStone]);
 
-  useEffect(() => {
-    console.log("<====stones====>", stones);
-    // Синхронизируем tags с stones
-    const html = convertStonesToHtml(stones);
-    const tagArray = html.split(/(?=<)/).filter(Boolean);
-    setTags(tagArray);
-  }, [stones]);
-
-  useEffect(() => {
-    const html = convertStonesToHtml(stones);
-    const tagArray = html.split(/(?=<)/).filter(Boolean);
-    const errors = tagArray
-      .map((tag, index) => {
-        const { errors } = htmlToScss(tag);
-        return errors.map((error) => ({
-          index,
-          message: error.message,
-        }));
-      })
-      .flat();
-    setValidationErrors(errors);
-  }, [stones]);
-
-  const handleSelectTag = (index: number) => {
-    setSelectedTags((prevSelected) => {
-      const isSelected = prevSelected.includes(index);
-      const updatedSelected = isSelected
-        ? prevSelected.filter((i) => i !== index)
-        : [...prevSelected, index];
-      return updatedSelected;
-    });
-  };
-
   const handleSelectStone = (index: number) => {
     setSelectedStones((prevSelected) => {
       const isSelected = prevSelected.includes(index);
@@ -222,11 +162,11 @@ const Plaza = () => {
     });
   };
 
-  const handleClick = (event: MouseEvent) => {
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (event.altKey) {
       setSnipets((prev) => {
         const newSnipets = [
-          ...prev,
+          ...(Array.isArray(prev) ? prev : [prev]),
           (event.target as HTMLElement)?.innerText || "",
         ];
         return newSnipets;
@@ -312,30 +252,24 @@ const Plaza = () => {
   const handlerCopy = (e: React.MouseEvent<HTMLButtonElement>) => {
     navigator.clipboard.writeText(convertStonesToHtml(stones));
     if (Duplicate.current) {
-      Duplicate.current.style.boxShadow = "0 0 10px cyan";
+      (Duplicate.current as any).style.boxShadow = "0 0 10px cyan";
       setTimeout(() => {
         if (Duplicate.current) {
-          Duplicate.current.style.boxShadow = "none";
+          (Duplicate.current as any).style.boxShadow = "none";
         }
       }, 300);
     }
   };
 
   const handlerCopyPug = () => {
-    // const html = convertStonesToHtml(stones);
-    // const tagArray = html.split(/(?=<)/).filter(Boolean);
-    // const pugOutput = tagArray.map((tag) => htmlToPug(tag)).join("\n");
-    // navigator.clipboard.writeText(pugOutput);
-
     const html = convertStonesToHtml(stones);
     const pugOutput = htmlToPug(html);
     navigator.clipboard.writeText(pugOutput);
-
     if (CopyPug.current) {
-      CopyPug.current.style.boxShadow = "0 0 10px blue";
+      (CopyPug.current as any).style.boxShadow = "0 0 10px blue";
       setTimeout(() => {
         if (CopyPug.current) {
-          CopyPug.current.style.boxShadow = "none";
+          (CopyPug.current as any).style.boxShadow = "none";
         }
       }, 300);
     }
@@ -343,147 +277,32 @@ const Plaza = () => {
 
   const handlerCopyScss = () => {
     const html = convertStonesToHtml(stones);
-    // const tagArray = html.split(/(?=<)/).filter(Boolean);
-    const tagArray = html;
-    // const errors = tagArray
-    //   .map((tag, index) => {
-    //     const { errors } = htmlToScss(tag);
-    //     return errors.map((error) => ({
-    //       index,
-    //       message: error.message,
-    //     }));
-    //   })
-    //   .flat();
-    // if (errors.length > 0) {
-    //   alert(
-    //     "Невозможно конвертировать в SCSS из-за ошибок в HTML:\n" +
-    //       errors.map((err) => `- ${err.message}`).join("\n")
-    //   );
-    //   return;
-    // }
-    // const scssOutput = tagArray.map((tag) => htmlToScss(tag).scss).join("\n");
-    const scssOutput = htmlToScss(tagArray).scss;
+    const scssOutput = htmlToScss(html).scss;
     navigator.clipboard.writeText(scssOutput);
     if (CopyScss.current) {
-      CopyScss.current.style.boxShadow = "0 0 10px green";
+      (CopyScss.current as any).style.boxShadow = "0 0 10px green";
       setTimeout(() => {
         if (CopyScss.current) {
-          CopyScss.current.style.boxShadow = "none";
+          (CopyScss.current as any).style.boxShadow = "none";
         }
       }, 300);
     }
   };
 
   const handlerClear = () => {
-    setTags([]);
     setStone([]);
     setStones([]);
-    setSelectedTags([]);
     setSelectedStones([]);
-    setValidationErrors([]);
+    setSnipets("");
     if (Mark.current) {
-      Mark.current.style.boxShadow = "0 0 10px red";
+      (Mark.current as any).style.boxShadow = "0 0 10px red";
       setTimeout(() => {
         if (Mark.current) {
-          Mark.current.style.boxShadow = "none";
+          (Mark.current as any).style.boxShadow = "none";
         }
       }, 300);
     }
   };
-
-  // const handleDragStart = (
-  //   e: React.DragEvent<HTMLDivElement>,
-  //   index: number
-  // ) => {
-  //   e.dataTransfer.setData("text/plain", index.toString());
-  //   e.dataTransfer.effectAllowed = "move";
-  // };
-
-  // const handleDrop = (
-  //   e: React.DragEvent<HTMLDivElement>,
-  //   targetIndex: number
-  // ) => {
-  //   e.preventDefault();
-  //   const draggedIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
-  //   if (draggedIndex === targetIndex) return;
-
-  //   const newTags = [...tags];
-  //   const draggedTag = newTags[draggedIndex];
-  //   const targetTag = newTags[targetIndex];
-
-  //   const draggedTagName = getTagName(draggedTag);
-  //   const targetTagName = getTagName(targetTag);
-
-  //   let errorMessage = "";
-  //   if (/^h[1-6]$/.test(targetTagName) && /^h[1-6]$/.test(draggedTagName)) {
-  //     errorMessage = `Недопустимая вложенность: <${draggedTagName}> не может быть внутри <${targetTagName}>`;
-  //   }
-  //   if (selfClosingTags.includes(targetTagName)) {
-  //     errorMessage = `Недопустимая вложенность: <${targetTagName}> не может содержать <${draggedTagName}>`;
-  //   }
-  //   if (
-  //     inlineElements.includes(targetTagName) &&
-  //     blockElements.includes(draggedTagName)
-  //   ) {
-  //     errorMessage = `Недопустимая вложенность: строчный <${targetTagName}> не может содержать блочный <${draggedTagName}>`;
-  //   }
-  //   if (draggedTagName === "li" && !["ul", "ol"].includes(targetTagName)) {
-  //     errorMessage = `Недопустимая вложенность: <li> должен быть внутри <ul> или <ol>, а не <${targetTagName}>`;
-  //   }
-  //   if (/^h[1-6]$/.test(targetTagName) && draggedTagName === "li") {
-  //     errorMessage = `Недопустимая вложенность: <${draggedTagName}> не может быть внутри заголовка <${targetTagName}>`;
-  //   }
-  //   if (
-  //     targetTagName === "p" &&
-  //     (draggedTagName === "p" || blockElements.includes(draggedTagName))
-  //   ) {
-  //     errorMessage = `Недопустимая вложенность: <p> не может содержать <${draggedTagName}>`;
-  //   }
-  //   const interactiveElements = ["a", "button", "input", "select", "textarea"];
-  //   if (targetTagName === "a" && interactiveElements.includes(draggedTagName)) {
-  //     errorMessage = `Недопустимая вложенность: <a> не может содержать <${draggedTagName}>`;
-  //   }
-  //   if (
-  //     targetTagName === "button" &&
-  //     interactiveElements.includes(draggedTagName)
-  //   ) {
-  //     errorMessage = `Недопустимая вложенность: <button> не может содержать <${draggedTagName}>`;
-  //   }
-  //   if (["dt", "dd"].includes(draggedTagName) && targetTagName !== "dl") {
-  //     errorMessage = `Недопустимая вложенность: <${draggedTagName}> должен быть внутри <dl>, а не <${targetTagName}>`;
-  //   }
-  //   if (draggedTagName === "figcaption" && targetTagName !== "figure") {
-  //     errorMessage = `Недопустимая вложенность: <figcaption> должен быть внутри <figure>, а не <${targetTagName}>`;
-  //   }
-  //   if (["td", "th"].includes(draggedTagName) && targetTagName !== "tr") {
-  //     errorMessage = `Недопустимая вложенность: <${draggedTagName}> должен быть внутри <tr>, а не <${targetTagName}>`;
-  //   }
-  //   if (
-  //     draggedTagName === "tr" &&
-  //     !["table", "tbody", "thead", "tfoot"].includes(targetTagName)
-  //   ) {
-  //     errorMessage = `Недопустимая вложенность: <tr> должен быть внутри <table>, <tbody>, <thead> или <tfoot>, а не <${targetTagName}>`;
-  //   }
-
-  //   if (errorMessage) {
-  //     setError(errorMessage);
-  //     setShowModal(true);
-  //     setTimeout(() => {
-  //       setShowModal(false);
-  //       setError("");
-  //     }, 1500);
-  //     return;
-  //   }
-
-  //   const updatedTargetTag = targetTag.replace(/>/, `>${draggedTag}`);
-  //   newTags[targetIndex] = updatedTargetTag;
-  //   newTags.splice(draggedIndex, 1);
-
-  //   setTags((prev) => {
-  //     handlerLastTags(prev);
-  //     return newTags;
-  //   });
-  // };
 
   const StoneNode = ({ s }: { s: Stone }) => {
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
@@ -730,7 +549,7 @@ const Plaza = () => {
 
       const { tag, attributes, isSelfClosing } = parseTag(stone.content);
       if (!tag) {
-        return "";
+        return stone.content;
       }
 
       const children = stones.filter((s) => s.parentId === stoneId);
@@ -814,11 +633,11 @@ const Plaza = () => {
           setSnipets={setSnipets}
           storedSnipets={storedSnipets}
           setStoredSnipets={setStoredSnipets}
-          setSelectedTags={setSelectedTags}
-          selectedTags={selectedTags}
-          setTags={setTags}
           snipOpen={snipOpen}
           setSnipOpen={setSnipOpen}
+          setStones={setStones}
+          selectedStones={selectedStones}
+          stones={stones}
         />
       </div>
       <div className="flex-1 p-4">
@@ -891,14 +710,6 @@ const Plaza = () => {
             >
               <ArrowDownIcon className="w-4 h-4 text-white" />
             </button>
-            <button
-              type="button"
-              onClick={moveReturn}
-              disabled={tags.length === 0}
-              className="w-8 h-8 bg-slate-400 rounded-full border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out"
-            >
-              <ArrowUturnLeftIcon className="w-4 h-4 text-white" />
-            </button>
           </div>
           <div className="plaza rounded border border-zinc-300">
             <div
@@ -913,53 +724,6 @@ const Plaza = () => {
                 <StoneNode key={s.id} s={s} />
               ))}
             </div>
-            {/* <div className="rounded border border-gray-300 bg-transparent">
-              {tags.map((tag, index) => {
-                const hasError = validationErrors.some(
-                  (err) => err.index === index
-                );
-                const isSelected = selectedTags.includes(index);
-                return (
-                  <div
-                    key={index}
-                    className={`grid items-center grid-cols-[1fr_20px] border border-zinc-800 ${
-                      hasError ? "border-red-500 bg-red-100" : ""
-                    } ${isSelected ? styles.selected : ""}`}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, index)}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, index)}
-                    onClick={(event) => {
-                      handleSelectTag(index);
-                      handleClick(event);
-                    }}
-                    title={
-                      hasError
-                        ? validationErrors
-                            .filter((err) => err.index === index)
-                            .map((err) => err.message)
-                            .join("\n")
-                        : ""
-                    }
-                  >
-                    <TagTree tags={[tag]} />
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setTags(tags.filter((_, i) => i !== index));
-                        setSelectedTags(
-                          selectedTags.filter((i) => i !== index)
-                        );
-                      }}
-                      className="max-w-6 h-6 border border-zinc-300 flex items-center justify-center leading-none text-[14px] cursor-pointer bg-yellow-700 transition-all duration-200 ease-in-out"
-                    >
-                      <XMarkIcon className="max-w-6 h-6 text-white" />
-                    </button>
-                  </div>
-                );
-              })}
-            </div> */}
           </div>
         </div>
       </div>

@@ -1,21 +1,27 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import styles from "./LocalSnipets.module.scss";
 import Input from "../ui/Input/Input";
-import TagTree from "../TagTree/TagTree";
 import { XMarkIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
-import { set } from "mongoose";
+import { parse, parseFragment } from "parse5";
+import { ChildNode, Element } from "parse5/dist/tree-adapters/default";
+
+interface Stone {
+  id: number;
+  content: string;
+  level: number;
+  parentId: number | null;
+}
 
 interface LocalSnipetsProps {
   snipets: any;
   setSnipets: any;
   storedSnipets: any;
   setStoredSnipets: any;
-  setSelectedTags: any;
-  selectedTags: any;
-  setTags: any;
   snipOpen: boolean;
   setSnipOpen: any;
+  setStones: React.Dispatch<React.SetStateAction<Stone[]>>;
+  selectedStones: number[];
+  stones: Stone[];
 }
 
 const LocalSnipets: React.FC<LocalSnipetsProps> = ({
@@ -23,11 +29,11 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
   setSnipets,
   storedSnipets,
   setStoredSnipets,
-  setSelectedTags,
-  selectedTags,
-  setTags,
   snipOpen,
   setSnipOpen,
+  setStones,
+  selectedStones,
+  stones,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [snipetIdToDelete, setSnipetIdToDelete] = useState<number | null>(null);
@@ -35,6 +41,210 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
   const [categories, setCategories] = useState<string[]>([]);
   const [openTabs, setOpenTabs] = useState<string[]>([]);
   const [error, setError] = useState<string>("");
+
+  const selfClosingTags = [
+    "area",
+    "base",
+    "br",
+    "col",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "param",
+    "source",
+    "track",
+    "wbr",
+  ];
+
+  // Функция для преобразования HTML в stones
+  const htmlToStones = (htmlArray: string[]): Stone[] => {
+    const stones: Stone[] = [];
+    let currentId = Date.now();
+
+    const serializeAttributes = (
+      attrs: { name: string; value: string }[]
+    ): string => {
+      return attrs.map((attr) => `${attr.name}="${attr.value}"`).join(" ");
+    };
+
+    const processNode = (
+      node: ChildNode,
+      level: number,
+      parentId: number | null,
+      parentTag?: string
+    ): void => {
+      if (node.nodeName === "#text") {
+        const text = (node as any).value.trim();
+        if (text) {
+          const content = text.replace(/ /g, " ");
+          stones.push({
+            id: currentId++,
+            content: content,
+            level,
+            parentId,
+          });
+        }
+        return;
+      }
+
+      if (node.nodeName === "#document-fragment") {
+        (node as any).childNodes.forEach((child: ChildNode) =>
+          processNode(child, level, parentId)
+        );
+        return;
+      }
+
+      const element = node as Element;
+      const tagName = element.tagName;
+      const isSelfClosing = selfClosingTags.includes(tagName);
+      const attributes = serializeAttributes(element.attrs);
+      let content = `<${tagName}${attributes ? ` ${attributes}` : ""}>`;
+
+      if (isSelfClosing) {
+        content = `<${tagName}${attributes ? ` ${attributes}` : ""}>`;
+      } else {
+        content = `<${tagName}${
+          attributes ? ` ${attributes}` : ""
+        }></${tagName}>`;
+      }
+
+      const stoneId = currentId++;
+      stones.push({
+        id: stoneId,
+        content,
+        level,
+        parentId,
+      });
+
+      if (!isSelfClosing) {
+        element.childNodes.forEach((child) =>
+          processNode(child, level + 1, stoneId, tagName)
+        );
+      }
+    };
+
+    htmlArray.forEach((html) => {
+      const fragment = parseFragment(html);
+      fragment.childNodes.forEach((node) => processNode(node, 0, null));
+    });
+
+    return stones;
+  };
+
+  // Исправленная функция для преобразования stones в HTML
+  const stonesToHtml = (
+    selectedStones: number[],
+    stones: Stone[]
+  ): string[] => {
+    const htmlArray: string[] = [];
+
+    const parseTag = (
+      content: string
+    ): { tag: string; attributes: string; isSelfClosing: boolean } => {
+      const tagMatch = content.match(/^<([a-z0-9]+)([^>]*)>/i);
+      if (!tagMatch) {
+        return { tag: "", attributes: "", isSelfClosing: false };
+      }
+      const tag = tagMatch[1].toLowerCase();
+      const attributes = tagMatch[2].trim();
+      const isSelfClosing = selfClosingTags.includes(tag);
+      return { tag, attributes, isSelfClosing };
+    };
+
+    const buildHtml = (
+      stoneId: number,
+      stones: Stone[],
+      processed: Set<number>
+    ): string => {
+      const stone = stones.find((s) => s.id === stoneId);
+      if (!stone || processed.has(stoneId)) {
+        return "";
+      }
+      processed.add(stoneId);
+
+      const { tag, attributes, isSelfClosing } = parseTag(stone.content);
+      if (!tag) {
+        return stone.content; // Текстовый узел
+      }
+
+      const children = stones.filter((s) => s.parentId === stoneId);
+      let childrenHtml = "";
+
+      for (const child of children) {
+        childrenHtml += buildHtml(child.id, stones, processed);
+      }
+
+      if (isSelfClosing && children.length === 0) {
+        return `<${tag}${attributes ? ` ${attributes}` : ""}>`;
+      }
+
+      return `<${tag}${
+        attributes ? ` ${attributes}` : ""
+      }>${childrenHtml}</${tag}>`;
+    };
+
+    // Обрабатываем все выделенные stones
+    selectedStones.forEach((index) => {
+      const stone = stones[index];
+      if (!stone) return;
+      const processed = new Set<number>();
+      const html = buildHtml(stone.id, stones, processed);
+      if (html) {
+        htmlArray.push(html);
+      }
+    });
+
+    return htmlArray;
+  };
+
+  // Функция для сохранения выбранных stones как сниппета
+  const saveSelectedStonesAsSnippet = async () => {
+    if (selectedStones.length === 0) {
+      setError("No stones selected");
+      setTimeout(() => setError(""), 1000);
+      return;
+    }
+
+    const htmlArray = stonesToHtml(selectedStones, stones);
+    if (htmlArray.length === 0) {
+      setError("No valid HTML to save");
+      setTimeout(() => setError(""), 1000);
+      return;
+    }
+
+    try {
+      const payload = {
+        id: new Date().getTime(),
+        value: htmlArray,
+        category: "local",
+      };
+      console.log("Saving selected stones as snipet:", payload);
+
+      const response = await fetch("/api/snipets", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to save snipet");
+        setTimeout(() => setError(""), 1000);
+        throw new Error(errorData.error || "Failed to save snipet");
+      }
+
+      const { snipet } = await response.json();
+      setStoredSnipets((prev: any) => [...prev, snipet]);
+    } catch (error) {
+      console.error("Ошибка сохранения сниппета:", error);
+    }
+  };
+
   const copySnipet = async () => {
     if (!snipets || (typeof snipets === "string" && snipets.trim() === "")) {
       setError("Snippet content is required");
@@ -69,7 +279,6 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
       setStoredSnipets((prev: any) => [...prev, snipet]);
       setSnipets("");
       setCategory("local");
-      setSelectedTags([]);
     } catch (error) {
       console.error("Ошибка сохранения сниппета:", error);
     }
@@ -89,6 +298,7 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
       }
 
       const snipets = await response.json();
+      console.log("<====snipets====>", snipets);
       setStoredSnipets(snipets);
     } catch (error) {
       console.error("Ошибка получения сниппетов:", error);
@@ -177,7 +387,6 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
         data="snippet"
         value={snipets}
         onChange={(e) => {
-          // setStoredSnipets(e.target.value);
           setSnipets(e.target.value);
         }}
       />
@@ -200,16 +409,21 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
       >
         Save Snipet
       </button>
+      <button
+        type="button"
+        onClick={saveSelectedStonesAsSnippet}
+        disabled={selectedStones.length === 0}
+        className="my-2 p-4 h-8 bg-green-500 rounded-[5px] border border-gray-300 flex items-center justify-center leading-none text-[14px] cursor-pointer hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out text-white"
+      >
+        Save
+      </button>
       <div className="my-2 flex flex-col gap-2">
-        {/* Секция для категории "local" */}
         {categories.includes("local") && (
           <div className="border-b border-gray-300">
-            <h3 className="px-4 py-2 text-sm font-medium text-gray-600">
-              local
-            </h3>
-            <ul className="flex flex-col gap-1 px-4 pb-2">
+            <h3 className="py-2 text-sm font-medium text-gray-600">local</h3>
+            <ul className="flex flex-col gap-1 pb-2">
               {displayCategory("local").map((snipet: any) => (
-                <div key={snipet.id} className="flex gap-1">
+                <div key={snipet.id} className=" overflow-hidden w-full">
                   <button
                     className="w-4 h-4 bg-red-500 text-amber-50 hover:bg-red-600 transition-all duration-200 ease-in-out cursor-pointer flex items-center justify-center"
                     onClick={() => openDeleteModal(snipet.id)}
@@ -217,20 +431,19 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
                     <XMarkIcon className="max-w-3 h-3 text-white" />
                   </button>
                   <button
-                    className="border border-gray-300 rounded text-left"
+                    className="border border-gray-300 rounded text-left px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 w-full"
                     onClick={() => {
-                      setTags((prev: string[]) => [...prev, ...snipet.value]);
+                      const newStones = htmlToStones(snipet.value);
+                      setStones((prev: Stone[]) => [...prev, ...newStones]);
                     }}
                   >
-                    <TagTree tags={snipet.value} />
+                    {snipet.value.join(" ")}
                   </button>
                 </div>
               ))}
             </ul>
           </div>
         )}
-
-        {/* Табы для остальных категорий */}
         {categories && categories.length > 0 ? (
           categories
             .filter((cat) => cat !== "local")
@@ -238,7 +451,7 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
               <div key={category} className="border-b border-gray-300">
                 <button
                   onClick={() => toggleTab(category)}
-                  className="w-full flex justify-between items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-500 transition-all duration-200 ease-in-out"
+                  className="w-full flex justify-between items-center py-2 text-sm font-medium text-gray-600 hover:text-blue-500 transition-all duration-200 ease-in-out"
                 >
                   <span>{category}</span>
                   <ChevronDownIcon
@@ -248,9 +461,12 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
                   />
                 </button>
                 {openTabs.includes(category) && (
-                  <ul className="flex flex-col gap-1 px-4 pb-2">
+                  <ul className="flex flex-col gap-1 pb-2">
                     {displayCategory(category).map((snipet: any) => (
-                      <div key={snipet.id} className="flex gap-1">
+                      <div
+                        key={snipet.id}
+                        className="flex flex-col gap-1 overflow-hidden"
+                      >
                         <button
                           className="w-4 h-4 bg-red-500 text-amber-50 hover:bg-red-600 transition-all duration-200 ease-in-out cursor-pointer flex items-center justify-center"
                           onClick={() => openDeleteModal(snipet.id)}
@@ -258,15 +474,16 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
                           <XMarkIcon className="max-w-3 h-3 text-white" />
                         </button>
                         <button
-                          className="border border-gray-300 rounded text-left"
+                          className="border border-gray-300 rounded text-left px-2 py-1 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => {
-                            setTags((prev: string[]) => [
+                            const newStones = htmlToStones(snipet.value);
+                            setStones((prev: Stone[]) => [
                               ...prev,
-                              ...snipet.value,
+                              ...newStones,
                             ]);
                           }}
                         >
-                          <TagTree tags={snipet.value} />
+                          {snipet.value.join(" ")}
                         </button>
                       </div>
                     ))}
@@ -278,7 +495,6 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
           <p>Нет категорий</p>
         ) : null}
       </div>
-
       {isModalOpen && (
         <div className="fixed inset-0 top-0 flex justify-center bg-black bg-opacity-50 z-2000">
           <div className="bg-red-100 p-4 rounded shadow-lg max-w-sm w-full">
@@ -287,7 +503,7 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
               <button
                 type="button"
                 onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-all duration-200 ease-in-out"
+                className="p-2 bg-gray-300 rounded hover:bg-gray-400 transition-all duration-200 ease-in-out"
               >
                 Отмена
               </button>
@@ -296,7 +512,7 @@ const LocalSnipets: React.FC<LocalSnipetsProps> = ({
                 onClick={() =>
                   snipetIdToDelete !== null && removeSnipet(snipetIdToDelete)
                 }
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-all duration-200 ease-in-out"
+                className="p-2 bg-red-500 text-white rounded hover:bg-red-600 transition-all duration-200 ease-in-out"
               >
                 Удалить
               </button>
