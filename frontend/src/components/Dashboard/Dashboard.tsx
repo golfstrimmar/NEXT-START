@@ -125,6 +125,7 @@ const Dashboard = () => {
     "__decor",
     "__hidden",
     "__head",
+    "__form",
     "__email",
     "__items",
     "__item",
