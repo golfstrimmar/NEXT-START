@@ -27,8 +27,11 @@ const SocketInitializer: React.FC = () => {
       // });
     });
 
-    socket.on("connect_error", (error) => {
-      console.error("Connection error:", error.message);
+    socket.on("connect_error", (error: any) => {
+      console.error(
+        "Connection error:",
+        error instanceof Error ? error.message : error
+      );
     });
 
     socket.on("disconnect", () => {
