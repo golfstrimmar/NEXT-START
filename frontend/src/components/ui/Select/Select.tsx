@@ -1,83 +1,70 @@
-import React, { useState, useEffect } from "react";
-import "@/scss/common/colors.scss";
-import styles from "./Select.module.scss";
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 
-// Тип элемента
-interface Item {
-  name: string;
-  value: "asc" | "desc"; // Значение может быть только "asc" или "desc"
-}
-
-// Пропсы компонента Select
 interface SelectProps {
-  setSortOrder: (order: "asc" | "desc") => void;
-  selectItems: Item[]; // Массив объектов типа Item
+  selectItems: string[];
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  name?: string;
+  className?: string;
 }
 
-const Select: React.FC<SelectProps> = ({ setSortOrder, selectItems }) => {
-  const [active, setActive] = useState<boolean>(false);
-  const [selectedValue, setSelectedValue] = useState<string>(
-    selectItems[0].name
-  );
+export default function Select({
+  selectItems,
+  value,
+  onChange,
+  name = "category",
+  className = "w-full",
+}: SelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    const handleClick = (event: MouseEvent): void => {
-      const target = event.target as Element;
-      if (!target.closest(".select")) {
-        setActive(false);
-      }
-    };
-    window.addEventListener("click", handleClick);
-    return () => {
-      window.removeEventListener("click", handleClick);
-    };
-  }, []);
-
-  // -----------------------------
-  const handlerClickItem = (item: Item) => {
-    setSelectedValue(item.name); //в браузер отправляем текст
-    setSortOrder(item.value); // в родителя отправляем value
-    setActive(false);
+  const handleSelect = (item: string) => {
+    // Создаём синтетическое событие, совместимое с handleChange
+    const syntheticEvent = {
+      target: { name, value: item },
+    } as React.ChangeEvent<HTMLSelectElement>;
+    onChange(syntheticEvent);
+    setIsOpen(false);
   };
 
   return (
-    <>
+    <div className={`relative ${className}`}>
       <div
-        className={`${styles["select"]} ${active ? styles["_is-active"] : ""}`}
+        className="p-2 border border-gray-300 rounded bg-white cursor-pointer flex justify-between items-center transition-all duration-300"
+        onClick={() => setIsOpen(!isOpen)}
       >
-        <button
-          className={`${styles["dropdown-button"]}`}
-          onClick={(event) => {
-            event.stopPropagation();
-            setActive((prev) => !prev);
-          }}
-        >
-          <span>{selectedValue}</span>
-          <input type="hidden" name="place" value={selectedValue} />
-          <Image
-            src="/assets/svg/chevron-down.svg"
-            alt="chevron-down"
-            width={50}
-            height={50}
-            className="fill-blue-500"
-          />
-        </button>
-        <ul className={`${styles["dropdown-list"]} `}>
-          {selectItems.map((item, index) => (
-            <li
-              key={index}
-              onClick={() => handlerClickItem(item)}
-              className={`${styles["dropdown-list__item"]}`}
-              data-value={item.value}
-            >
-              {item.name}
-            </li>
-          ))}
-        </ul>
+        <span>{value || "Select a category"}</span>
+        <Image
+          src="/assets/svg/chevron-down.svg"
+          alt="chevron-down"
+          width={15}
+          height={15}
+          className={`transform transition-transform duration-300 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
       </div>
-    </>
+      <ul
+        className={`absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-auto transition-all duration-300 ease-in-out ${
+          isOpen
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 -translate-y-2 pointer-events-none"
+        }`}
+      >
+        {selectItems.map((item) => (
+          <li
+            key={item}
+            className={`p-2 cursor-pointer hover:bg-blue-100 ${
+              value === item ? "bg-blue-50 font-semibold" : ""
+            }`}
+            onClick={() => handleSelect(item)}
+          >
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
-};
-
-export default Select;
+}
