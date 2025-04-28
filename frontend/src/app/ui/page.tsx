@@ -37,6 +37,12 @@ const Ui: React.FC<UiProps> = () => {
     { name: "Oldest First", value: "asc" },
   ] as const;
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  useEffect(() => {
+    if (sortOrder) {
+      console.log("<==== sortOrder====>", sortOrder);
+    }
+  }, [sortOrder]);
   // -------------------------
   const handlerInputOnChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -131,10 +137,20 @@ const Ui: React.FC<UiProps> = () => {
       <hr className="my-4" />
 
       <h2 className="text-[#006B36] text-2xl">Tabs</h2>
-      <Tabs />
+      <div className="flex gap-4">
+        <Tabs />
+        <Tabs />
+      </div>
       {/* ========Select=========== */}
-      {/* <h4>sortOrder: {sortOrder}</h4>
-      <Select setSortOrder={setSortOrder} selectItems={selectItems} /> */}
+      <hr className="my-4" />
+      <h2 className="text-[#006B36] text-2xl">Select</h2>
+      <h4>sortOrder: {sortOrder}</h4>
+      <Select
+        selectItems={selectItems}
+        value={sortOrder}
+        onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
+        setSortOrder={setSortOrder}
+      />
       {/* ========Burger=========== */}
       <hr className="my-4" />
       <h2 className="text-[#006B36] text-2xl">Burger-sm</h2>
@@ -142,65 +158,64 @@ const Ui: React.FC<UiProps> = () => {
         <Burger handlerburgerClick={() => setIsOpen(!isOpen)} isOpen={isOpen} />
       </div>
       {/* ========Input=========== */}
-      {/* <div className="m-4"></div>
+      <div className="m-4"></div>
       <p>Input value: {value}</p>
       <Input
         typeInput="text"
         data="Name"
         value={value}
         onChange={handlerInputOnChange}
-      /> */}
+      />
       {/* ========Input===textarea======== */}
-      {/* <div className="m-4"></div>
+      <div className="m-4"></div>
       <Input
         typeInput="textarea"
         data="TextareaName"
         value={valueTextarea}
         onChange={onChangeTextarea}
-      /> */}
+      />
       {/* ========Input number=========== */}
-      {/* <div className="m-4"></div>
+      <div className="m-4"></div>
       <p>Input valueNumber: {valueNumber}</p>
       <Input
         typeInput="number"
         data="Number"
         value={valueNumber}
         onChange={handlerNumberOnChange}
-      /> */}
+      />
       {/* ================= */}
-      {/* <p>End Time: {endTime}</p>
+      <p>End Time: {endTime}</p>
       <Input
         typeInput="datetime-local"
         data="End Time"
         value={endTime}
         onChange={handleEndTimeChange}
-      /> */}
-      {/* =======Calendar========== */}
-      {/* <div className="mt-4">==========</div>
-      <h5>Uhr: {Uhr}</h5>
-      <div className="mt-4">==========</div>
-      <Calendar setFinishDate={setFinishDate} /> */}
+      />
+
       {/* ============================== */}
-      {/* <div className="m-4"></div>
+      <div className="m-4"></div>
+      <p>Uhr:{Uhr}</p>
       <ClockUhr value={Uhr} onChange={handlerUhrOnChange} />
       {/* =======InputCheck============ */}
-      {/* <div className="m-4"></div>
+      <hr className="my-4" />
+      <h2 className="text-[#006B36] text-2xl">Check</h2>
       <InputCheck
         type="checkbox"
         data="Check"
         value={valueCheck}
         checkedValue="option1"
         onChange={handlerCheckOnChange}
-      />  */}
+      />
       {/* ========InputRadio=========== */}
-      {/* <div className="m-4"></div>
+      <hr className="my-4" />
+      <h2 className="text-[#006B36] text-2xl">Radio</h2>
       <InputRadio
         type="radio"
         data="RadioOption"
         options={RadioOptions}
         value={selectedOptionRadio}
         onChange={handlerInputOnChangeRadio}
-      /> */}
+      />
       {/* =======Button============ */}
       <hr className="my-4" />
       <h2 className="text-[#006B36] text-2xl">Button</h2>

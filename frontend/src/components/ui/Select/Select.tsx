@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
+interface SelectItem {
+  name: string;
+  value: "asc" | "desc";
+}
+
 interface SelectProps {
-  selectItems: string[];
-  value: string;
+  selectItems: SelectItem[];
+  value: "asc" | "desc";
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  setSortOrder: React.Dispatch<React.SetStateAction<"asc" | "desc">>;
   name?: string;
   className?: string;
 }
@@ -15,28 +21,47 @@ export default function Select({
   selectItems,
   value,
   onChange,
+
   name = "category",
   className = "w-full",
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleSelect = (item: string) => {
-    const syntheticEvent = {
-      target: { name, value: item },
-    } as React.ChangeEvent<HTMLSelectElement>;
-    onChange(syntheticEvent);
+  const handleSelect = (value: string) => {
+    onChange({
+      target: { name, value },
+    } as React.ChangeEvent<HTMLSelectElement>);
     setIsOpen(false);
   };
+  const selectedItem = selectItems.find((item) => item.value === value);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      e.stopPropagation();
+
+      if (
+        e.target instanceof Node &&
+        !e.target.closest(".select-custom") &&
+        !e.target.closest(".next-hidden")
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className} `}>
       <div
         className={`select-custom p-2 border border-gray-300 rounded bg-white cursor-pointer flex justify-between items-center transition-all duration-300 ${
           isOpen ? "run" : ""
         }`}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span>{value || "Select a category"}</span>
+        <span>{selectedItem?.name || "Select a category"}</span>
         <Image
           src="/assets/svg/chevron-down.svg"
           alt="chevron-down"
@@ -56,7 +81,7 @@ export default function Select({
               <li
                 key={index}
                 className={`p-2 cursor-pointer hover:bg-blue-100 ${
-                  value === item ? "bg-blue-50 font-semibold" : ""
+                  value === item.value ? "bg-blue-50 font-semibold" : ""
                 }`}
                 onClick={() => handleSelect(item.value)}
               >
