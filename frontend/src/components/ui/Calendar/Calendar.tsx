@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styles from "./Calendar.module.scss";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 
@@ -35,14 +35,19 @@ const Calendar: React.FC<CalendarProps> = ({
     selectedDate
   );
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   useEffect(() => {
-    if (selectedDate === null) {
-      setInternalSelectedDate(currentDate);
+    const dateToUse = selectedDate ?? new Date();
+    if (
+      dateToUse.getFullYear() === currentDate.getFullYear() &&
+      dateToUse.getMonth() === currentDate.getMonth()
+    ) {
+      setSelectedDay(dateToUse.getDate());
     } else {
-      setInternalSelectedDate(selectedDate);
+      setSelectedDay(null); // Сброс, если месяц другой
     }
-  }, [selectedDate]);
+  }, [selectedDate, currentDate]);
 
   const validateAndSetDate = (date: Date) => {
     const now = new Date().toLocaleString("de-DE", {
@@ -66,8 +71,11 @@ const Calendar: React.FC<CalendarProps> = ({
       }, 2000);
       handleDateChange(newDate);
     } else {
-      setInternalSelectedDate(date);
-      handleDateChange(date);
+      // setInternalSelectedDate(date);
+      // handleDateChange(date);
+      if (date) {
+        handleDateChange(date);
+      }
     }
   };
 
@@ -98,6 +106,7 @@ const Calendar: React.FC<CalendarProps> = ({
       const month = currentDate.getMonth();
       const newDate = new Date(year, month, day);
       validateAndSetDate(newDate);
+      setSelectedDay(day);
     }
   };
 
@@ -119,7 +128,7 @@ const Calendar: React.FC<CalendarProps> = ({
     <>
       <ModalMessage message={successMessage} open={openModalMessage} />
 
-      {selectedDate && <p>selectedDate:{selectedDate}</p>}
+      {/* {selectedDate && <p>selectedDate:{selectedDate}</p>} */}
       <div className={`${styles["calendar"]} ${styles["rel"]}`}>
         <div className={`${styles["calendar-header"]}`}>
           <button
@@ -163,9 +172,9 @@ const Calendar: React.FC<CalendarProps> = ({
           {daysInMonth.map((day, index) => (
             <div
               key={index}
-              className={`${styles["calendar-day"]} 
-          
-              `}
+              className={`${styles["calendar-day"]} ${
+                day && day === selectedDay ? styles["selected"] : ""
+              }`}
               onClick={() => handleDayClick(day)}
             >
               {day}
@@ -178,12 +187,3 @@ const Calendar: React.FC<CalendarProps> = ({
 };
 
 export default Calendar;
-//  ${
-//    day &&
-//    internalSelectedDate &&
-//    day === internalSelectedDate?.getDate() &&
-//    currentDate.getMonth() === internalSelectedDate?.getMonth() &&
-//    currentDate.getFullYear() === internalSelectedDate?.getFullYear()
-//      ? styles["selected"]
-//      : ""
-//  }

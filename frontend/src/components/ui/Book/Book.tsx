@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import Calendar from "@/components/ui/Calendar/Calendar";
 import ClockUhr from "@/components/ui/ClockUhr/ClockUhr";
 import "./book.scss";
+import Button from "../Button/Button";
 
-// Типы для пропсов компонентов Calendar и ClockUhr
 interface CalendarProps {
   setErrors: (error: string) => void;
   setDate: (date: string) => void;
@@ -20,28 +20,24 @@ interface ClockUhrProps {
 
 const Book: React.FC = () => {
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Обнуляем время
+  today.setHours(0, 0, 0, 0);
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
 
-  const [checkIn, setCheckIn] = useState<string>(
-    today.toLocaleDateString("de-DE")
-  );
-
-  const [checkOut, setCheckOut] = useState<string>(
-    tomorrow.toLocaleDateString("de-DE")
-  );
-  const [checkInTime, setCheckInTime] = useState<string>("00:00"); // Время заезда
-  const [checkOutTime, setCheckOutTime] = useState<string>("00:00"); // Время выезда
+  const [checkIn, setCheckIn] = useState<Date>(new Date());
+  const [checkOut, setCheckOut] = useState<string>(tomorrow);
+  const [checkInTime, setCheckInTime] = useState<string>("00:00");
+  const [checkOutTime, setCheckOutTime] = useState<string>("00:00");
   const [guests, setGuests] = useState<number>(0);
   const [errors, setErrors] = useState<string>("");
   const [openCalendarIn, setOpenCalendarIn] = useState<boolean>(false);
   const [openCalendarOut, setOpenCalendarOut] = useState<boolean>(false);
 
-  // Функция для преобразования строки в объект Date
-  const parseDate = (dateString: string): Date => {
-    const [day, month, year] = dateString.split(".").map(Number);
-    return new Date(year, month - 1, day); // Месяцы в Date начинаются с 0
+  const parseDate = (date: Date): string => {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -53,22 +49,25 @@ const Book: React.FC = () => {
       !checkOutTime ||
       guests === 0
     ) {
-      setErrors("Заполните, пожалуйста, все поля формы.");
+      setErrors("Please fill out all fields.");
       setTimeout(() => {
         setErrors("");
       }, 2000);
       return;
     }
+
     const params = new URLSearchParams({
-      checkin: checkIn,
+      checkin: parseDate(checkIn),
       checkin_time: checkInTime,
-      checkout: checkOut,
+      checkout: parseDate(checkOut),
       checkout_time: checkOutTime,
       guests: guests.toString(),
     });
+
     window.history.pushState(null, "", `?${params.toString()}`);
-    setCheckIn(today.toLocaleDateString("de-DE"));
-    setCheckOut(tomorrow.toLocaleDateString("de-DE"));
+
+    setCheckIn(today);
+    setCheckOut(tomorrow);
     setCheckInTime("00:00");
     setCheckOutTime("00:00");
     setGuests(0);
@@ -77,47 +76,52 @@ const Book: React.FC = () => {
   };
 
   useEffect(() => {
-    const tempIn = parseDate(checkIn); // Преобразуем строку в объект Date
-    const tempOut = parseDate(checkOut);
-
-    if (tempIn >= tempOut) {
-      // Если дата заезда позже или равна дате выезда, сдвигаем checkOut на 1 день
-      const newCheckOut = new Date(tempIn);
-      newCheckOut.setDate(tempIn.getDate() + 1); // Увеличиваем дату на 1 день
-
-      // Обновляем состояние checkOut
-      setCheckOut(newCheckOut.toLocaleDateString("de-DE"));
-    }
-  }, [checkIn, checkOut]);
-
-  useEffect(() => {
     if (errors !== "") {
       setTimeout(() => {
         setErrors("");
       }, 1500);
     }
   }, [errors, openCalendarIn, openCalendarOut, checkIn, checkOut]);
-  const [check, setCheck] = useState<string>(today.toLocaleDateString("de-DE"));
+
+  const handleDateChangeIn = (date: Date) => {
+    if (date) {
+      setCheckIn(date);
+    }
+  };
+  const handleDateChangeOut = (date: Date) => {
+    if (date) {
+      setCheckOut(date);
+    }
+  };
+
+  useEffect(() => {
+    if (checkIn && checkOut) {
+      if (checkIn < today) {
+        setCheckIn(today);
+        setErrors("Check-in date cannot be in the past.");
+        setTimeout(() => {
+          setErrors("");
+        }, 1000);
+      }
+      if (checkIn >= checkOut) {
+        const today = new Date(checkIn);
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        setCheckOut(tomorrow);
+      }
+    }
+  }, [checkIn, checkOut]);
+
   return (
     <div className="book">
       <div className="container">
         {errors && <h3 className="errors center">{errors}</h3>}
-        {check && <p>{check}</p>}
-        <Calendar
-          selectedDate={check}
-          handleDateChange={setCheck}
-          // setErrors={setErrors}
-          // setDate={setCheckIn}
-          // closeCalendar={() => setOpenCalendarIn(false)}
-          // minDate={new Date()}
-          // flag="in"
-          // initialDate={
-          //   new Date(checkIn.split(".").reverse().join("-"))
-          // }
-        />
+
         <div className="book__wrap">
-          <h2>Бронирование</h2>
+          <h2>Booking</h2>
           <form className="book__date" onSubmit={handleSubmit}>
+            {/* Check-in */}
             <div
               className="book__section relative"
               onClick={() => {
@@ -130,32 +134,23 @@ const Book: React.FC = () => {
                   id="In"
                   type="text"
                   name="checkin"
-                  value={`${checkIn} ${checkInTime}`}
+                  value={parseDate(checkIn) + `  ${checkInTime}`}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setCheckIn(e.target.value)
                   }
-                  placeholder="Дата и время заезда"
+                  placeholder="Check-in date and time"
                   readOnly
                 />
                 <label className="text-field__label" htmlFor="In">
-                  Заезд
+                  Check-in
                 </label>
               </div>
+
               {openCalendarIn && (
                 <div className="book-calendar">
                   <Calendar
-                    selectedDate={
-                      new Date(checkIn.split(".").reverse().join("-"))
-                    }
-                    handleDateChange={setCheckIn}
-                    // setErrors={setErrors}
-                    // setDate={setCheckIn}
-                    // closeCalendar={() => setOpenCalendarIn(false)}
-                    // minDate={new Date()}
-                    // flag="in"
-                    // initialDate={
-                    //   new Date(checkIn.split(".").reverse().join("-"))
-                    // }
+                    selectedDate={checkIn}
+                    handleDateChange={handleDateChangeIn}
                   />
                   <ClockUhr
                     value={checkInTime}
@@ -166,6 +161,8 @@ const Book: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* Check-out */}
             <div
               className="book__section"
               onClick={() => {
@@ -178,42 +175,36 @@ const Book: React.FC = () => {
                   id="Out"
                   type="text"
                   name="checkout"
-                  value={`${checkOut} ${checkOutTime}`}
+                  value={parseDate(checkOut) + ` ${checkOutTime}`}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setCheckOut(e.target.value)
                   }
-                  placeholder="Дата и время выезда"
+                  placeholder="Check-out date and time"
                   readOnly
                 />
                 <label className="text-field__label" htmlFor="Out">
-                  Выезд
+                  Check-out
                 </label>
               </div>
               {openCalendarOut && (
                 <div className="calendar">
-                  <Calendar
-                    setErrors={setErrors}
-                    setDate={setCheckOut}
-                    closeCalendar={() => setOpenCalendarOut(false)}
-                    flag="out"
-                    minDate={
-                      checkIn
-                        ? new Date(checkIn.split(".").reverse().join("-"))
-                        : new Date()
-                    }
-                    initialDate={
-                      new Date(checkOut.split(".").reverse().join("-"))
-                    }
-                  />
-                  <ClockUhr
-                    value={checkOutTime}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setCheckOutTime(e.target.value)
-                    }
-                  />
+                  <div className="book-calendar">
+                    <Calendar
+                      selectedDate={checkOut}
+                      handleDateChange={handleDateChangeOut}
+                    />
+                    <ClockUhr
+                      value={checkOutTime}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setCheckOutTime(e.target.value)
+                      }
+                    />
+                  </div>
                 </div>
               )}
             </div>
+
+            {/* Guests */}
             <div
               className="book__section"
               onClick={() => {
@@ -230,17 +221,16 @@ const Book: React.FC = () => {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setGuests(Number(e.target.value))
                   }
-                  placeholder="Количество гостей"
+                  placeholder="Number of guests"
                   min="0"
                 />
                 <label className="text-field__label" htmlFor="Guests">
-                  Гости
+                  Guests
                 </label>
               </div>
             </div>
-            <button className="btn btn-success form-button" type="submit">
-              Найти
-            </button>
+
+            <Button buttonType="submit" buttonText="Search" />
           </form>
         </div>
       </div>

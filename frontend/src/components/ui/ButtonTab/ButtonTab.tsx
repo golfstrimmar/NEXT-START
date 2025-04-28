@@ -7,7 +7,7 @@ export default function ButtonTab({ refs, name }: ButtonTabProps) {
   return (
     <button
       type="button"
-      className="button-tab px-2 py-1 pl-6  relative"
+      className="button-tab px-2 py-1 pl-6  relative cursor-pointer"
       data-name={name}
       ref={(el) => {
         if (el && !refs.current.includes(el)) {

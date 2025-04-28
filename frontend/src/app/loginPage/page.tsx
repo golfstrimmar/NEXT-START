@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Eye from "@/assets/svg/eye.svg";
+import Image from "next/image";
+// import Eye from "/assets/svg/eye.svg";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import Button from "@/components/ui/Button/Button";
 import { useSelector, useDispatch } from "react-redux";
@@ -218,10 +219,18 @@ const LoginPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <Eye
+            {/* <Eye
               className="w-5 h-5 absolute right-2 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer opacity-50"
               onClick={handlerVisiblePassword}
-            ></Eye>
+            ></Eye> */}
+            <Image
+              className="w-5 h-5 absolute right-2 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer opacity-50"
+              src="/assets/svg/eye.svg"
+              alt="eye"
+              width={15}
+              height={15}
+              onClick={handlerVisiblePassword}
+            ></Image>
           </div>
         </div>
 

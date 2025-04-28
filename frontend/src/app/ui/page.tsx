@@ -10,6 +10,7 @@ import Select from "@/components/ui/Select/Select";
 import Calendar from "@/components/ui/Calendar/Calendar";
 import ClockUhr from "@/components/ui/ClockUhr/ClockUhr";
 import Book from "@/components/ui/Book/Book";
+import Tabs from "@/components/ui/Tabs/Tabs";
 // =======================
 
 // =======================
@@ -106,17 +107,40 @@ const Ui: React.FC<UiProps> = () => {
   const handlerUhrOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUhr(e.target.value);
   };
-  // =================================
+  // ==============для календаря===================
+  const [check, setCheck] = useState<Date>(new Date());
+
+  const handleDateChange = (date: Date) => {
+    if (date) {
+      setCheck(date);
+    }
+  };
+  // =============
   return (
     <div className={styles["ui-page"]}>
+      <hr className="my-4" />
+      <h2 className="text-[#006B36] text-2xl">Calendar</h2>
+      {check && <p>{new Date(check).toLocaleDateString("de-DE")} </p>}
+      <Calendar selectedDate={check} handleDateChange={handleDateChange} />
+
+      {/* ========Book=========== */}
+      <hr className="my-4" />
       <Book />
+
+      {/* ========Tabs=========== */}
+      <hr className="my-4" />
+
+      <h2 className="text-[#006B36] text-2xl">Tabs</h2>
+      <Tabs />
       {/* ========Select=========== */}
-      {/* <h4>sortOrder: {sortOrder}</h4> */}
-      {/* <Select setSortOrder={setSortOrder} selectItems={selectItems} /> */}
+      {/* <h4>sortOrder: {sortOrder}</h4>
+      <Select setSortOrder={setSortOrder} selectItems={selectItems} /> */}
       {/* ========Burger=========== */}
-      {/* <div className="m-4 bg-black">
+      <hr className="my-4" />
+      <h2 className="text-[#006B36] text-2xl">Burger-sm</h2>
+      <div className="m-4 bg-black">
         <Burger handlerburgerClick={() => setIsOpen(!isOpen)} isOpen={isOpen} />
-      </div> */}
+      </div>
       {/* ========Input=========== */}
       {/* <div className="m-4"></div>
       <p>Input value: {value}</p>
@@ -178,7 +202,9 @@ const Ui: React.FC<UiProps> = () => {
         onChange={handlerInputOnChangeRadio}
       /> */}
       {/* =======Button============ */}
-      {/* <Button onClick={onClickButton}>Bid Now</Button> */}
+      <hr className="my-4" />
+      <h2 className="text-[#006B36] text-2xl">Button</h2>
+      <Button onClick={onClickButton}>Bid Now</Button>
       {/* =================== */}
     </div>
   );

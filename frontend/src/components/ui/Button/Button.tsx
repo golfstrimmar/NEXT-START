@@ -6,6 +6,7 @@ interface ButtonProps {
   children: React.ReactNode;
   buttonText?: string;
   buttonValue?: string;
+  buttonType?: string;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -13,6 +14,7 @@ const Button: React.FC<ButtonProps> = ({
   children,
   buttonText,
   buttonValue,
+  buttonType,
 }) => {
   const [ripples, setRipples] = useState<
     { x: number; mValue: number; y: number; key: number }[]
@@ -43,6 +45,7 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <>
       <button
+        type={buttonType}
         onClick={(e) => {
           handleButtonClick(e);
         }}

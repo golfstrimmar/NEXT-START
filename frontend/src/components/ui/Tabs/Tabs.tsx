@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef } from "react";
-import styles from "./Tabs.module.scss";
+import "./Tabs.scss";
 import ButtonTab from "@/components/ui/ButtonTab/ButtonTab";
 interface TabsProps {
   handlerburgerClick: () => void;
