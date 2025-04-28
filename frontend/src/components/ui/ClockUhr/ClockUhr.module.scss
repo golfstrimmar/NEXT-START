@@ -1,9 +1,13 @@
-@import "@/scss/common/colors";
+@import '@/scss/common/colors';
+
+.clock-uhr {}
 
 .timeUhr {
   position: relative;
-  background-color: azure;
 
+  &.disabled {
+    opacity: 0.5;
+  }
 }
 
 .time-display {
@@ -26,7 +30,6 @@
 }
 
 .clock-face-display {
-
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -51,8 +54,8 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   display: flex;
-  flex-direction: column;
-  row-gap: 80px;
+  gap: 100px;
+  min-width: 650px;
 
   @media (max-width: 767px) {
     flex-direction: column;

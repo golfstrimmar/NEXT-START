@@ -111,74 +111,74 @@ const Ui: React.FC<UiProps> = () => {
     <div className={styles["ui-page"]}>
       <Book />
       {/* ========Select=========== */}
-      <h4>sortOrder: {sortOrder}</h4>
-      <Select setSortOrder={setSortOrder} selectItems={selectItems} />
+      {/* <h4>sortOrder: {sortOrder}</h4> */}
+      {/* <Select setSortOrder={setSortOrder} selectItems={selectItems} /> */}
       {/* ========Burger=========== */}
-      <div className="m-4 bg-black">
+      {/* <div className="m-4 bg-black">
         <Burger handlerburgerClick={() => setIsOpen(!isOpen)} isOpen={isOpen} />
-      </div>
+      </div> */}
       {/* ========Input=========== */}
-      <div className="m-4"></div>
+      {/* <div className="m-4"></div>
       <p>Input value: {value}</p>
       <Input
         typeInput="text"
         data="Name"
         value={value}
         onChange={handlerInputOnChange}
-      />
+      /> */}
       {/* ========Input===textarea======== */}
-      <div className="m-4"></div>
+      {/* <div className="m-4"></div>
       <Input
         typeInput="textarea"
         data="TextareaName"
         value={valueTextarea}
         onChange={onChangeTextarea}
-      />
+      /> */}
       {/* ========Input number=========== */}
-      <div className="m-4"></div>
+      {/* <div className="m-4"></div>
       <p>Input valueNumber: {valueNumber}</p>
       <Input
         typeInput="number"
         data="Number"
         value={valueNumber}
         onChange={handlerNumberOnChange}
-      />
+      /> */}
       {/* ================= */}
-      <p>End Time: {endTime}</p>
+      {/* <p>End Time: {endTime}</p>
       <Input
         typeInput="datetime-local"
         data="End Time"
         value={endTime}
         onChange={handleEndTimeChange}
-      />
+      /> */}
       {/* =======Calendar========== */}
-      <div className="mt-4">==========</div>
+      {/* <div className="mt-4">==========</div>
       <h5>Uhr: {Uhr}</h5>
       <div className="mt-4">==========</div>
-      <Calendar setFinishDate={setFinishDate} />
+      <Calendar setFinishDate={setFinishDate} /> */}
       {/* ============================== */}
-      <div className="m-4"></div>
+      {/* <div className="m-4"></div>
       <ClockUhr value={Uhr} onChange={handlerUhrOnChange} />
       {/* =======InputCheck============ */}
-      <div className="m-4"></div>
+      {/* <div className="m-4"></div>
       <InputCheck
         type="checkbox"
         data="Check"
         value={valueCheck}
         checkedValue="option1"
         onChange={handlerCheckOnChange}
-      />
+      />  */}
       {/* ========InputRadio=========== */}
-      <div className="m-4"></div>
+      {/* <div className="m-4"></div>
       <InputRadio
         type="radio"
         data="RadioOption"
         options={RadioOptions}
         value={selectedOptionRadio}
         onChange={handlerInputOnChangeRadio}
-      />
+      /> */}
       {/* =======Button============ */}
-      <Button onClick={onClickButton}>Bid Now</Button>
+      {/* <Button onClick={onClickButton}>Bid Now</Button> */}
       {/* =================== */}
     </div>
   );

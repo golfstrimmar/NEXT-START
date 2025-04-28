@@ -2,58 +2,47 @@
 import React, { useState, useEffect } from "react";
 import styles from "./ClockUhr.module.scss";
 
-interface ClockUhrProps {
+interface InputProps {
+  data: string;
   value: string;
-  onChange: (event: { target: { value: string; name: string } }) => void;
+  disabled?: boolean;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
 }
 
-const ClockUhr: React.FC<ClockUhrProps> = ({ value, onChange }) => {
-  const hours: number[] = Array.from({ length: 24 }, (_, i) => i);
-  const minutes: number[] = Array.from({ length: 12 }, (_, i) => i * 5);
+const ClockUhr: React.FC<InputProps> = ({ value, onChange, disabled }) => {
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+  const minutes = Array.from({ length: 12 }, (_, i) => i * 5);
 
-  // Функция для поиска ближайшей минуты
-  const getClosestMinute = (min: number): number => {
+  // Объявляем getClosestMinute перед useState
+  const getClosestMinute = (min: number) => {
     return minutes.reduce((prev, curr) =>
       Math.abs(curr - min) < Math.abs(prev - min) ? curr : prev
     );
   };
 
-  // Инициализация состояний с проверкой value
-  const [hour, setHour] = useState<string>(() => {
-    if (value && value.includes(":")) {
-      return String(Number(value.split(":")[0])).padStart(2, "0");
-    }
-    return "00";
-  });
+  const [hour, setHour] = useState<string>(
+    value ? value.split(":")[0].padStart(2, "0") : "00"
+  );
   const [minute, setMinute] = useState<string>(() => {
-    if (value && value.includes(":")) {
-      const minValue = Number(value.split(":")[1]);
-      return String(getClosestMinute(minValue)).padStart(2, "0");
-    }
-    return "00";
+    const minValue = value ? Number(value.split(":")[1]) : 0;
+    return getClosestMinute(minValue).toString().padStart(2, "0");
   });
   const [time, setTime] = useState<string>(value || "00:00");
 
-  // Обновление состояния при изменении value
   useEffect(() => {
-    if (value && value.includes(":")) {
-      const [h, m] = value.split(":").map(Number);
-      setHour(String(h).padStart(2, "0"));
-      setMinute(String(getClosestMinute(m)).padStart(2, "0"));
-      setTime(value);
-    } else {
-      setHour("00");
-      setMinute("00");
-      setTime("00:00");
-    }
+    console.log("==value ClockUhr==", value);
+    const cleanedValue = value ? value.trim() : "00:00";
+    setTime(cleanedValue);
+    setHour(cleanedValue ? cleanedValue.split(":")[0].padStart(2, "0") : "00");
+    setMinute(() => {
+      const minValue = cleanedValue ? Number(cleanedValue.split(":")[1]) : 0;
+      return getClosestMinute(minValue).toString().padStart(2, "0");
+    });
   }, [value]);
 
-  // Вычисление позиции элементов на циферблате
-  const getPosition = (
-    index: number,
-    total: number,
-    radius: number
-  ): { x: number; y: number } => {
+  const getPosition = (index: number, total: number, radius: number) => {
     const angle = (index / total) * 360 - 90;
     const rad = (angle * Math.PI) / 180;
     const x = radius * Math.cos(rad);
@@ -61,38 +50,35 @@ const ClockUhr: React.FC<ClockUhrProps> = ({ value, onChange }) => {
     return { x, y };
   };
 
-  // Обработчик выбора времени
   const handleTimeClick = (hour: number, minute: number) => {
-    const formattedHour = String(hour).padStart(2, "0");
-    const formattedMinute = String(minute).padStart(2, "0");
-    const newTime = `${formattedHour}:${formattedMinute}`;
-
-    // Формируем синтетическое событие
+    if (disabled) return;
+    const newHour = Math.floor(hour).toString().padStart(2, "0"); // Гарантируем число
+    const newMinute = Math.floor(minute).toString().padStart(2, "0"); // Гарантируем число
+    const newtime = `${newHour}:${newMinute}`;
+    console.log("<====newtime====>", { newtime, hour, minute });
     const syntheticEvent = {
-      target: {
-        value: newTime,
-        name: "time",
-      },
-    };
-
-    setHour(formattedHour);
-    setMinute(formattedMinute);
-    setTime(newTime);
+      target: { value: newtime },
+    } as React.ChangeEvent<HTMLInputElement>;
+    setHour(newHour);
+    setMinute(newMinute);
+    setTime(newtime);
     onChange(syntheticEvent);
   };
 
   return (
-    <div className={styles.timeUhr}>
+    <div className={`clock-uhr ${disabled ? "opacity-30" : ""}`}>
       <div className={styles["clock-picker"]}>
         <div className={styles["clock-face"]}>
           <div className={styles["clock-face-display"]}>
             <div
               className={`${styles["time-display"]} ${styles["time-display-hour"]}`}
             >
-              {hour}
+              {time ? time.split(":")[0] : "00"}
             </div>
             <span>:</span>
-            <div className={styles["time-display"]}>{minute}</div>
+            <div className={`${styles["time-display"]}`}>
+              {time ? time.split(":")[1] : "00"}
+            </div>
           </div>
           {hours.map((h) => {
             const { x, y } = getPosition(h, 24, 80);
@@ -100,7 +86,7 @@ const ClockUhr: React.FC<ClockUhrProps> = ({ value, onChange }) => {
               <div
                 key={h}
                 className={`${styles.hour} ${
-                  String(h).padStart(2, "0") === hour ? styles.selected : ""
+                  h.toString().padStart(2, "0") === hour ? styles.selected : ""
                 }`}
                 style={{
                   left: `calc(50% + ${Math.round(x * 1.4)}px)`,
@@ -116,12 +102,14 @@ const ClockUhr: React.FC<ClockUhrProps> = ({ value, onChange }) => {
         </div>
         <div className={styles["minutes-face"]}>
           <div className={styles["clock-face-display"]}>
-            <div className={styles["time-display"]}>{hour}</div>
+            <div className={`${styles["time-display"]}`}>
+              {time ? time.split(":")[0] : "00"}
+            </div>
             <span>:</span>
             <div
               className={`${styles["time-display"]} ${styles["time-display-hour"]}`}
             >
-              {minute}
+              {time ? time.split(":")[1] : "00"}
             </div>
           </div>
           {minutes.map((m) => {
@@ -130,7 +118,9 @@ const ClockUhr: React.FC<ClockUhrProps> = ({ value, onChange }) => {
               <div
                 key={m}
                 className={`${styles.minute} ${
-                  String(m).padStart(2, "0") === minute ? styles.selected : ""
+                  m.toString().padStart(2, "0") === minute
+                    ? styles.selected
+                    : ""
                 }`}
                 style={{
                   left: `calc(50% + ${Math.round(x)}px)`,

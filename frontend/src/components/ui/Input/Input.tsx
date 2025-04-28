@@ -14,7 +14,9 @@ interface InputProps {
     | "password"
     | "search"
     | "time";
+  id: string;
   data: string;
+  name: string;
   value: string;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -27,8 +29,10 @@ interface InputProps {
 }
 
 const Input: React.FC<InputProps> = ({
+  id,
   typeInput,
   data,
+  name,
   value,
   onChange,
   inputRef,
@@ -40,8 +44,8 @@ const Input: React.FC<InputProps> = ({
       {typeInput === "textarea" ? (
         <textarea
           rows="5"
-          id={data}
-          name={data}
+          id={id}
+          name={name}
           value={value}
           ref={inputRef as RefObject<HTMLTextAreaElement>}
           onChange={onChange}
@@ -53,9 +57,9 @@ const Input: React.FC<InputProps> = ({
         />
       ) : (
         <input
-          id={data}
+          id={id}
           ref={inputRef as RefObject<HTMLInputElement>}
-          name={data}
+          name={name}
           type={typeInput}
           value={value}
           onChange={onChange}

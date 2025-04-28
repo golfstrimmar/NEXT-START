@@ -1,66 +1,82 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import styles from "./Calendar.module.scss";
+import ModalMessage from "@/components/ModalMessage/ModalMessage";
 
-// Типы для пропсов компонента
 interface CalendarProps {
-  setDate: (date: string) => void;
-  closeCalendar: () => void;
-  minDate: Date | null;
-  initialDate: Date | null;
-  setErrors: (error: string) => void;
-  flag: "in" | "out";
+  selectedDate: Date | null;
+  handleDateChange: (date: Date) => void;
 }
 
-const weekdays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
-const months = [
-  "Январь",
-  "Февраль",
-  "Март",
-  "Апрель",
-  "Май",
-  "Июнь",
-  "Июль",
-  "Август",
-  "Сентябрь",
-  "Октябрь",
-  "Ноябрь",
-  "Декабрь",
+const weekdays: string[] = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+const months: string[] = [
+  "Januar",
+  "Februar",
+  "März",
+  "April",
+  "Mai",
+  "Juni",
+  "Juli",
+  "August",
+  "September",
+  "Oktober",
+  "November",
+  "Dezember",
 ];
 
 const Calendar: React.FC<CalendarProps> = ({
-  setDate,
-  closeCalendar,
-  minDate,
-  initialDate,
-  setErrors,
-  flag,
+  selectedDate,
+  handleDateChange,
 }) => {
-  const [currentDate, setCurrentDate] = useState<Date>(() => {
-    const date = initialDate || new Date();
-    date.setHours(0, 0, 0, 0); // Обнуляем время
-    return date;
-  });
-
-  const [selectedDate, setSelectedDate] = useState<Date | null>(() => {
-    const date = initialDate || null;
-    if (date) date.setHours(0, 0, 0, 0); // Обнуляем время
-    return date;
-  });
+  const [successMessage, setSuccessMessage] = useState<string>("");
+  const [openModalMessage, setOpenModalMessage] = useState<boolean>(false);
+  const [internalSelectedDate, setInternalSelectedDate] = useState<Date | null>(
+    selectedDate
+  );
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
   useEffect(() => {
-    const date = initialDate || new Date();
-    date.setHours(0, 0, 0, 0); // Обнуляем время
-    setCurrentDate(date);
-    setSelectedDate(initialDate ? date : null);
-  }, [initialDate]);
+    if (selectedDate === null) {
+      setInternalSelectedDate(currentDate);
+    } else {
+      setInternalSelectedDate(selectedDate);
+    }
+  }, [selectedDate]);
+
+  const validateAndSetDate = (date: Date) => {
+    const now = new Date().toLocaleString("de-DE", {
+      timeZone: "Europe/Berlin",
+    });
+    const selected = new Date(
+      date.toLocaleString("de-DE", { timeZone: "Europe/Berlin" })
+    );
+    selected.setHours(0, 0, 0, 0);
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+
+    if (selected < today) {
+      setSuccessMessage("Date must be in the future!");
+      setOpenModalMessage(true);
+      const newDate = new Date(today);
+      setInternalSelectedDate(newDate);
+      setTimeout(() => {
+        setSuccessMessage("");
+        setOpenModalMessage(false);
+      }, 2000);
+      handleDateChange(newDate);
+    } else {
+      setInternalSelectedDate(date);
+      handleDateChange(date);
+    }
+  };
 
   const getDaysInMonth = (date: Date): (number | null)[] => {
     const year = date.getFullYear();
     const month = date.getMonth();
     const startOfMonth = new Date(year, month, 1);
     const endOfMonth = new Date(year, month + 1, 0);
-    const days = [];
+    const days: (number | null)[] = [];
 
     const firstDayOfMonth =
       startOfMonth.getDay() === 0 ? 6 : startOfMonth.getDay() - 1;
@@ -81,129 +97,93 @@ const Calendar: React.FC<CalendarProps> = ({
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
       const newDate = new Date(year, month, day);
-      newDate.setHours(0, 0, 0, 0); // Обнуляем время
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Обнуляем время для текущей даты
-
-      // Проверяем, что дата не раньше текущей
-      if (newDate < today) {
-        setErrors("Дата не может быть меньше текущей.");
-        return;
-      }
-
-      // Проверяем minDate (например, выезд не раньше заезда)
-      if (minDate && newDate < minDate && flag === "out") {
-        setErrors("Дата отъезда должна быть не раньше даты приезда.");
-        return;
-      }
-      if (minDate) {
-        const minCheckOutDate = new Date(minDate);
-        minCheckOutDate.setDate(minCheckOutDate.getDate() + 1); // Минимальная дата выезда = minDate + 1 день
-        if (newDate < minCheckOutDate && flag === "out") {
-          setErrors("Дата выезда должна быть минимум на день позже заезда.");
-          return;
-        }
-      }
-      setSelectedDate(newDate);
-      const formattedDate = newDate.toLocaleDateString("de-DE"); // Формат DD.MM.YYYY
-      setDate(formattedDate);
-      closeCalendar();
+      validateAndSetDate(newDate);
     }
   };
 
   const handleMonthChange = (direction: number) => {
     const newDate = new Date(currentDate);
     newDate.setMonth(currentDate.getMonth() + direction);
-    newDate.setHours(0, 0, 0, 0); // Обнуляем время
     setCurrentDate(newDate);
   };
 
   const handleYearChange = (direction: number) => {
     const newDate = new Date(currentDate);
     newDate.setFullYear(currentDate.getFullYear() + direction);
-    newDate.setHours(0, 0, 0, 0); // Обнуляем время
     setCurrentDate(newDate);
   };
 
   const daysInMonth = getDaysInMonth(currentDate);
 
   return (
-    <div className={`${styles["calendar"]} ${styles["rel"]}`}>
-      <div className={`${styles["calendar-header"]}`}>
-        <button
-          type="button"
-          className={`${styles["arrow-btn"]} ${styles["prev-year"]}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleYearChange(-1);
-          }}
-        >
-          {"<<"}
-        </button>
-        <button
-          type="button"
-          className={`${styles["arrow-btn"]} ${styles["prev-month"]}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleMonthChange(-1);
-          }}
-        >
-          {"<"}
-        </button>
-        <span>
-          {months[currentDate.getMonth()]} {currentDate.getFullYear()}
-        </span>
-        <button
-          type="button"
-          className={`${styles["arrow-btn"]} ${styles["next-month"]}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleMonthChange(1);
-          }}
-        >
-          {">"}
-        </button>
-        <button
-          type="button"
-          className={`${styles["arrow-btn"]} ${styles["next-year"]}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleYearChange(1);
-          }}
-        >
-          {">>"}
-        </button>
-      </div>
-      <div className={`${styles["calendar-grid"]}`}>
-        {weekdays.map((day, index) => (
-          <div key={index} className={`${styles["calendar-day"]}`}>
-            {day}
-          </div>
-        ))}
-        {daysInMonth.map((day, index) => {
-          const isSelected =
-            day &&
-            selectedDate &&
-            day === selectedDate.getDate() &&
-            currentDate.getMonth() === selectedDate.getMonth() &&
-            currentDate.getFullYear() === selectedDate.getFullYear();
+    <>
+      <ModalMessage message={successMessage} open={openModalMessage} />
 
-          return (
+      {selectedDate && <p>selectedDate:{selectedDate}</p>}
+      <div className={`${styles["calendar"]} ${styles["rel"]}`}>
+        <div className={`${styles["calendar-header"]}`}>
+          <button
+            type="button"
+            className={`${styles["arrow-btn"]} ${styles["prev-year"]}`}
+            onClick={() => handleYearChange(-1)}
+          >
+            &lt;&lt;
+          </button>
+          <button
+            type="button"
+            className={`${styles["arrow-btn"]} ${styles["prev-month"]}`}
+            onClick={() => handleMonthChange(-1)}
+          >
+            &lt;
+          </button>
+          <span>
+            {months[currentDate.getMonth()]} {currentDate.getFullYear()}
+          </span>
+          <button
+            type="button"
+            className={`${styles["arrow-btn"]} ${styles["next-month"]}`}
+            onClick={() => handleMonthChange(1)}
+          >
+            &gt;
+          </button>
+          <button
+            type="button"
+            className={`${styles["arrow-btn"]} ${styles["next-year"]}`}
+            onClick={() => handleYearChange(1)}
+          >
+            &gt;&gt;
+          </button>
+        </div>
+        <div className={`${styles["calendar-grid"]}`}>
+          {weekdays.map((day, index) => (
+            <div key={index} className={`${styles["calendar-day"]}`}>
+              {day}
+            </div>
+          ))}
+          {daysInMonth.map((day, index) => (
             <div
               key={index}
-              className={`${styles["calendar-day"]} ${
-                isSelected ? styles["selected"] : ""
-              }`}
+              className={`${styles["calendar-day"]} 
+          
+              `}
               onClick={() => handleDayClick(day)}
             >
               {day}
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
 export default Calendar;
+//  ${
+//    day &&
+//    internalSelectedDate &&
+//    day === internalSelectedDate?.getDate() &&
+//    currentDate.getMonth() === internalSelectedDate?.getMonth() &&
+//    currentDate.getFullYear() === internalSelectedDate?.getFullYear()
+//      ? styles["selected"]
+//      : ""
+//  }

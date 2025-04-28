@@ -26,7 +26,8 @@ const Book: React.FC = () => {
 
   const [checkIn, setCheckIn] = useState<string>(
     today.toLocaleDateString("de-DE")
-  ); // Формат DD.MM.YYYY
+  );
+
   const [checkOut, setCheckOut] = useState<string>(
     tomorrow.toLocaleDateString("de-DE")
   );
@@ -96,16 +97,29 @@ const Book: React.FC = () => {
       }, 1500);
     }
   }, [errors, openCalendarIn, openCalendarOut, checkIn, checkOut]);
-
+  const [check, setCheck] = useState<string>(today.toLocaleDateString("de-DE"));
   return (
     <div className="book">
       <div className="container">
         {errors && <h3 className="errors center">{errors}</h3>}
+        {check && <p>{check}</p>}
+        <Calendar
+          selectedDate={check}
+          handleDateChange={setCheck}
+          // setErrors={setErrors}
+          // setDate={setCheckIn}
+          // closeCalendar={() => setOpenCalendarIn(false)}
+          // minDate={new Date()}
+          // flag="in"
+          // initialDate={
+          //   new Date(checkIn.split(".").reverse().join("-"))
+          // }
+        />
         <div className="book__wrap">
           <h2>Бронирование</h2>
           <form className="book__date" onSubmit={handleSubmit}>
             <div
-              className="book__section"
+              className="book__section relative"
               onClick={() => {
                 setOpenCalendarIn((prev) => !prev);
                 setOpenCalendarOut(false);
@@ -128,16 +142,20 @@ const Book: React.FC = () => {
                 </label>
               </div>
               {openCalendarIn && (
-                <div className="calendar">
+                <div className="book-calendar">
                   <Calendar
-                    setErrors={setErrors}
-                    setDate={setCheckIn}
-                    closeCalendar={() => setOpenCalendarIn(false)}
-                    minDate={new Date()}
-                    flag="in"
-                    initialDate={
+                    selectedDate={
                       new Date(checkIn.split(".").reverse().join("-"))
                     }
+                    handleDateChange={setCheckIn}
+                    // setErrors={setErrors}
+                    // setDate={setCheckIn}
+                    // closeCalendar={() => setOpenCalendarIn(false)}
+                    // minDate={new Date()}
+                    // flag="in"
+                    // initialDate={
+                    //   new Date(checkIn.split(".").reverse().join("-"))
+                    // }
                   />
                   <ClockUhr
                     value={checkInTime}
