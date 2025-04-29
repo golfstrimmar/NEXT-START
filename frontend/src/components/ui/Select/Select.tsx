@@ -5,14 +5,13 @@ import Image from "next/image";
 
 interface SelectItem {
   name: string;
-  value: "asc" | "desc";
+  value: string;
 }
 
 interface SelectProps {
   selectItems: SelectItem[];
-  value: "asc" | "desc";
+  value: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  setSortOrder: React.Dispatch<React.SetStateAction<"asc" | "desc">>;
   name?: string;
   className?: string;
 }
@@ -21,8 +20,7 @@ export default function Select({
   selectItems,
   value,
   onChange,
-
-  name = "category",
+  name = "sort-order", // Изменено по умолчанию на sort-order для сортировки
   className = "w-full",
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,14 +52,14 @@ export default function Select({
   }, []);
 
   return (
-    <div className={`relative ${className} `}>
+    <div className={`relative ${className}`}>
       <div
         className={`select-custom p-2 border border-gray-300 rounded bg-white cursor-pointer flex justify-between items-center transition-all duration-300 ${
           isOpen ? "run" : ""
         }`}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span>{selectedItem?.name || "Select a category"}</span>
+        <span>{selectedItem?.name || "Select sort order"}</span>
         <Image
           src="/assets/svg/chevron-down.svg"
           alt="chevron-down"
@@ -73,10 +71,10 @@ export default function Select({
         />
       </div>
       <div
-        className={`z-10 w-full mt-1 bg-white  max-h-60 overflow-auto transition-all duration-300  ease-in-out next-hidden`}
+        className={`z-10 w-full mt-1 bg-white max-h-60 overflow-auto transition-all duration-300 ease-in-out next-hidden`}
       >
-        <div className={`next-hidden__wrap select-list  `}>
-          <ul className="">
+        <div className="next-hidden__wrap select-list">
+          <ul>
             {selectItems.map((item, index) => (
               <li
                 key={index}
