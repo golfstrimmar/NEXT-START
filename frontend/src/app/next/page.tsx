@@ -7,6 +7,7 @@ import Image from "next/image";
 import Button from "@/components/ui/Button/Button";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import ButtonTab from "@/components/ButtonTab";
+import Tabs from "@/components/ui/Tabs/Tabs";
 interface DashItem {
   id: string;
   name: string;
@@ -39,14 +40,22 @@ const NextPage = () => {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
-    if (dashItems.length > 0) {
-      dashItems.forEach((item) => {
-        if (!categories.includes(item.category)) {
-          setCategories((prevCategories) => [...prevCategories, item.category]);
-        }
-      });
+    if (dashItems?.length > 0) {
+      const uniqueCategories = Array.from(
+        new Set(
+          dashItems.map((item) => item.category).filter((category) => category)
+        )
+      );
+
+      setCategories(uniqueCategories);
     }
   }, [dashItems]);
+
+  useEffect(() => {
+    if (categories) {
+      console.log("<==== categories====>", categories);
+    }
+  }, [categories]);
 
   const fetchNotes = async () => {
     try {
@@ -181,25 +190,25 @@ const NextPage = () => {
               <TrashIcon className="w-5 h-5 text-red-500" />
             </button>
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-2 mt-2">
             {categories?.length > 0 &&
               categories.map((category, index) => (
-                <div className="flex flex-col" key={index}>
+                <div key={index} className="border border-slate-400 ">
                   <ButtonTab refs={refs} name={category} />
-                  <div className="next-hidden">
-                    <div className="next-hidden__wrap">
-                      {category}
-                      {/* {dashItems
+                  <div className="next-hidden ">
+                    <div className="next-hidden__wrap pl-2">
+                      {/* {category} */}
+                      {dashItems
                         ?.filter((item) => item.category === category)
                         .map((item) => (
                           <button
                             key={item.id}
                             type="button"
-                            className={`p-1 border border-slate-400  transition-all duration-200  flex justify-between items-center
+                            className={`p-1 w-full   border border-slate-400  transition-all duration-200  flex justify-between items-center 
                 ${
                   actItem === item.id
-                    ? "bg-slate-500 text-white"
-                    : "bg-slate-0 hover:bg-slate-100"
+                    ? "bg-slate-500 hover:bg-slate-600 text-white"
+                    : "bg-slate-200 hover:bg-slate-300"
                 }
                 `}
                             onClick={(e) => {
@@ -240,68 +249,14 @@ const NextPage = () => {
                               }}
                             />
                           </button>
-                        ))} */}
+                        ))}
                     </div>
                   </div>
                 </div>
               ))}
           </div>
         </div>
-        {/* {categories?.length > 0 &&
-              categories?.map((category) =>
-                dashItems
-                  ?.filter((item) => item.category === category)
-                  .map((item, index) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className={`p-1 border border-slate-400  transition-all duration-200  flex justify-between items-center
-                ${
-                  actItem === item.id
-                    ? "bg-slate-500 text-white"
-                    : "bg-slate-0 hover:bg-slate-100"
-                }
-                `}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setValue((prev: string[]) => {
-                          return actItem === item.id ? [] : [...item?.value];
-                        });
-                        setActItem((prev) => {
-                          return actItem !== item.id ? item.id : "";
-                        });
-                      }}
-                    >
-                      {item.name}
-                      <Image
-                        src="/assets/svg/edit.svg"
-                        alt="arrow"
-                        width={25}
-                        height={25}
-                        className="fill-slate-500 border-cyan-600 border-2 rounded-full ml-auto"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsOpen((prev) => !prev);
-                          setItemToEdit(item);
-                          setOnEdit(true);
-                        }}
-                      />
-                      <Image
-                        src="/assets/svg/cross.svg"
-                        alt="arrow"
-                        width={25}
-                        height={25}
-                        className="fill-slate-500 border-cyan-600 border-2 rounded-full "
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          holderDelite(item?.id);
-                        }}
-                      />
-                    </button>
-                  ))
-              )} */}
-        {/* </div>
-        </div> */}
+
         <div
           className={`outline-4  ${
             isCopied

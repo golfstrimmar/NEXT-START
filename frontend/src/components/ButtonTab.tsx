@@ -7,7 +7,7 @@ export default function ButtonTab({ refs, name }: ButtonTabProps) {
   return (
     <button
       type="button"
-      className="button-tab"
+      className="button-tab w-full p-2 border border-gray-300 rounded bg-white cursor-pointer transition-all duration-300"
       data-name={name}
       ref={(el) => {
         if (el && !refs.current.includes(el)) {

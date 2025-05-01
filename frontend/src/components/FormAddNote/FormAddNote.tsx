@@ -57,7 +57,7 @@ const FormNote: React.FC<FormNoteProps> = ({
           .split("\n")
           .map((line) => line.trim())
           .filter((line) => line !== ""),
-        category: category.trim() || "без категории", // Если категория не указана
+        category: category.trim(), // Если категория не указана
       });
 
       const response = await fetch(url, {
@@ -119,7 +119,7 @@ const FormNote: React.FC<FormNoteProps> = ({
         </label>
         <Input
           typeInput="text"
-          value={category}
+          value={category || ""}
           onChange={(e) => setCategory(e.target.value)}
           disabled={isLoading}
         />
