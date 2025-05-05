@@ -1,7 +1,4 @@
-mongodb+srv://golfstrimmar18:rInlwKY7WzFsQtoo@cluster-e-commerce-next.qoipa.mongodb.net/
-google---
-Client ID = 1027625437156-loc32o6vvdk80mn2cd1q9uorpd72c8no.apps.googleusercontent.com
-Client secret = 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
+
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
