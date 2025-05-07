@@ -1,113 +1,84 @@
-const fs = require("fs");
-const path = require("path");
-const readline = require("readline");
+import fs from 'fs'
+import path from 'path'
+import readline from 'readline'
+import { fileURLToPath } from 'url'
 
-// Создаем интерфейс для ввода с командной строки
+// Получаем эквивалент __dirname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+// Создаем интерфейс для ввода
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-});
+})
 
 const createReactComponent = (componentName) => {
-  // Путь к папке компонента в уже существующей структуре src/Components
-  const componentFolder = path.join(
-    __dirname,
-    "src",
-    "Components",
-    componentName
-  );
+  // Путь к папке компонента
+  const componentFolder = path.join(__dirname, 'src', 'Components', componentName)
 
-  // Проверка, существует ли папка компонента, если нет - создаем
+  // Создаем папку, если не существует
   if (!fs.existsSync(componentFolder)) {
-    fs.mkdirSync(componentFolder, { recursive: true });
-    console.log(`Папка для компонента ${componentName} была успешно создана.`);
+    fs.mkdirSync(componentFolder, { recursive: true })
+    console.log(`Папка для компонента ${componentName} создана.`)
   } else {
-    console.log(`Папка для компонента ${componentName} уже существует.`);
+    console.log(`Папка ${componentName} уже существует.`)
   }
 
-  // Путь к файлу компонента
-  const componentFile = path.join(componentFolder, `${componentName}.tsx`);
+  // Пути к файлам
+  const componentFile = path.join(componentFolder, `${componentName}.tsx`)
+  const scssFile = path.join(componentFolder, `${componentName}.module.scss`)
 
-  // Путь к файлу SCSS
-  const scssFile = path.join(componentFolder, `${componentName}.module.scss`);
-
-  // Структура компонента (JSX)
+  // Шаблон компонента
   const componentContent = `
 'use client';
-import React , { useState, useEffect } from 'react';
+import React from 'react';
 import styles from './${componentName}.module.scss';
-// =================================
 
-// =================================
-const ${componentName}: React.FC<${componentName}Props> = ({ handlerburgerClick, isOpen }) => {
- 
-  // ==============================
-  // ==============================
+interface ${componentName}Props {
+  // Определи пропсы, если нужно
+}
+
+const ${componentName}: React.FC<${componentName}Props> = () => {
   return (
-    <div className="${componentName.toLowerCase()}">
-        <div className={\`\${styles.burger} \${isOpen ? styles.run : ''}\`}
-      onClick={() => {
-        handlerburgerClick();
-      }}>
-            <div className="${componentName.toLowerCase()}-"></div>
-            <div className="${componentName.toLowerCase()}-"></div>
-            <div className="${componentName.toLowerCase()}-"></div>
-        </div>
+    <div className={styles.${componentName.toLowerCase()}}>
+      <div className={styles['${componentName.toLowerCase()}__item']}></div>
+      <div className={styles['${componentName.toLowerCase()}__item']}></div>
+      <div className={styles['${componentName.toLowerCase()}__item']}></div>
     </div>
   );
 };
 
 export default ${componentName};
-  `;
+  `.trim()
 
-  // Структура SCSS
+  // Шаблон SCSS
   const scssContent = `
-  @import '@/scss/common/colors';
+@import '@/scss/common/colors';
+
 .${componentName.toLowerCase()} {
-  
-  &- {
-   
-
-    &- {
-     
-    }
-
-    &- {
-     
-    }
-
-    &- {
-     
-    }
+  &__item {
+    /* Стили для элементов */
   }
 }
-  `;
+  `.trim()
 
-  // Запись содержимого в файл компонента (JSX)
-  fs.writeFileSync(componentFile, componentContent, "utf8");
-  console.log(
-    `Компонент ${componentName} был успешно создан в ${componentFile}`
-  );
+  // Записываем файлы
+  fs.writeFileSync(componentFile, componentContent, 'utf8')
+  console.log(`Компонент ${componentName}.tsx создан: ${componentFile}`)
+  fs.writeFileSync(scssFile, scssContent, 'utf8')
+  console.log(`Стили ${componentName}.module.scss созданы: ${scssFile}`)
+}
 
-  // Запись содержимого в файл SCSS
-  fs.writeFileSync(scssFile, scssContent, "utf8");
-  console.log(
-    `Файл стилей ${componentName}.scss был успешно создан в ${scssFile}`
-  );
-};
-
-// Запрашиваем имя компонента у пользователя
-rl.question("Введите название нового компонента: ", (componentName) => {
+// Запрашиваем имя компонента
+rl.question('Введите название компонента: ', (componentName) => {
   if (!componentName) {
-    console.log("Имя компонента не может быть пустым.");
-    rl.close();
-    process.exit(1); // Завершаем процесс с ошибкой
+    console.log('Имя компонента не может быть пустым.')
+    rl.close()
+    process.exit(1)
   }
 
-  // Создаем компонент с заданным именем
-  createReactComponent(componentName);
-
-  // Закрываем интерфейс readline и завершаем процесс
-  rl.close();
-  process.exit(0); // Завершаем процесс успешно
-});
+  createReactComponent(componentName)
+  rl.close()
+  process.exit(0)
+})
