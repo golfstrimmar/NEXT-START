@@ -144,7 +144,7 @@ const NextPage = () => {
   };
 
   return (
-    <>
+    <div>
       {message && <ModalMessage message={message} open={showModal} />}
       {error && <ModalMessage message={error} open={showModal} />}
       <div className="my-2">
@@ -170,7 +170,7 @@ const NextPage = () => {
           }}
         />
       )}
-      <div className="grid grid-cols-[30%_1fr]  my-8">
+      <div className="grid grid-cols-[30%_1fr] w-full  my-8">
         <div className={styles.sidebar}>
           <div className="flex justify-end items-center border border-slate-400">
             <button
@@ -190,7 +190,7 @@ const NextPage = () => {
               <TrashIcon className="w-5 h-5 text-red-500" />
             </button>
           </div>
-          <div className="flex flex-col gap-2 mt-2">
+          <div className="flex flex-col wrap gap-2 mt-2">
             {categories?.length > 0 &&
               categories.map((category, index) => (
                 <div key={index} className="border border-slate-400 ">
@@ -273,7 +273,7 @@ const NextPage = () => {
         >
           {value.length > 0 && (
             <pre
-              className={` p-2 rounded ${
+              className={` p-2 rounded w-full overflow-x-auto whitespace-pre-wrap break-words ${
                 isCopied ? " bg-emerald-100" : "bg-gray-100"
               }`}
             >
@@ -282,7 +282,7 @@ const NextPage = () => {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
