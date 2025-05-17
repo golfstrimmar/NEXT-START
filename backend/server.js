@@ -15,8 +15,8 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const corsOptions = {
   origin: [
     "http://localhost:3001", // Локальный фронтенд
-    // "https://chatneon.vercel.app", // Vercel фронтенд
-    // "https://next-start-production.up.railway.app", // Railway фронтенд
+    "https://chatneon.vercel.app", // Vercel фронтенд
+    "https://next-start-production.up.railway.app", // Railway фронтенд
   ],
   methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS",
   // credentials: true, // Разрешает куки и авторизацию
