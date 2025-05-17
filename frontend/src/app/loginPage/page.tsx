@@ -219,10 +219,7 @@ const LoginPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            {/* <Eye
-              className="w-5 h-5 absolute right-2 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer opacity-50"
-              onClick={handlerVisiblePassword}
-            ></Eye> */}
+
             <Image
               className="w-5 h-5 absolute right-2 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer opacity-50"
               src="/assets/svg/eye.svg"

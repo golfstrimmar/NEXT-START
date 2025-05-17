@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import styles from "./RegisterPage.module.scss";
-import Eye from "@/assets/svg/eye.svg";
+import Image from "next/image";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import Input from "@/components/ui/Input/Input";
@@ -236,7 +236,11 @@ const RegisterPage: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <Eye
+            <Image
+              src="/assets/svg/eye.svg"
+              alt="eye"
+              width={20}
+              height={20}
               className="w-5 h-5 absolute right-2 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer opacity-50"
               onClick={handlerVisiblePassword}
             />
@@ -270,8 +274,12 @@ const RegisterPage: React.FC = () => {
                   value={googlePassword}
                   onChange={(e) => setGooglePassword(e.target.value)}
                 />
-                <Eye
-                  className="w-5 h-5 absolute right-2 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer opacity-50"
+                <Image
+                  src="/assets/svg/eye.svg"
+                  width={20}
+                  height={20}
+                  alt="Picture of the author"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer opacity-50"
                   onClick={handlerVisiblePassword}
                 />
               </div>
