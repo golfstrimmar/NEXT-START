@@ -47,16 +47,16 @@ const Navbar: React.FC = () => {
   return (
     <nav className="fixed top-0 left-0 w-full bg-blue-700 p-4 shadow-md z-50">
       <div className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="text-white text-lg font-bold">
+        <Link href="/" className="text-white text-lg font-bold ">
           A
         </Link>
         <Burger handlerburgerClick={() => setIsOpen(!isOpen)} isOpen={isOpen} />
         <ul className={`${styles["navbar-menu"]} ${isOpen ? styles.run : ""}`}>
-          <li>
+          <li className="flex flex-col justify-center">
             <Link
               href="/"
-              className={` hover:text-gray-300 transition-colors duration-200 ${
-                activeLink === "/" ? "text-blue" : "text-white "
+              className={` hover:text-gray-300 transition-colors duration-200  ${
+                activeLink === "/" ? "text-[#0ae42e]" : "text-white "
               }`}
               onClick={() => {
                 setIsOpen(false);
@@ -73,14 +73,21 @@ const Navbar: React.FC = () => {
                   <div className="text-white hover:text-gray-300">
                     <Link
                       href="/profile"
-                      className={` hover:text-gray-300 transition-colors duration-200 ${
+                      className={` hover:text-gray-300 transition-colors duration-200 flex items-center ${
                         activeLink === "/profile" ? "text-blue" : "text-white "
                       }`}
                       onClick={() => {
                         setIsOpen(false);
                       }}
                     >
-                      <p>Hallo, {user.userName} !</p>
+                      <img
+                        className="w-8 h-8 rounded-full mr-2"
+                        src={user.avatar}
+                        alt="user"
+                      />
+                      <p>
+                        Hallo, <strong>{user.userName} !</strong>
+                      </p>
                     </Link>
                   </div>
                 ) : (
@@ -128,7 +135,7 @@ const Navbar: React.FC = () => {
           ) : (
             ""
           )}
-          <li>
+          {/* <li>
             <Link
               href="/ui"
               className={` hover:text-gray-300 transition-colors duration-200 ${
@@ -140,7 +147,7 @@ const Navbar: React.FC = () => {
             >
               UI kit
             </Link>
-          </li>
+          </li> */}
         </ul>
       </div>
     </nav>

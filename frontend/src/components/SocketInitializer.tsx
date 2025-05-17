@@ -11,7 +11,7 @@ const SocketInitializer: React.FC = () => {
   //  const articles = useAppSelector((state: RootState) => state.articles.articles);
   useEffect(() => {
     const serverUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5005";
     const socket = io(serverUrl, {
       transports: ["websocket"],
     });

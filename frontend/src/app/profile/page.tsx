@@ -89,27 +89,30 @@ const Profile: React.FC = () => {
         </div>
 
         {user ? (
-          <div className="p-3 flex flex-col gap-2">
+          <div className="p-3 flex flex-col gap-2 items-center">
             <div className="">
-              <label className="italic text-[#6c757d]">Email:</label>
-              <p className="">{user?.email}</p>
+              <label className="italic text-[#6c757d]">
+                Email: <span className="">{user?.email}</span>
+              </label>
             </div>
 
             <div className="">
-              <label className="italic text-[#6c757d]">User ID:</label>
-              <p className="">{user?._id}</p>
+              <label className="italic text-[#6c757d]">
+                User ID: <span className="">{user?._id}</span>
+              </label>
             </div>
 
             <div className="">
-              <label className="italic text-[#6c757d]">Member since:</label>
-              <p className="">
-                {" "}
-                {new Date(user?.createdAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </p>
+              <label className="italic text-[#6c757d]">
+                Member since:{" "}
+                <span>
+                  {new Date(user?.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </span>
+              </label>
             </div>
 
             {error && <p className="profile-error">{error}</p>}

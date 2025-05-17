@@ -133,7 +133,17 @@ const RegisterPage: React.FC = () => {
     setFormErrors(errors);
     return { isValid, errors };
   };
-
+  // -----------------
+  useEffect(() => {
+    if (username || email || password) {
+      console.log(
+        "<====  username, email, password====>",
+        username,
+        email,
+        password
+      );
+    }
+  }, [username, email, password]);
   const handleRegister = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const { isValid, errors } = validateForm();
@@ -148,11 +158,12 @@ const RegisterPage: React.FC = () => {
       }, 2000);
       return;
     }
+
     if (socket) {
       socket.emit("register", { username, email, password });
     }
   };
-
+  // ------------
   const handlerVisiblePassword = () => {
     if (passwordInputRef.current) {
       passwordInputRef.current.type =
