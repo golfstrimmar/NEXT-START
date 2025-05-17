@@ -2,58 +2,52 @@ const express = require("express");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { PrismaClient } = require("@prisma/client");
+const cors = require("cors");
 
 const app = express();
 const prisma = new PrismaClient();
+
+// Настройка CORS с конкретными доменами
+const corsOptions = {
+  origin: [
+    "http://localhost:3001", // Локальный фронтенд
+    "https://chatneon.vercel.app", // Vercel фронтенд
+    "https://next-start-production.up.railway.app", // Railway фронтенд
+  ],
+  methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS",
+  // credentials: true, // Разрешает куки и авторизацию
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+// app.options("*", cors(corsOptions));
+
 const httpServer = createServer(app);
+
+// Настройка CORS для Socket.io, синхронизированная с Express
 const io = new Server(httpServer, {
-  cors: { origin: "*" },
+  cors: {
+    origin: corsOptions.origin, // Те же домены
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    credentials: true, // Добавлено для поддержки куки
+  },
 });
 
-// Добавим middleware для логов
+// Логирование запросов
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log("CORS headers:", res.getHeaders());
   next();
 });
 
-// Включим логирование запросов Prisma
 prisma.$on("query", (e) => {
   console.log("Prisma Query:", e.query);
 });
 
-// Подключение WebSocket с обработкой ошибок
-io.on("connection", (socket) => {
-  console.log("👉 Клиент подключен:", socket.id);
-
-  socket.on("send_message", async (data) => {
-    try {
-      console.log("Получено сообщение:", data);
-
-      // Сохраняем сообщение в БД
-      const message = await prisma.message.create({
-        data: {
-          text: data.text,
-          author: data.author || "Anonymous",
-        },
-      });
-
-      console.log("Сообщение сохранено в БД:", message);
-      // Отправляем всем клиентам
-      io.emit("new_message", message);
-    } catch (error) {
-      console.error("Ошибка при сохранении сообщения:", error);
-      socket.emit("error", "Не удалось сохранить сообщение");
-    }
-  });
-});
-
-// Получение сообщений с обработкой ошибок
 app.get("/messages", async (req, res) => {
   try {
     const messages = await prisma.message.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: "desc" },
       take: 100,
     });
     console.log("Отправлено сообщений:", messages.length);
@@ -64,39 +58,33 @@ app.get("/messages", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3005;
+// WebSocket логика
+io.on("connection", (socket) => {
+  console.log("👉 Клиент подключен:", socket.id);
 
-async function seedDatabase() {
-  try {
-    console.log("Проверка seed данных...");
-    const messages = await prisma.message.findMany();
-    console.log("Найдено сообщений в БД:", messages.length);
-
-    if (messages.length === 0) {
-      console.log("Добавление тестовых данных...");
-      await prisma.message.createMany({
-        data: [
-          { text: "Сообщение из seed-функции", author: "System" },
-          { text: "Ещё одно сообщение", author: "Admin" },
-        ],
+  socket.on("send_message", async (data) => {
+    try {
+      console.log("Получено сообщение:", data);
+      const message = await prisma.message.create({
+        data: {
+          text: data.text,
+          author: data.author || "Anonymous",
+        },
       });
-      console.log("✅ Тестовые данные добавлены в БД!");
+      console.log("Сообщение сохранено в БД:", message);
+      io.emit("new_message", message);
+    } catch (error) {
+      console.error("Ошибка при сохранении сообщения:", error);
+      socket.emit("error", "Не удалось сохранить сообщение");
     }
-  } catch (error) {
-    console.error("Ошибка в seedDatabase:", error);
-  } finally {
-    await prisma.$disconnect();
-  }
-}
+  });
+});
+
+const PORT = process.env.PORT || 3005;
 
 // Запуск сервера
 httpServer.listen(PORT, "0.0.0.0", async () => {
   console.log(`🚀 Сервер запущен на порту ${PORT}`);
-  try {
-    await seedDatabase();
-  } catch (error) {
-    console.error("Ошибка при запуске сервера:", error);
-  }
 });
 
 // Обработка завершения процесса
