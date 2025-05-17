@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import MessageList from "@/components/MessageList/MessageList";
 export default function Home() {
   return (
     <div className=" min-h-screen  font-[family-name:var(--font-geist-sans)]">
@@ -31,6 +32,7 @@ export default function Home() {
             fill
           />
         </div>
+        <MessageList />
       </div>
     </div>
   );
