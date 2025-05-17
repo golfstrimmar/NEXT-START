@@ -1,108 +1,106 @@
-import express from "express";
-import { createServer } from "http";
-import { Server } from "socket.io";
-import http from "http";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { connectDB } from "./config/db.js";
-import cors from "cors";
-import dotenv from "dotenv";
-import axios from "axios";
-import { OAuth2Client } from "google-auth-library";
+const express = require("express");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+const { PrismaClient } = require("@prisma/client");
 
 const app = express();
-connectDB();
-dotenv.config();
+const prisma = new PrismaClient();
 const httpServer = createServer(app);
-const io = new Server(httpServer);
-
-const server = http.createServer(app);
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-// ==============================================
-
-// import Article from "./models/Article.js";
-// import articleHandler from "./components/articleHandler.js";
-// import articleEditHandler from "./components/articleEditHandler.js";
-import googleRegister from "./components/googleRegister.js";
-import handlerRegister from "./components/handlerRegister.js";
-import handlerLogin from "./components/handlerLogin.js";
-import googleLogin from "./components/googleLogin.js";
-import handlerSetPassword from "./components/handlerSetPassword.js";
-import User from "./models/User.js";
-
-// ==============================================
-
-app.get("/", (req, res) => {
-  res.send("Start Backend");
+const io = new Server(httpServer, {
+  cors: { origin: "*" },
 });
-// ----------------------------
-app.get("/auth/google/callback", async (req, res) => {
-  const { code } = req.query;
-  if (!code) return res.status(400).send("Code is required");
-  try {
-    const response = await axios.post("https://oauth2.googleapis.com/token", {
-      code,
-      client_id: process.env.GOOGLE_CLIENT_ID,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET,
-      redirect_uri: "http://localhost:5001/auth/google/callback",
-      grant_type: "authorization_code",
-    });
-    const { access_token, id_token } = response.data;
-    const ticket = await client.verifyIdToken({
-      idToken: id_token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-    const payload = ticket.getPayload();
-    const email = payload.email;
-    const userName = payload.name;
-    const googleId = payload.sub;
-    const avatarUrl = payload.picture || null;
-    let user = await User.findOne({ email });
-    if (!user) {
-      const avatarBase64 = avatarUrl
-        ? await downloadAvatarAsBase64(avatarUrl)
-        : null;
-      user = new User({ email, userName, avatar: avatarBase64, googleId });
-      await user.save();
-    }
-    const jwtToken = jwt.sign(
-      { userId: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "10h" }
-    );
-    res.redirect(`http://localhost:3001/dashboard?token=${jwtToken}`);
-  } catch (error) {
-    console.error("Google callback error:", error);
-    res.status(500).send("Authentication failed");
-  }
+
+// Добавим middleware для логов
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
 });
-const downloadAvatarAsBase64 = async (url) => {
-  try {
-    const response = await axios.get(url, { responseType: "arraybuffer" });
-    return `data:image/jpeg;base64,${Buffer.from(response.data).toString(
-      "base64"
-    )}`;
-  } catch (error) {
-    console.error("Failed to download avatar:", error);
-    return null;
-  }
-};
-// ----------------------------
+
+// Включим логирование запросов Prisma
+prisma.$on("query", (e) => {
+  console.log("Prisma Query:", e.query);
+});
+
+// Подключение WebSocket с обработкой ошибок
 io.on("connection", (socket) => {
-  console.log("Socket connected:", socket.id);
+  console.log("👉 Клиент подключен:", socket.id);
 
-  googleRegister(io, socket);
-  handlerRegister(io, socket);
-  handlerLogin(io, socket);
-  googleLogin(io, socket);
-  handlerSetPassword(io, socket);
+  socket.on("send_message", async (data) => {
+    try {
+      console.log("Получено сообщение:", data);
 
-  socket.on("disconnect", () => {
-    console.log(`Client disconnected: ${socket.id}`);
+      // Сохраняем сообщение в БД
+      const message = await prisma.message.create({
+        data: {
+          text: data.text,
+          author: data.author || "Anonymous",
+        },
+      });
+
+      console.log("Сообщение сохранено в БД:", message);
+      // Отправляем всем клиентам
+      io.emit("new_message", message);
+    } catch (error) {
+      console.error("Ошибка при сохранении сообщения:", error);
+      socket.emit("error", "Не удалось сохранить сообщение");
+    }
   });
 });
-const PORT = process.env.PORT || 5001;
-httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+
+// Получение сообщений с обработкой ошибок
+app.get("/messages", async (req, res) => {
+  try {
+    const messages = await prisma.message.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 100,
+    });
+    console.log("Отправлено сообщений:", messages.length);
+    res.json(messages);
+  } catch (error) {
+    console.error("Ошибка при получении сообщений:", error);
+    res.status(500).json({ error: "Не удалось загрузить сообщения" });
+  }
+});
+
+const PORT = process.env.PORT || 3001;
+
+async function seedDatabase() {
+  try {
+    console.log("Проверка seed данных...");
+    const messages = await prisma.message.findMany();
+    console.log("Найдено сообщений в БД:", messages.length);
+
+    if (messages.length === 0) {
+      console.log("Добавление тестовых данных...");
+      await prisma.message.createMany({
+        data: [
+          { text: "Сообщение из seed-функции", author: "System" },
+          { text: "Ещё одно сообщение", author: "Admin" },
+        ],
+      });
+      console.log("✅ Тестовые данные добавлены в БД!");
+    }
+  } catch (error) {
+    console.error("Ошибка в seedDatabase:", error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+// Запуск сервера
+httpServer.listen(PORT, "0.0.0.0", async () => {
+  console.log(`🚀 Сервер запущен на порту ${PORT}`);
+  try {
+    await seedDatabase();
+  } catch (error) {
+    console.error("Ошибка при запуске сервера:", error);
+  }
+});
+
+// Обработка завершения процесса
+process.on("SIGINT", async () => {
+  await prisma.$disconnect();
+  process.exit();
 });
