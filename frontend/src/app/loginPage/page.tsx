@@ -63,7 +63,7 @@ const LoginPage = () => {
           router.replace("/profile");
           setSuccessMessage("");
           setOpenModalMessage(false);
-        }, 2000);
+        }, 5000);
       };
 
       socket.on("loginSuccess", handleLoginSuccess);
@@ -79,7 +79,7 @@ const LoginPage = () => {
           router.replace("/profile");
           setSuccessMessage("");
           setOpenModalMessage(false);
-        }, 2000);
+        }, 5000);
       });
 
       socket.on("loginError", (data: SocketData) => {
@@ -88,9 +88,9 @@ const LoginPage = () => {
         setTimeout(() => {
           setSuccessMessage("");
           setOpenModalMessage(false);
-          router.replace("/registerPage");
+          // router.replace("/registerPage");
           setEmail("");
-        }, 2000);
+        }, 5000);
       });
       socket.on("googleloginError", (data: SocketData) => {
         console.error(data.message, data.error);
@@ -100,8 +100,12 @@ const LoginPage = () => {
         setTimeout(() => {
           setSuccessMessage("");
           setOpenModalMessage(false);
-          router.replace("/registerPage");
-        }, 2000);
+
+          if (data.error === "User not found") {
+            router.replace("/registerPage");
+          }
+          // router.replace("/registerPage");
+        }, 5000);
       });
 
       return () => {
@@ -145,7 +149,7 @@ const LoginPage = () => {
       setTimeout(() => {
         setSuccessMessage("");
         setOpenModalMessage(false);
-      }, 2000);
+      }, 5000);
       return;
     }
     if (socket) {
@@ -182,7 +186,7 @@ const LoginPage = () => {
     setTimeout(() => {
       setSuccessMessage("");
       setOpenModalMessage(false);
-    }, 2000);
+    }, 5000);
   };
   // ===============================
   // ===============================

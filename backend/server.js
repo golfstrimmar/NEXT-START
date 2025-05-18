@@ -279,19 +279,25 @@ io.on("connection", (socket) => {
       let user = await prisma.user.findFirst({
         where: { OR: [{ googleId }, { email }] },
       });
-
-      // Если пользователь не существует, создаем его
+      console.log("<====user====>", user);
+      console.log("<====user password====>", user.password);
+      const isPasswordValid = user.password.length > 0 ? true : false;
+      console.log("<====isPasswordValid====>", isPasswordValid);
       if (!user) {
-        user = await prisma.user.create({
-          data: {
-            username: name,
-            email,
-            googleId,
-            avatarUrl,
-          },
+        socket.emit("loginError", {
+          message: "Invalid email or password",
         });
+        return;
       }
-
+      if (!isPasswordValid) {
+        socket.emit("requirePassword", {
+          email,
+          userName: name,
+          googleId,
+          avatarUrl,
+        });
+        return;
+      }
       // Генерация JWT-токена
       const jwtToken = jwt.sign(
         { id: user.id, username: user.username, email: user.email },
