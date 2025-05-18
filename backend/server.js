@@ -7,24 +7,31 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const app = express();
 const prisma = new PrismaClient();
+
 const { OAuth2Client } = require("google-auth-library");
 const saltRounds = 10;
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Настройка CORS с конкретными доменами
 const corsOptions = {
-  origin: [
-    "http://localhost:3001", // Локальный фронтенд
-    "https://chatneon.vercel.app", // Vercel фронтенд
-    "https://next-start-production.up.railway.app", // Railway фронтенд
-  ],
+  origin: true,
+  // origin: [
+  //   "http://localhost:3001", // Локальный фронтенд
+  //   "https://chatneon.vercel.app", // Vercel фронтенд
+  //   "https://next-start-production.up.railway.app", // Railway фронтенд
+  // ],
   methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS",
   // credentials: true, // Разрешает куки и авторизацию
   allowedHeaders: ["Content-Type", "Authorization"],
 };
-
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log("Request Origin:", req.headers.origin);
+  console.log("Request Headers:", req.headers);
+  next();
+});
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+// app.options("*", cors(corsOptions));
 
 const httpServer = createServer(app);
 
