@@ -6,7 +6,7 @@ import styles from "./Navbar.module.scss";
 import { useSelector, useDispatch } from "react-redux";
 import { clearUser } from "@/app/redux/slices/authSlice";
 import { useRouter, useParams, usePathname } from "next/navigation";
-
+import Image from "next/image";
 interface User {
   _id?: string;
   userName: string;
@@ -80,11 +80,22 @@ const Navbar: React.FC = () => {
                         setIsOpen(false);
                       }}
                     >
-                      <img
-                        className="w-8 h-8 rounded-full mr-2"
-                        src={user.avatar}
-                        alt="user"
-                      />
+                      {user?.avatar !== "" ? (
+                        <img
+                          className="w-8 h-8 rounded-full mr-2"
+                          src={user.avatar}
+                          alt="user"
+                        />
+                      ) : (
+                        <Image
+                          className="w-8 h-8 rounded-full mr-2"
+                          src="/assets/svg/avatar.svg"
+                          alt="user"
+                          width={30}
+                          height={30}
+                        />
+                      )}
+
                       <p>
                         Hallo, <strong>{user.userName} !</strong>
                       </p>

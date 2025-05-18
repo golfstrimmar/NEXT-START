@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-// import Eye from "/assets/svg/eye.svg";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import Button from "@/components/ui/Button/Button";
 import { useSelector, useDispatch } from "react-redux";
@@ -10,9 +9,6 @@ import "./LoginPage.scss";
 import { setUser } from "@/app/redux/slices/authSlice";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import Input from "@/components/ui/Input/Input";
-// =========================
-
-// =========================
 
 interface SocketData {
   user: {
@@ -45,9 +41,8 @@ const LoginPage = () => {
     email: "",
     password: "",
   });
-  // =========================
+  const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
 
-  // =========================
   useEffect(() => {
     if (socket) {
       const handleLoginSuccess = (data: SocketData) => {
@@ -58,12 +53,11 @@ const LoginPage = () => {
         dispatch(setUser({ user: data.user, token: data.token }));
         setSuccessMessage(data.message);
         setOpenModalMessage(true);
-
         setTimeout(() => {
           router.replace("/profile");
           setSuccessMessage("");
           setOpenModalMessage(false);
-        }, 5000);
+        }, 2000);
       };
 
       socket.on("loginSuccess", handleLoginSuccess);
@@ -75,11 +69,12 @@ const LoginPage = () => {
         dispatch(setUser({ user: data.user, token: data.token }));
         setSuccessMessage("Google login successful");
         setOpenModalMessage(true);
+        setIsGoogleLoading(false);
         setTimeout(() => {
           router.replace("/profile");
           setSuccessMessage("");
           setOpenModalMessage(false);
-        }, 5000);
+        }, 2000);
       });
 
       socket.on("loginError", (data: SocketData) => {
@@ -88,34 +83,45 @@ const LoginPage = () => {
         setTimeout(() => {
           setSuccessMessage("");
           setOpenModalMessage(false);
-          // router.replace("/registerPage");
           setEmail("");
-        }, 5000);
+        }, 2000);
       });
       socket.on("googleloginError", (data: SocketData) => {
         console.error(data.message, data.error);
-        const combinedMessage = `${data.message} - ${data.error}`;
-        setSuccessMessage(combinedMessage);
-        setOpenModalMessage(true);
-        setTimeout(() => {
-          setSuccessMessage("");
-          setOpenModalMessage(false);
-
-          if (data.error === "User not found") {
+        console.log("<====data.error====>", data.error);
+        if (
+          data.error === "Cannot read properties of null (reading 'password')"
+        ) {
+          setOpenModalMessage(true);
+          setIsGoogleLoading(false);
+          setSuccessMessage("User not found. Please register.");
+          setTimeout(() => {
+            setSuccessMessage("");
+            setOpenModalMessage(false);
             router.replace("/registerPage");
-          }
-          // router.replace("/registerPage");
-        }, 5000);
+          }, 2000);
+        }
+        if (data.error === "User not found") {
+          setSuccessMessage("User not found. Please register.");
+          setOpenModalMessage(true);
+          setIsGoogleLoading(false);
+          setTimeout(() => {
+            setSuccessMessage("");
+            setOpenModalMessage(false);
+            router.replace("/registerPage");
+          }, 2000);
+        }
       });
 
       return () => {
         socket.off("loginSuccess", handleLoginSuccess);
+        socket.off("googleLoginSuccess");
+        socket.off("loginError");
+        socket.off("googleloginError");
       };
     }
   }, [socket, dispatch, router]);
-  // ===============================
-  // ===============================
-  // ===============================
+
   const validateForm = () => {
     let isValid = true;
     let errors = { email: "", password: "" };
@@ -137,6 +143,7 @@ const LoginPage = () => {
     setFormErrors(errors);
     return { isValid, errors };
   };
+
   const handleLogin = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const { isValid, errors } = validateForm();
@@ -149,20 +156,17 @@ const LoginPage = () => {
       setTimeout(() => {
         setSuccessMessage("");
         setOpenModalMessage(false);
-      }, 5000);
+      }, 2000);
       return;
     }
     if (socket) {
       socket.emit("login", { email, password });
     }
   };
-  // ===============================
-  // ===============================
-  // ===============================
+
   const handleGoogleLoginSuccess = (response: CredentialResponse): void => {
-    const { credential } = response; // Получаем token от Google
+    const { credential } = response;
     console.log("Erfolg:", response);
-    // Проверим, что токен существует
     if (!credential) {
       console.error("Google login failed: No credential provided");
       setSuccessMessage("Google login failed");
@@ -170,15 +174,17 @@ const LoginPage = () => {
       setTimeout(() => {
         setSuccessMessage("");
         setOpenModalMessage(false);
-      }, 5000);
+      }, 2000);
       return;
     }
-
-    // Отправка токена на сервер через сокет
+    setIsGoogleLoading(true);
+    document.activeElement?.blur();
+    setFormErrors({ email: "", password: "" });
     if (socket) {
       socket.emit("googleLogin", { token: credential });
     }
   };
+
   const handleGoogleLoginFailure = (): void => {
     console.error("Google login failed:");
     setSuccessMessage("Google login failed");
@@ -186,11 +192,9 @@ const LoginPage = () => {
     setTimeout(() => {
       setSuccessMessage("");
       setOpenModalMessage(false);
-    }, 5000);
+    }, 2000);
   };
-  // ===============================
-  // ===============================
-  // ===============================
+
   const passwordInputRef = useRef<HTMLInputElement | null>(null);
   const handlerVisiblePassword = () => {
     if (passwordInputRef.current) {
@@ -198,7 +202,7 @@ const LoginPage = () => {
         passwordInputRef.current.type === "password" ? "text" : "password";
     }
   };
-  // =========================
+
   return (
     <div className="">
       <ModalMessage message={successMessage} open={openModalMessage} />
@@ -206,13 +210,15 @@ const LoginPage = () => {
         Login
       </h1>
       <form
-        className={` flex flex-col gap-2 max-w-3xl mx-auto bg-white shadow-lg rounded-2xl p-6 space-y-4`}
+        className={`flex flex-col gap-2 max-w-3xl mx-auto bg-white shadow-lg rounded-2xl p-6 space-y-4`}
       >
         <Input
           typeInput="email"
           data="User Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          autoComplete="off"
+          disabled={isGoogleLoading}
         />
         <div className="input-password">
           <div className="inline-block relative">
@@ -222,8 +228,9 @@ const LoginPage = () => {
               data="User Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              disabled={isGoogleLoading}
             />
-
             <Image
               className="w-5 h-5 absolute right-2 top-1/2 transform -translate-y-1/2 z-10 cursor-pointer opacity-50"
               src="/assets/svg/eye.svg"
@@ -231,22 +238,26 @@ const LoginPage = () => {
               width={15}
               height={15}
               onClick={handlerVisiblePassword}
-            ></Image>
+            />
           </div>
         </div>
 
-        {/* Google Login */}
-        <button className="googleLoginButton">
-          <GoogleLogin
-            onSuccess={handleGoogleLoginSuccess}
-            onError={handleGoogleLoginFailure}
-          />
+        <button className="googleLoginButton" disabled={isGoogleLoading}>
+          {isGoogleLoading ? (
+            <span>Loading...</span>
+          ) : (
+            <GoogleLogin
+              onSuccess={handleGoogleLoginSuccess}
+              onError={handleGoogleLoginFailure}
+            />
+          )}
         </button>
 
         <Button
           onClick={(e) => {
             handleLogin(e);
           }}
+          disabled={isGoogleLoading}
         >
           Login
         </Button>
@@ -254,4 +265,5 @@ const LoginPage = () => {
     </div>
   );
 };
+
 export default LoginPage;
