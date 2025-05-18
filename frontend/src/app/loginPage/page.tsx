@@ -78,8 +78,18 @@ const LoginPage = () => {
       });
 
       socket.on("loginError", (data: SocketData) => {
-        setSuccessMessage(data.message);
-        setOpenModalMessage(true);
+        console.error(data.message, data.error);
+        if (data.message === "Invalid email or password") {
+          setSuccessMessage("User not found. Please register.");
+          setOpenModalMessage(true);
+          setTimeout(() => {
+            setSuccessMessage("");
+            setOpenModalMessage(false);
+            router.replace("/registerPage");
+          }, 2000);
+        }
+        // setSuccessMessage(data.message);
+        // setOpenModalMessage(true);
         setTimeout(() => {
           setSuccessMessage("");
           setOpenModalMessage(false);

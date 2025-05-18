@@ -27,7 +27,7 @@ export default function Home() {
         <div className="home-img relative aspect-[1.5/1] w-1/2 h-auto">
           <Image
             className="object-contain absolute"
-            src="https://res.cloudinary.com/dke0nudcz/image/upload/v1735521101/urvu7z8wv1m3rxfg0sjk.jpg"
+            src="/assets/images/image.jpg"
             alt="Picture of the author"
             fill
           />

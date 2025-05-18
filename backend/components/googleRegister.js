@@ -1,4 +1,4 @@
-export default (io, socket) => {
+export default (io, socket, googleClient, prisma) => {
   socket.on("googleRegister", async ({ token }) => {
     try {
       const ticket = await googleClient.verifyIdToken({
