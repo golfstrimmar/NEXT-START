@@ -1,6 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { fetchMessages } from "@/lib/api";
-import { Message } from "@/types/message";
+import { getUser } from "@/app/redux/slices/authSlice";
+import Message from "@/components/Message/Message";
+import { tr } from "framer-motion/client";
+
+interface Message {
+  id: number;
+  text: string;
+  author: string;
+  createdAt: string;
+}
 
 export default function MessageList() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -23,6 +32,7 @@ export default function MessageList() {
     loadMessages();
   }, []);
 
+  // ----------------------------------
   if (loading) {
     return (
       <div className="flex justify-center items-center h-20">
@@ -51,21 +61,7 @@ export default function MessageList() {
               key={msg.id}
               className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
             >
-              <div className="flex justify-between items-start">
-                <span className="font-semibold text-blue-600">
-                  {msg.author}
-                </span>
-                <span className="text-xs text-gray-500">
-                  {new Date(msg.createdAt).toLocaleString("ru-RU", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
-              <p className="mt-2 text-gray-800">{msg.text}</p>
+              <Message msg={msg} />
             </li>
           ))}
         </ul>

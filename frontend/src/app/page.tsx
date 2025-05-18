@@ -2,7 +2,14 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import MessageList from "@/components/MessageList/MessageList";
+import ModalAddEvent from "@/components/ModalAddEvent/ModalAddEvent";
+import Button from "@/components/ui/Button/Button";
+
+import { AnimatePresence } from "framer-motion";
+
 export default function Home() {
+  const [AddModalOpen, setAddModalOpen] = useState<boolean>(false);
+
   return (
     <div className=" min-h-screen  font-[family-name:var(--font-geist-sans)]">
       <div>
@@ -33,6 +40,17 @@ export default function Home() {
           />
         </div>
         <MessageList />
+        <Button
+          buttonText="Add Event"
+          onClick={() => {
+            setAddModalOpen(true);
+          }}
+        ></Button>
+        <AnimatePresence>
+          {AddModalOpen && (
+            <ModalAddEvent onClose={() => setAddModalOpen(false)} />
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

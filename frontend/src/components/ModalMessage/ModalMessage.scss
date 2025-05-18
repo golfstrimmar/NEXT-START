@@ -3,12 +3,12 @@
 .modalmessage {
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, .9);
+  background: rgba(0, 0, 0, .95);
   transform: scale(0);
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1000;
+  z-index: 2000;
   display: grid;
   place-items: center;
   transition: all .5s;

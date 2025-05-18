@@ -89,18 +89,42 @@ io.on("connection", (socket) => {
 
   socket.on("send_message", async (data) => {
     try {
-      console.log("Получено сообщение:", data);
+      console.log("Received message:", data);
       const message = await prisma.message.create({
         data: {
           text: data.text,
           author: data.author || "Anonymous",
         },
       });
-      console.log("Сообщение сохранено в БД:", message);
+      console.log("Meessage saved: ", message);
       io.emit("new_message", message);
     } catch (error) {
       console.error("Ошибка при сохранении сообщения:", error);
       socket.emit("error", "Не удалось сохранить сообщение");
+    }
+  });
+  // ------------------
+  socket.on("find_user", async ({ id }) => {
+    const userID = Number(id);
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userID },
+      });
+      if (!user) {
+        socket.emit("UserFailed", {
+          message: "User not found",
+        });
+        return;
+      }
+
+      socket.emit("UserSuccess", {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      socket.emit("UserFailed", { message: "User not found" });
     }
   });
   // ---------------------Register
