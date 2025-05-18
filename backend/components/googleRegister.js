@@ -1,4 +1,5 @@
- socket.on("googleRegister", async ({ token }) => {
+export default (io, socket) => {
+  socket.on("googleRegister", async ({ token }) => {
     try {
       const ticket = await googleClient.verifyIdToken({
         idToken: token,
@@ -35,3 +36,4 @@
       });
     }
   });
+};
