@@ -4,14 +4,23 @@ import Image from "next/image";
 import MessageList from "@/components/MessageList/MessageList";
 import ModalAddEvent from "@/components/ModalAddEvent/ModalAddEvent";
 import Button from "@/components/ui/Button/Button";
-
+import { useSelector } from "react-redux";
 import { AnimatePresence } from "framer-motion";
+import MessageType from "@/types/message";
+import User from "@/types/user";
+
+import ModalMessage from "@/components/ModalMessage/ModalMessage";
 
 export default function Home() {
   const [AddModalOpen, setAddModalOpen] = useState<boolean>(false);
-
+  const socket: Socket = useSelector((state) => state.socket.socket);
+  const user: User = useSelector((state) => state.auth.user);
+  const users: User[] = useSelector((state) => state.auth.users);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   return (
     <div className=" min-h-screen  font-[family-name:var(--font-geist-sans)]">
+      {error && <ModalMessage message={error} open={showModal} />}
       <div>
         <Image
           src="/assets/svg/home.svg"
@@ -39,11 +48,30 @@ export default function Home() {
             fill
           />
         </div>
+        {users &&
+          users.map((user) => {
+            return (
+              <div key={user.id}>
+                <p>{user.userName}</p>
+                <p>{user.email}</p>
+              </div>
+            );
+          })}
+
         <MessageList />
         <Button
-          buttonText="Add Event"
+          buttonText="Add Message"
           onClick={() => {
-            setAddModalOpen(true);
+            if (user) {
+              setAddModalOpen(true);
+            } else {
+              setError("For add message you need to be logged in");
+              setShowModal(true);
+              setTimeout(() => {
+                setShowModal(false);
+                setError("");
+              }, 1500);
+            }
           }}
         ></Button>
         <AnimatePresence>

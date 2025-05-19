@@ -3,12 +3,12 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { io } from "socket.io-client";
 import { setSocket, disconnectSocket } from "@/app/redux/slices/socketSlice";
-// import { RootState, useAppSelector } from "@/app/redux/store";
-// import { setAuctions } from "@/app/redux/slices/auctionsSlice";
+import { setMessages, addMessage } from "@/app/redux/slices/messagesSlice";
+import { setUsers, addUser } from "@/app/redux/slices/authSlice";
 
 const SocketInitializer: React.FC = () => {
   const dispatch = useDispatch();
-  //  const articles = useAppSelector((state: RootState) => state.articles.articles);
+
   useEffect(() => {
     const serverUrl =
       process.env.NEXT_PUBLIC_API_URL || "http://localhost:5005";
@@ -19,12 +19,42 @@ const SocketInitializer: React.FC = () => {
     socket.on("connect", () => {
       console.log("Connected to server with id:", socket.id);
       dispatch(setSocket(socket));
-      // socket.emit("getAuctions");
+      socket.emit("get_messages"); // Запрашиваем сообщения
+      socket.emit("get_users"); // Запрашиваем пользователей
+    });
 
-      // socket.on("auctionsList", (auctions) => {
-      //   console.log("Received auctions:", auctions);
-      //   dispatch(setAuctions(auctions));
-      // });
+    // Получение всех сообщений
+    socket.on("messages", (messages: any) => {
+      console.log("Received messages:", messages);
+      dispatch(setMessages(messages));
+    });
+
+    // Получение нового сообщения
+    socket.on("new_message", (newMessage: any) => {
+      console.log("Received new message:", newMessage);
+      dispatch(addMessage(newMessage));
+    });
+
+    // Получение всех пользователей
+    socket.on("users", (users: any) => {
+      console.log("Received users:", users);
+      dispatch(setUsers(users));
+    });
+
+    // Получение нового пользователя
+    socket.on("new_user", (newUser: any) => {
+      console.log("Received new user:", newUser);
+      dispatch(addUser(newUser));
+    });
+
+    socket.on("registrationSuccess", (newUser: any) => {
+      console.log("Received new user from registrationSuccess:", newUser);
+      dispatch(addUser(newUser.user)); // Берем user из объекта события
+    });
+
+    socket.on("googleRegisterSuccess", (newUser: any) => {
+      console.log("Received new google user:", newUser);
+      dispatch(addUser(newUser.user)); // Берем user из объекта события
     });
 
     socket.on("connect_error", (error: any) => {
@@ -39,7 +69,16 @@ const SocketInitializer: React.FC = () => {
       dispatch(disconnectSocket());
     });
 
+    // Очистка
     return () => {
+      socket.off("messages");
+      socket.off("new_message");
+      socket.off("users");
+      socket.off("new_user");
+      socket.off("connect_error");
+      socket.off("disconnect");
+      socket.off("registrationSuccess");
+      socket.off("googleRegisterSuccess");
       socket.disconnect();
       dispatch(disconnectSocket());
     };

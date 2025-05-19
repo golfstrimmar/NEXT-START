@@ -9,7 +9,7 @@ import Image from "next/image";
 import Input from "@/components/ui/Input/Input";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import { Socket } from "dgram";
-
+import { useRouter, useParams, usePathname } from "next/navigation";
 // ----------------------------
 interface User {
   _id: string;
@@ -31,7 +31,7 @@ interface Message {
 }
 const ModalAddEvent = ({ onClose }) => {
   const user: User = useSelector((state) => state.auth.user);
-
+  const router = useRouter();
   const socket: Socket = useSelector((state) => state.socket.socket);
   const [NewMessage, setNewMessage] = useState<Message>({
     id: "",
@@ -40,18 +40,16 @@ const ModalAddEvent = ({ onClose }) => {
     createdAt: "",
   });
   const [text, setText] = useState<string>("");
-
   const [showModal, setShowModal] = useState<boolean>(false);
-
   const [error, setError] = useState<string>("");
 
   // ----------------------------
 
   useEffect(() => {
-    if (user) {
-      console.log("<==== user====>", user);
+    if (!user) {
+      router.push("/");
     }
-  }, []);
+  }, [router, user]);
 
   useEffect(() => {
     if (NewMessage) {
@@ -59,7 +57,7 @@ const ModalAddEvent = ({ onClose }) => {
       setNewMessage((prev) => {
         return {
           ...prev,
-          author: user._id,
+          author: user?._id,
           text: text,
         };
       });
@@ -83,6 +81,7 @@ const ModalAddEvent = ({ onClose }) => {
     socket.emit("send_message", NewMessage);
     socket.on("new_message", (message) => {
       console.log("<====New message from server====>", message);
+      onClose();
     });
     // onClose();
   };
@@ -116,7 +115,7 @@ const ModalAddEvent = ({ onClose }) => {
             className="w-full relative mb-8 bg-white border border-gray-300 rounded-lg p-1 sm:p-4"
           >
             <h2 className="text-2xl font-semibold mb-4">
-              User: {user.userName}
+              User: {user?.userName}
             </h2>
             <div className="mb-4">
               <Input

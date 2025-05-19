@@ -1,17 +1,22 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux"; // Добавим useDispatch для диспатча
 import styles from "./RegisterPage.module.scss";
 import Image from "next/image";
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import Input from "@/components/ui/Input/Input";
 import Button from "@/components/ui/Button/Button";
+import { addUser } from "@/app/redux/slices/authSlice"; // Импорт экшена
 
+// Интерфейс пользователя (синхронизирован с authSlice)
 interface User {
-  _id?: string;
-  userName?: string;
+  id: number;
+  userName: string;
+  email: string;
+  avatar?: string | null;
+  createdAt?: string;
 }
 
 interface SocketData {
@@ -29,15 +34,16 @@ const RegisterPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const socket = useSelector((state: any) => state.socket.socket);
   const router = useRouter();
-  const [username, setUsername] = useState<string>("");
+  const dispatch = useDispatch(); // Добавляем диспатч
+  const [userName, setUsername] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [formErrors, setFormErrors] = useState<{
-    username: string;
+    userName: string;
     email: string;
     password: string;
   }>({
-    username: "",
+    userName: "",
     email: "",
     password: "",
   });
@@ -61,6 +67,9 @@ const RegisterPage: React.FC = () => {
       console.log("===--- registrationSuccess ---====", data);
       setSuccessMessage(data.message);
       setOpenModalMessage(true);
+      if (data.user) {
+        dispatch(addUser(data.user)); // Локально добавляем пользователя в Redux
+      }
       setTimeout(() => {
         setSuccessMessage("");
         setOpenModalMessage(false);
@@ -73,6 +82,9 @@ const RegisterPage: React.FC = () => {
       setSuccessMessage(data.message);
       setOpenModalMessage(true);
       setShowPasswordModal(false);
+      if (data.user) {
+        dispatch(addUser(data.user)); // Локально добавляем пользователя в Redux
+      }
       setTimeout(() => {
         setSuccessMessage("");
         setOpenModalMessage(false);
@@ -107,13 +119,13 @@ const RegisterPage: React.FC = () => {
       socket.off("requirePassword");
       socket.off("registrationError");
     };
-  }, [socket, router]);
+  }, [socket, router, dispatch]);
 
   const validateForm = () => {
     let isValid = true;
-    let errors = { username: "", email: "", password: "" };
-    if (!username) {
-      errors.username = "Username is required";
+    let errors = { userName: "", email: "", password: "" };
+    if (!userName) {
+      errors.userName = "userName is required";
       isValid = false;
     }
     if (!email) {
@@ -133,17 +145,18 @@ const RegisterPage: React.FC = () => {
     setFormErrors(errors);
     return { isValid, errors };
   };
-  // -----------------
+
   useEffect(() => {
-    if (username || email || password) {
+    if (userName || email || password) {
       console.log(
-        "<====  username, email, password====>",
-        username,
+        "<====  userName, email, password====>",
+        userName,
         email,
         password
       );
     }
-  }, [username, email, password]);
+  }, [userName, email, password]);
+
   const handleRegister = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const { isValid, errors } = validateForm();
@@ -160,10 +173,10 @@ const RegisterPage: React.FC = () => {
     }
 
     if (socket) {
-      socket.emit("register", { username, email, password });
+      socket.emit("register", { userName, email, password });
     }
   };
-  // ------------
+
   const handlerVisiblePassword = () => {
     if (passwordInputRef.current) {
       passwordInputRef.current.type =
@@ -229,7 +242,7 @@ const RegisterPage: React.FC = () => {
         <Input
           typeInput="text"
           data="User name"
-          value={username}
+          value={userName}
           onChange={(e) => setUsername(e.target.value)}
         />
         <Input

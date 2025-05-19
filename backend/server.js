@@ -68,7 +68,7 @@ app.use((req, res, next) => {
 prisma.$on("query", (e) => {
   console.log("Prisma Query:", e.query);
 });
-
+// ------------
 app.get("/messages", async (req, res) => {
   try {
     const messages = await prisma.message.findMany({
@@ -86,7 +86,21 @@ app.get("/messages", async (req, res) => {
 // WebSocket логика
 io.on("connection", (socket) => {
   console.log("👉Socket client:", socket.id);
-
+  // ------------
+  socket.on("get_messages", async () => {
+    try {
+      const messages = await prisma.message.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 100,
+      });
+      console.log("Send to client by Socket.io:", messages.length);
+      socket.emit("messages", messages);
+    } catch (error) {
+      console.error("Error getting messages:", error);
+      socket.emit("error", "Failed to get messages");
+    }
+  });
+  // ------------
   socket.on("send_message", async (data) => {
     try {
       console.log("Received message:", data);
@@ -96,13 +110,14 @@ io.on("connection", (socket) => {
           author: data.author || "Anonymous",
         },
       });
-      console.log("Meessage saved: ", message);
+      console.log("Message saved:", message);
       io.emit("new_message", message);
     } catch (error) {
-      console.error("Ошибка при сохранении сообщения:", error);
-      socket.emit("error", "Не удалось сохранить сообщение");
+      console.error("Error saving message:", error);
+      socket.emit("error", "Failed to save message");
     }
   });
+
   // ------------------
   socket.on("find_user", async ({ id }) => {
     const userID = Number(id);
@@ -119,12 +134,31 @@ io.on("connection", (socket) => {
 
       socket.emit("UserSuccess", {
         id: user.id,
-        username: user.username,
+        userName: user.userName,
         email: user.email,
       });
     } catch (error) {
       console.error("Login error:", error);
       socket.emit("UserFailed", { message: "User not found" });
+    }
+  });
+  // ------------------
+  socket.on("get_users", async () => {
+    try {
+      const users = await prisma.user.findMany({
+        select: {
+          id: true,
+          userName: true,
+          email: true,
+          avatarUrl: true,
+          createdAt: true,
+        },
+      });
+      console.log("Отправлено пользователей:", users.length);
+      socket.emit("users", users);
+    } catch (error) {
+      console.error("Ошибка при получении пользователей:", error);
+      socket.emit("error", "Не удалось загрузить пользователей");
     }
   });
   // ---------------------Register

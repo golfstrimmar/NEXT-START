@@ -41,7 +41,7 @@ export default (socket, prisma, googleClient, jwt) => {
       }
       // Генерация JWT-токена
       const jwtToken = jwt.sign(
-        { id: user.id, username: user.username, email: user.email },
+        { id: user.id, userName: user.userName, email: user.email },
         process.env.JWT_SECRET || "your_jwt_secret",
         { expiresIn: "1h" }
       );
@@ -51,7 +51,7 @@ export default (socket, prisma, googleClient, jwt) => {
         message: "Google login successful",
         user: {
           _id: user.id.toString(),
-          userName: user.username,
+          userName: user.userName,
           email: user.email,
           passwordHash: user.password || "",
           avatar: user.avatarUrl || "",

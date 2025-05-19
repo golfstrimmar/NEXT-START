@@ -1,4 +1,4 @@
-export default (socket, prisma, jwt, bcrypt ) => {
+export default (socket, prisma, jwt, bcrypt) => {
   socket.on("login", async ({ email, password }) => {
     try {
       // Поиск пользователя
@@ -23,7 +23,7 @@ export default (socket, prisma, jwt, bcrypt ) => {
 
       // Генерация JWT-токена
       const token = jwt.sign(
-        { id: user.id, username: user.username, email: user.email },
+        { id: user.id, userName: user.userName, email: user.email },
         process.env.JWT_SECRET || "your_jwt_secret",
         { expiresIn: "1h" }
       );
@@ -33,7 +33,7 @@ export default (socket, prisma, jwt, bcrypt ) => {
         message: "Login successful",
         user: {
           _id: user.id.toString(),
-          userName: user.username,
+          userName: user.userName,
           email: user.email,
           passwordHash: user.password,
           avatar: user.avatarUrl || "",

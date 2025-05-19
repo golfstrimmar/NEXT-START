@@ -1,25 +1,26 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+// Интерфейс пользователя
 interface User {
-  _id: string;
+  id: number;
   userName: string;
   email: string;
-  passwordHash: string;
-  avatar: string;
-  googleId: string;
+  avatar?: string;
   createdAt: string;
-  updatedAt: string;
-  __v: number;
 }
 
+// Интерфейс состояния авторизации
 interface AuthState {
   user: User | null;
   token: string | null;
+  users: User[];
 }
 
+// Начальное состояние без обращения к localStorage
 const initialState: AuthState = {
   user: null,
   token: null,
+  users: [],
 };
 
 const authSlice = createSlice({
@@ -29,13 +30,29 @@ const authSlice = createSlice({
     setUser: (state, action: PayloadAction<{ user: User; token: string }>) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
+      // Проверяем доступность localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(action.payload.user));
+        localStorage.setItem("token", action.payload.token);
+      }
     },
     clearUser: (state) => {
       state.user = null;
       state.token = null;
+      // Проверяем доступность localStorage
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+      }
+    },
+    setUsers: (state, action: PayloadAction<User[]>) => {
+      state.users = action.payload;
+    },
+    addUser: (state, action: PayloadAction<User>) => {
+      state.users.push(action.payload);
     },
   },
 });
 
-export const { setUser, clearUser } = authSlice.actions;
+export const { setUser, clearUser, setUsers, addUser } = authSlice.actions;
 export default authSlice.reducer;

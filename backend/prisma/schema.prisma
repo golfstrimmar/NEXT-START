@@ -16,7 +16,7 @@ model Message {
 
 model User {
   id        Int      @id @default(autoincrement())
-  username  String   @unique
+  userName  String   @unique
   email     String   @unique
   password  String?
   googleId  String?  @unique

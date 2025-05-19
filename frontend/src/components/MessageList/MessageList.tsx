@@ -1,38 +1,33 @@
 import { useEffect, useState, useMemo } from "react";
-import { fetchMessages } from "@/lib/api";
-import { getUser } from "@/app/redux/slices/authSlice";
 import Message from "@/components/Message/Message";
-import { tr } from "framer-motion/client";
-
-interface Message {
-  id: number;
-  text: string;
-  author: string;
-  createdAt: string;
-}
+import { MessageType } from "@/types/message";
+import { useSelector } from "react-redux";
+import User from "@/types/user"; // Добавлен импорт User
 
 export default function MessageList() {
-  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const users: User[] = useSelector((state) => state.auth.users);
+  const [newMessages, setNewMessages] = useState<MessageType[]>([]);
+  const messages: MessageType[] = useSelector(
+    (state) => state.messages.messages
+  );
 
+  // Обновляем сообщения с заменой author на userName при изменении messages или users
   useEffect(() => {
-    const loadMessages = async () => {
-      try {
-        const data = await fetchMessages();
-        console.log("<====data====>", data);
-        setMessages(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (users && messages) {
+      setLoading(false);
+      const updatedMessages = messages.map((msg) => {
+        const user = users.find((u) => u.id === Number(msg.author));
+        return user ? { ...msg, author: user.userName } : msg;
+      });
+      setNewMessages(updatedMessages);
+    }
+  }, [users, messages]);
 
-    loadMessages();
-  }, []);
+  const memoizedMessages = useMemo(() => {
+    return newMessages.length === 0 ? [] : newMessages;
+  }, [newMessages]);
 
-  // ----------------------------------
   if (loading) {
     return (
       <div className="flex justify-center items-center h-20">
@@ -41,22 +36,13 @@ export default function MessageList() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-        Error: {error}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-center mb-6">Сообщения из базы</h2>
-      {messages.length === 0 ? (
-        <p className="text-center text-gray-500">Нет сообщений</p>
+      {memoizedMessages.length === 0 ? (
+        <p className="text-center text-gray-500">No messages yet</p>
       ) : (
         <ul className="space-y-4">
-          {messages.map((msg) => (
+          {memoizedMessages.map((msg) => (
             <li
               key={msg.id}
               className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"

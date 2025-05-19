@@ -1,47 +1,11 @@
 "use client";
 import React, { useEffect } from "react";
-import styles from "./Message.module.scss";
-import { useSelector } from "react-redux";
+import { MessageType } from "@/types/message";
 interface MessageProps {
-  msg: {
-    id: string;
-    text: string;
-    author: string;
-    createdAt: string;
-  };
+  msg: MessageType;
 }
 
 const Message: React.FC<MessageProps> = ({ msg }) => {
-  const socket = useSelector((state: any) => state.socket.socket);
-  // ----------------------------------
-  useEffect(() => {
-    if (socket && msg) {
-      const handleUserSuccess = (data) => {
-        console.log("<====data id====>", data.id);
-        console.log("<====data name====>", data.username);
-        console.log("<====data email====>", data.email);
-      };
-      socket.on("UserSuccess", handleUserSuccess);
-      return () => {
-        socket.off("UserSuccess", handleUserSuccess);
-      };
-    }
-  }, [socket, msg]);
-
-  useEffect(() => {
-    if (socket && msg) {
-      const findUser = async () => {
-        try {
-          socket.emit("find_user", {
-            id: msg.author,
-          });
-        } catch (error) {
-          console.error(error);
-        }
-      };
-      findUser();
-    }
-  }, [socket, msg]);
   return (
     <div>
       <div className="flex justify-between items-start">
