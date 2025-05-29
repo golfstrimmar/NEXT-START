@@ -12,13 +12,15 @@ export default function MessageList() {
     (state) => state.messages.messages
   );
 
-  // Обновляем сообщения с заменой author на userName при изменении messages или users
   useEffect(() => {
     if (users && messages) {
       setLoading(false);
       const updatedMessages = messages.map((msg) => {
         const user = users.find((u) => u.id === Number(msg.author));
-        return user ? { ...msg, author: user.userName } : msg;
+        console.log("<====== user mes list=====>", user as User);
+        return user
+          ? { ...msg, author: user.userName, authorID: String(user.id) }
+          : msg;
       });
       setNewMessages(updatedMessages);
     }

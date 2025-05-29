@@ -25,11 +25,20 @@ const messagesSlice = createSlice({
     addMessage: (state, action: PayloadAction<Message>) => {
       state.messages.unshift(action.payload);
     },
+    updateMessage: (state, action: PayloadAction<Message>) => {
+      const index = state.messages.findIndex(
+        (msg) => msg.id === action.payload.id
+      );
+      if (index !== -1) {
+        state.messages[index] = action.payload;
+      }
+    },
     clearMessages: (state) => {
       state.messages = [];
     },
   },
 });
 
-export const { setMessages, addMessage, clearMessages } = messagesSlice.actions;
+export const { setMessages, addMessage, updateMessage, clearMessages } =
+  messagesSlice.actions;
 export default messagesSlice.reducer;
