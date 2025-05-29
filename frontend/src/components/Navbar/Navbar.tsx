@@ -112,7 +112,9 @@ const Navbar: React.FC = () => {
                 <Link
                   href="/registerPage"
                   className={` hover:text-gray-300 transition-colors duration-200 ${
-                    activeLink === "/registerPage" ? "text-blue" : "text-white "
+                    activeLink === "/registerPage"
+                      ? "text-[#0ae42e]"
+                      : "text-white "
                   }`}
                   onClick={() => {
                     setIsOpen(false);
@@ -125,7 +127,9 @@ const Navbar: React.FC = () => {
                 <Link
                   href="/loginPage"
                   className={` hover:text-gray-300 transition-colors duration-200 ${
-                    activeLink === "/loginPage" ? "text-blue" : "text-white "
+                    activeLink === "/loginPage"
+                      ? "text-[#0ae42e]"
+                      : "text-white "
                   }`}
                   onClick={() => {
                     setIsOpen(false);

@@ -4,67 +4,10 @@ import "./Profile.scss";
 import { useSelector } from "react-redux";
 import Link from "next/link";
 import ChevronLeft from "@/components/icons/ChevronLeft";
-import Image from "next/image";
-
-interface User {
-  _id?: string;
-  userName: string;
-  email: string;
-  avatar: string;
-  createdAt: string;
-}
-
-interface Bid {
-  user: { _id: string; userName: string };
-  amount: number;
-  timestamp: string;
-}
-
-interface Auction {
-  _id: string;
-  title: string;
-  startPrice: number;
-  endTime: string;
-  imageUrl: string;
-  status: string;
-  creator: { _id: string; userName: string };
-  currentBid?: number;
-  bids: Bid[];
-  winner?: { user: string; amount: number };
-}
-
-interface ProfileData {
-  user: { userName: string };
-  createdAuctions: Auction[];
-  auctionsWithBids: Auction[];
-  wonAuctions: Auction[];
-}
+import User from "@/types/user";
 
 const Profile: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user as User);
-  const socket = useSelector((state: any) => state.socket.socket);
-  const token = useSelector((state: any) => state.auth.token);
-  const [profileData, setProfileData] = useState<ProfileData | null>(null);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (socket && token) {
-      socket.emit("getProfileData", { token });
-
-      socket.on("profileData", (data: ProfileData) => {
-        setProfileData(data);
-      });
-
-      socket.on("profileError", (message: string) => {
-        setError(message);
-      });
-
-      return () => {
-        socket.off("profileData");
-        socket.off("profileError");
-      };
-    }
-  }, [socket, token]);
 
   return (
     <div className="profile">
@@ -121,8 +64,6 @@ const Profile: React.FC = () => {
                 </span>
               </label>
             </div>
-
-            {error && <p className="profile-error">{error}</p>}
           </div>
         ) : (
           <div className="profile-loading">Loading user data...</div>
