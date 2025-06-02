@@ -27,6 +27,12 @@ import handlerRegister from "./components/handlerRegister.js";
 import handlerLogin from "./components/handlerLogin.js";
 import googleLogin from "./components/googleLogin.js";
 import handlerSetPassword from "./components/handlerSetPassword.js";
+import handlerGetUsers from "./components/handlerGetUsers.js";
+import handlerFindUser from "./components/handlerFindUser.js";
+import handlerEditMessage from "./components/handlerEditMessage.js";
+import handlerSendMessage from "./components/handlerSendMessage.js";
+import handlerGetMessages from "./components/handlerGetMessages.js";
+import handlerDeleteMessage from "./components/handlerDeleteMessage.js";
 // ====================================================
 // Настройка CORS с конкретными доменами
 const corsOptions = {
@@ -87,112 +93,15 @@ app.get("/messages", async (req, res) => {
 io.on("connection", (socket) => {
   console.log("👉Socket client:", socket.id);
   // ------------
-  socket.on("get_messages", async () => {
-    try {
-      const messages = await prisma.message.findMany({
-        orderBy: { createdAt: "desc" },
-        take: 100,
-      });
-      console.log("Send to client by Socket.io:", messages.length);
-      socket.emit("messages", messages);
-    } catch (error) {
-      console.error("Error getting messages:", error);
-      socket.emit("error", "Failed to get messages");
-    }
-  });
+  handlerGetMessages(socket, prisma);
   // ------------
-  socket.on("send_message", async (data) => {
-    try {
-      console.log("Received message:", data);
-      const message = await prisma.message.create({
-        data: {
-          text: data.text,
-          author: data.author || "Anonymous",
-        },
-      });
-      console.log("Message saved:", message);
-      io.emit("new_message", message);
-    } catch (error) {
-      console.error("Error saving message:", error);
-      socket.emit("error", "Failed to save message");
-    }
-  });
+  handlerSendMessage(io, socket, prisma);
   // -----------------
-  socket.on("edit_message", async (data) => {
-    try {
-      console.log("Received edit message request:", data);
-
-      const existingMessage = await prisma.message.findUnique({
-        where: { id: data.id },
-      });
-
-      if (!existingMessage) {
-        console.error("Message not found:", data.id);
-        socket.emit("error", "Message not found");
-        return;
-      }
-      console.log("Existing message:", existingMessage);
-      if (existingMessage.author !== data.authorID) {
-        console.error("Unauthorized edit attempt by:", data.author);
-        socket.emit("error", "You are not authorized to edit this message");
-        return;
-      }
-
-      const updatedMessage = await prisma.message.update({
-        where: { id: data.id },
-        data: { text: data.text },
-      });
-
-      console.log("Message updated:", updatedMessage);
-      io.emit("message_updated", updatedMessage);
-    } catch (error) {
-      console.error("Error updating message:", error);
-      socket.emit("error", "Failed to update message");
-    }
-  });
+  handlerEditMessage(io, socket, prisma);
   // ------------------
-  socket.on("find_user", async ({ id }) => {
-    const userID = Number(id);
-    try {
-      const user = await prisma.user.findUnique({
-        where: { id: userID },
-      });
-      if (!user) {
-        socket.emit("UserFailed", {
-          message: "User not found",
-        });
-        return;
-      }
-
-      socket.emit("UserSuccess", {
-        id: user.id,
-        userName: user.userName,
-        email: user.email,
-      });
-    } catch (error) {
-      console.error("Login error:", error);
-      socket.emit("UserFailed", { message: "User not found" });
-    }
-  });
+  handlerFindUser(socket, prisma);
   // ------------------
-  socket.on("get_users", async () => {
-    try {
-      const users = await prisma.user.findMany({
-        select: {
-          id: true,
-          userName: true,
-          email: true,
-          avatarUrl: true,
-          createdAt: true,
-        },
-      });
-      console.log("Отправлено пользователей:", users.length);
-      socket.emit("users", users);
-    } catch (error) {
-      console.error("Ошибка при получении пользователей:", error);
-      socket.emit("error", "Не удалось загрузить пользователей");
-    }
-  });
+  handlerGetUsers(socket, prisma);
   // ---------------------Register
   handlerRegister(socket, prisma, bcrypt, saltRounds);
   // ---------------------Google Register
@@ -203,6 +112,8 @@ io.on("connection", (socket) => {
   handlerLogin(socket, prisma, jwt, bcrypt);
   // --------------------- Google login
   googleLogin(socket, prisma, googleClient, jwt);
+  // ---------------------
+  handlerDeleteMessage(socket, prisma);
   // ---------------------
 });
 
