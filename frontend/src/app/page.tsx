@@ -70,7 +70,7 @@ export default function Home() {
               setTimeout(() => {
                 setShowModal(false);
                 setError("");
-              }, 1500);
+              }, 2500);
             }
           }}
         ></Button>

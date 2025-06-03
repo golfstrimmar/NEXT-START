@@ -2,13 +2,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import ModalMessage from "@/components/ModalMessage/ModalMessage";
+
 import Button from "@/components/ui/Button/Button";
 import { useSelector, useDispatch } from "react-redux";
 import "./LoginPage.scss";
 import { setUser } from "@/app/redux/slices/authSlice";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import Input from "@/components/ui/Input/Input";
+
+import dynamic from "next/dynamic";
+const ModalMessage = dynamic(
+  () => import("@/components/ModalMessage/ModalMessage"),
+  {
+    ssr: false,
+  }
+);
 
 interface SocketData {
   user: {
@@ -34,6 +42,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [openModalMessage, setOpenModalMessage] = useState<boolean>(false);
+  const [isModalVisible, setisModalVisible] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<{
     email: string;
     password: string;
@@ -53,6 +62,7 @@ const LoginPage = () => {
         dispatch(setUser({ user: data.user, token: data.token }));
         setSuccessMessage(data.message);
         setOpenModalMessage(true);
+        setisModalVisible(true);
         setTimeout(() => {
           router.replace("/profile");
           setSuccessMessage("");
@@ -64,12 +74,11 @@ const LoginPage = () => {
       socket.on("googleLoginSuccess", (data: SocketData) => {
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("token", data.token);
-        console.log("===--- user ---====", data.user);
-        console.log("===--- token ---====", data.token);
         dispatch(setUser({ user: data.user, token: data.token }));
         setSuccessMessage("Google login successful");
         setOpenModalMessage(true);
         setIsGoogleLoading(false);
+        setisModalVisible(true);
         setTimeout(() => {
           router.replace("/profile");
           setSuccessMessage("");
@@ -82,6 +91,7 @@ const LoginPage = () => {
         if (data.message === "Invalid email or password") {
           setSuccessMessage("User not found. Please register.");
           setOpenModalMessage(true);
+          setisModalVisible(true);
           setTimeout(() => {
             setSuccessMessage("");
             setOpenModalMessage(false);
@@ -105,6 +115,7 @@ const LoginPage = () => {
           setOpenModalMessage(true);
           setIsGoogleLoading(false);
           setSuccessMessage("User not found. Please register.");
+          setisModalVisible(true);
           setTimeout(() => {
             setSuccessMessage("");
             setOpenModalMessage(false);
@@ -114,6 +125,7 @@ const LoginPage = () => {
         if (data.error === "User not found") {
           setSuccessMessage("User not found. Please register.");
           setOpenModalMessage(true);
+          setisModalVisible(true);
           setIsGoogleLoading(false);
           setTimeout(() => {
             setSuccessMessage("");
@@ -215,7 +227,9 @@ const LoginPage = () => {
 
   return (
     <div className="">
-      <ModalMessage message={successMessage} open={openModalMessage} />
+      {isModalVisible && (
+        <ModalMessage message={successMessage} open={openModalMessage} />
+      )}
       <h1 className="text-3xl font-semibold italic text-gray-800 text-center">
         Login
       </h1>

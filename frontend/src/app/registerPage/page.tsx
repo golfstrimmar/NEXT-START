@@ -1,16 +1,22 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useSelector, useDispatch } from "react-redux"; // Добавим useDispatch для диспатча
+import { useSelector, useDispatch } from "react-redux";
 import styles from "./RegisterPage.module.scss";
 import Image from "next/image";
-import ModalMessage from "@/components/ModalMessage/ModalMessage";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import Input from "@/components/ui/Input/Input";
 import Button from "@/components/ui/Button/Button";
-import { addUser } from "@/app/redux/slices/authSlice"; // Импорт экшена
+import { addUser } from "@/app/redux/slices/authSlice";
+import dynamic from "next/dynamic";
 
-// Интерфейс пользователя (синхронизирован с authSlice)
+const ModalMessage = dynamic(
+  () => import("@/components/ModalMessage/ModalMessage"),
+  {
+    ssr: false,
+  }
+);
+
 interface User {
   id: number;
   userName: string;
@@ -34,7 +40,7 @@ const RegisterPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const socket = useSelector((state: any) => state.socket.socket);
   const router = useRouter();
-  const dispatch = useDispatch(); // Добавляем диспатч
+  const dispatch = useDispatch();
   const [userName, setUsername] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -51,6 +57,7 @@ const RegisterPage: React.FC = () => {
   const passwordGoogleInputRef = useRef<HTMLInputElement | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [openModalMessage, setOpenModalMessage] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [showPasswordModal, setShowPasswordModal] = useState<boolean>(false);
   const [googleData, setGoogleData] = useState<{
     email: string;
@@ -64,36 +71,44 @@ const RegisterPage: React.FC = () => {
     if (!socket) return;
 
     socket.on("registrationSuccess", (data: SocketData) => {
-      console.log("===--- registrationSuccess ---====", data);
       setSuccessMessage(data.message);
       setOpenModalMessage(true);
+      setIsModalVisible(true);
       if (data.user) {
-        dispatch(addUser(data.user)); // Локально добавляем пользователя в Redux
+        dispatch(addUser(data.user));
       }
+      // Очистка полей формы
+      setUsername("");
+      setEmail("");
+      setPassword("");
+      setFormErrors({ userName: "", email: "", password: "" });
       setTimeout(() => {
-        setSuccessMessage("");
         setOpenModalMessage(false);
         router.replace("/loginPage");
-      }, 2000);
+      }, 2500);
     });
 
     socket.on("googleRegisterSuccess", (data: SocketData) => {
-      console.log("===--- googleRegisterSuccess ---====", data);
       setSuccessMessage(data.message);
       setOpenModalMessage(true);
+      setIsModalVisible(true);
       setShowPasswordModal(false);
       if (data.user) {
-        dispatch(addUser(data.user)); // Локально добавляем пользователя в Redux
+        dispatch(addUser(data.user));
       }
+      // Очистка полей формы
+      setUsername("");
+      setEmail("");
+      setPassword("");
+      setFormErrors({ userName: "", email: "", password: "" });
+      setGooglePassword("");
       setTimeout(() => {
-        setSuccessMessage("");
         setOpenModalMessage(false);
         router.replace("/loginPage");
-      }, 2000);
+      }, 2500);
     });
 
     socket.on("requirePassword", (data: SocketData) => {
-      console.log("===--- requirePassword ---====", data);
       setGoogleData({
         email: data.email || "",
         userName: data.userName || "",
@@ -104,13 +119,12 @@ const RegisterPage: React.FC = () => {
     });
 
     socket.on("registrationError", (data: SocketData) => {
-      console.log("===--- registrationError ---====", data);
       setSuccessMessage(data.message || data.error || "Registration failed");
       setOpenModalMessage(true);
+      setIsModalVisible(true);
       setTimeout(() => {
-        setSuccessMessage("");
         setOpenModalMessage(false);
-      }, 2000);
+      }, 2500);
     });
 
     return () => {
@@ -146,17 +160,6 @@ const RegisterPage: React.FC = () => {
     return { isValid, errors };
   };
 
-  useEffect(() => {
-    if (userName || email || password) {
-      console.log(
-        "<====  userName, email, password====>",
-        userName,
-        email,
-        password
-      );
-    }
-  }, [userName, email, password]);
-
   const handleRegister = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const { isValid, errors } = validateForm();
@@ -165,10 +168,11 @@ const RegisterPage: React.FC = () => {
       const newFormErrors = errorList.join(", ");
       setSuccessMessage(newFormErrors);
       setOpenModalMessage(true);
+      setIsModalVisible(true);
       setTimeout(() => {
-        setSuccessMessage("");
         setOpenModalMessage(false);
-      }, 2000);
+        setSuccessMessage("");
+      }, 2500);
       return;
     }
 
@@ -193,13 +197,15 @@ const RegisterPage: React.FC = () => {
   const responseGoogle = (response: CredentialResponse) => {
     const { credential } = response;
     if (!credential) {
-      console.log("===--- Google registration failed ---====");
       setSuccessMessage("Google registration failed. Please try again.");
       setOpenModalMessage(true);
-      setTimeout(() => setSuccessMessage(""), 2000);
+      setIsModalVisible(true);
+      setTimeout(() => {
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+      }, 2500);
       return;
     }
-    console.log("Google token received:", credential);
     if (socket) {
       socket.emit("googleRegister", { token: credential });
     }
@@ -209,13 +215,21 @@ const RegisterPage: React.FC = () => {
     if (!googlePassword) {
       setSuccessMessage("Password is required");
       setOpenModalMessage(true);
-      setTimeout(() => setSuccessMessage(""), 2000);
+      setIsModalVisible(true);
+      setTimeout(() => {
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+      }, 2500);
       return;
     }
     if (googlePassword.length < 6) {
       setSuccessMessage("Password must be at least 6 characters");
       setOpenModalMessage(true);
-      setTimeout(() => setSuccessMessage(""), 2000);
+      setIsModalVisible(true);
+      setTimeout(() => {
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+      }, 2500);
       return;
     }
     if (googleData && socket) {
@@ -226,13 +240,29 @@ const RegisterPage: React.FC = () => {
         googleId: googleData.googleId,
         avatarUrl: googleData.avatarUrl,
       });
-      setGooglePassword(""); // Очищаем поле
+      setGooglePassword("");
+    }
+  };
+
+  const handleModalExitComplete = () => {
+    setIsModalVisible(false);
+    if (
+      successMessage.includes("Registration successful") ||
+      successMessage.includes("Google registration successful")
+    ) {
+      router.replace("/loginPage");
     }
   };
 
   return (
     <div className="">
-      <ModalMessage message={successMessage} open={openModalMessage} />
+      {isModalVisible && (
+        <ModalMessage
+          message={successMessage}
+          open={openModalMessage}
+          onExitComplete={handleModalExitComplete}
+        />
+      )}
       <h1 className="text-3xl font-semibold italic text-gray-800 text-center">
         Registration
       </h1>
@@ -277,7 +307,11 @@ const RegisterPage: React.FC = () => {
             onError={() => {
               setSuccessMessage("Failed to log in via Google.");
               setOpenModalMessage(true);
-              setTimeout(() => setSuccessMessage(""), 2000);
+              setIsModalVisible(true);
+              setTimeout(() => {
+                setOpenModalMessage(false);
+                setSuccessMessage("");
+              }, 2500);
             }}
           />
         </button>

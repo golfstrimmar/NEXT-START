@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { del } from "framer-motion/client";
 
 interface Message {
   id: number;
@@ -33,12 +34,22 @@ const messagesSlice = createSlice({
         state.messages[index] = action.payload;
       }
     },
+    deleteMessage: (state, action: PayloadAction<number>) => {
+      state.messages = state.messages.filter(
+        (msg) => msg.id !== action.payload
+      );
+    },
     clearMessages: (state) => {
       state.messages = [];
     },
   },
 });
 
-export const { setMessages, addMessage, updateMessage, clearMessages } =
-  messagesSlice.actions;
+export const {
+  setMessages,
+  addMessage,
+  updateMessage,
+  clearMessages,
+  deleteMessage,
+} = messagesSlice.actions;
 export default messagesSlice.reducer;
