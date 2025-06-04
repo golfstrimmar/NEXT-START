@@ -7,7 +7,7 @@ import { User } from "@/types/user";
 import ModalEditMessage from "@/components/ModalEditMessage/ModalEditMessage";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { p } from "framer-motion/client";
+import Tab from "@/components/ui/Tab/Tab";
 
 const ModalMessage = dynamic(
   () => import("@/components/ModalMessage/ModalMessage"),
@@ -209,8 +209,8 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       </div>
       <div className="grid grid-cols-[1fr_auto] gap-2 mt-4">
         <p className="text-gray-800 leading-none">{msg.text}</p>
-        <div className="flex gap-1">
-          <div className="flex gap-1">
+        <div className="flex items-center gap-4">
+          <div className="grid grid-cols-[1fr_25px] items-center gap-2">
             <Image
               src="/assets/svg/like.svg"
               width={15}
@@ -218,33 +218,22 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
               alt="like"
               className="object-cover cursor-pointer"
               onClick={() => handleLike(msg.id)}
-            />
-            <span>{usersLiked.length}</span>
+            />{" "}
+            <Tab length={usersLiked.length} details={usersLiked} />
           </div>
-          <div className="flex flex-col gap-1 border border-gray-300 p-2">
-            <p>Users who liked:</p>
-            {usersLiked &&
-              usersLiked.map((foo, index) => {
-                return <p key={index}>{foo}</p>;
-              })}
-          </div>
-          <div className="rotate-[180deg]">
-            <Image
-              src="/assets/svg/like.svg"
-              width={15}
-              height={15}
-              alt="dislike"
-              className="object-cover cursor-pointer"
-              onClick={() => handleDisLike(msg.id)}
-            />
-          </div>
-          <span>{usersDisliked.length}</span>
-          <div className="flex flex-col gap-1 border border-gray-300 p-2">
-            <p>Users who disliked:</p>
-            {usersDisliked &&
-              usersDisliked.map((foo, index) => {
-                return <p key={index}>{foo}</p>;
-              })}
+
+          <div className="grid grid-cols-[1fr_25px] items-center gap-2">
+            <div className="rotate-[180deg]">
+              <Image
+                src="/assets/svg/like.svg"
+                width={15}
+                height={15}
+                alt="dislike"
+                className="object-cover cursor-pointer"
+                onClick={() => handleDisLike(msg.id)}
+              />
+            </div>
+            <Tab length={usersDisliked.length} details={usersDisliked} />
           </div>
         </div>
       </div>

@@ -60,16 +60,19 @@ export default function Home() {
               </div>
             );
           })}
-        {usersLikedDisliked &&
-          usersLikedDisliked.map((foo) => {
-            return (
-              <div key={foo.id} className="flex gap-2">
-                <p>userId:{foo.userId}</p>
-                <p>messageId:{foo.messageId}</p>
-                <p>reaction:{foo.reaction}</p>
-              </div>
-            );
-          })}
+        <div className="border border-gray-500 p-2 mt-2 mb-2">
+          <h3>users Liked Disliked:</h3>
+          {usersLikedDisliked &&
+            usersLikedDisliked.map((foo) => {
+              return (
+                <div key={foo.id} className="flex gap-2">
+                  <p>userId:{foo.userId}</p>
+                  <p>messageId:{foo.messageId}</p>
+                  <p>reaction:{foo.reaction}</p>
+                </div>
+              );
+            })}
+        </div>
         <MessageList />
         <Button
           buttonText="Add Message"
