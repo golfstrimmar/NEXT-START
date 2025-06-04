@@ -11,8 +11,6 @@ model Message {
   id                Int                 @id @default(autoincrement())
   text              String
   author            String
-  likes             Int                 @default(0)
-  dislikes          Int                 @default(0)
   createdAt         DateTime            @default(now())
   UserMessageReaction UserMessageReaction[]
 }
