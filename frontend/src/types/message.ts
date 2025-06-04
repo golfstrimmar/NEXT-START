@@ -3,5 +3,7 @@ export interface MessageType {
   text: string;
   author: string;
   authorID: string;
+  likes: number;
+  dislikes: number;
   createdAt: string;
 }

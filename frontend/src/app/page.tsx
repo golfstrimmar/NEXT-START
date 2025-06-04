@@ -16,6 +16,9 @@ export default function Home() {
   const socket: Socket = useSelector((state) => state.socket.socket);
   const user: User = useSelector((state) => state.auth.user);
   const users: User[] = useSelector((state) => state.auth.users);
+  const usersLikedDisliked = useSelector(
+    (state) => state.messages.usersLikedDisliked
+  );
   const [showModal, setShowModal] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   return (
@@ -57,7 +60,16 @@ export default function Home() {
               </div>
             );
           })}
-
+        {usersLikedDisliked &&
+          usersLikedDisliked.map((foo) => {
+            return (
+              <div key={foo.id} className="flex gap-2">
+                <p>userId:{foo.userId}</p>
+                <p>messageId:{foo.messageId}</p>
+                <p>reaction:{foo.reaction}</p>
+              </div>
+            );
+          })}
         <MessageList />
         <Button
           buttonText="Add Message"

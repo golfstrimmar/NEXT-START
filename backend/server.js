@@ -33,6 +33,8 @@ import handlerEditMessage from "./components/handlerEditMessage.js";
 import handlerSendMessage from "./components/handlerSendMessage.js";
 import handlerGetMessages from "./components/handlerGetMessages.js";
 import handlerDeleteMessage from "./components/handlerDeleteMessage.js";
+import handlerLikeMessage from "./components/handlerLikeMessage.js";
+import handlerGetUsersLikedDisliked from "./components/handlerGetUsersLikedDisliked.js";
 // ====================================================
 // Настройка CORS с конкретными доменами
 const corsOptions = {
@@ -112,6 +114,10 @@ io.on("connection", (socket) => {
   handlerLogin(socket, prisma, jwt, bcrypt);
   // --------------------- Google login
   googleLogin(socket, prisma, googleClient, jwt);
+  // ---------------------
+  handlerLikeMessage(socket, prisma, io);
+  // ---------------------
+  handlerGetUsersLikedDisliked(socket, prisma);
   // ---------------------
   handlerDeleteMessage(socket, prisma);
   // ---------------------

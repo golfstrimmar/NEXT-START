@@ -3,7 +3,11 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { io } from "socket.io-client";
 import { setSocket, disconnectSocket } from "@/app/redux/slices/socketSlice";
-import { setMessages, addMessage } from "@/app/redux/slices/messagesSlice";
+import {
+  setMessages,
+  addMessage,
+  setUsersLikedDisliked,
+} from "@/app/redux/slices/messagesSlice";
 import { setUsers, addUser } from "@/app/redux/slices/authSlice";
 
 const SocketInitializer: React.FC = () => {
@@ -19,8 +23,9 @@ const SocketInitializer: React.FC = () => {
     socket.on("connect", () => {
       console.log("Connected to server with id:", socket.id);
       dispatch(setSocket(socket));
-      socket.emit("get_messages"); // Запрашиваем сообщения
-      socket.emit("get_users"); // Запрашиваем пользователей
+      socket.emit("get_messages");
+      socket.emit("get_users");
+      socket.emit("get_users_liked_disliked");
     });
 
     // Получение всех сообщений
@@ -47,6 +52,10 @@ const SocketInitializer: React.FC = () => {
       dispatch(addUser(newUser));
     });
 
+    socket.on("users_liked_disliked", (users: any) => {
+      console.log("===Received users_liked_disliked:===", users);
+      dispatch(setUsersLikedDisliked(users));
+    });
     socket.on("registrationSuccess", (newUser: any) => {
       console.log("Received new user from registrationSuccess:", newUser);
       dispatch(addUser(newUser.user)); // Берем user из объекта события
@@ -79,6 +88,7 @@ const SocketInitializer: React.FC = () => {
       socket.off("disconnect");
       socket.off("registrationSuccess");
       socket.off("googleRegisterSuccess");
+      socket.off("users_liked_disliked");
       socket.disconnect();
       dispatch(disconnectSocket());
     };

@@ -47,7 +47,7 @@ export default function MessageList() {
           {memoizedMessages.map((msg) => (
             <li
               key={msg.id}
-              className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
+              className="bg-white p-2 rounded-lg shadow hover:shadow-md transition-shadow"
             >
               <Message msg={msg} />
             </li>

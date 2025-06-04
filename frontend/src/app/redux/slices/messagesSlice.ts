@@ -1,19 +1,30 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { del } from "framer-motion/client";
 
 interface Message {
   id: number;
   text: string;
   author: string;
+  likes: number;
+  dislikes: number;
   createdAt: string;
+}
+
+interface UserReaction {
+  id: number;
+  userId: number;
+  userName: string;
+  messageId: number;
+  reaction: "like" | "dislike";
 }
 
 interface MessageState {
   messages: Message[];
+  usersLikedDisliked: UserReaction[];
 }
 
 const initialState: MessageState = {
   messages: [],
+  usersLikedDisliked: [],
 };
 
 const messagesSlice = createSlice({
@@ -38,9 +49,16 @@ const messagesSlice = createSlice({
       state.messages = state.messages.filter(
         (msg) => msg.id !== action.payload
       );
+      state.usersLikedDisliked = state.usersLikedDisliked.filter(
+        (reaction) => reaction.messageId !== action.payload
+      );
+    },
+    setUsersLikedDisliked: (state, action: PayloadAction<UserReaction[]>) => {
+      state.usersLikedDisliked = action.payload;
     },
     clearMessages: (state) => {
       state.messages = [];
+      state.usersLikedDisliked = [];
     },
   },
 });
@@ -51,5 +69,6 @@ export const {
   updateMessage,
   clearMessages,
   deleteMessage,
+  setUsersLikedDisliked,
 } = messagesSlice.actions;
 export default messagesSlice.reducer;

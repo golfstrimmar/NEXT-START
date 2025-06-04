@@ -8,18 +8,33 @@ datasource db {
 }
 
 model Message {
-  id        Int      @id @default(autoincrement())
-  text      String
-  author    String
-  createdAt DateTime @default(now())
+  id                Int                 @id @default(autoincrement())
+  text              String
+  author            String
+  likes             Int                 @default(0)
+  dislikes          Int                 @default(0)
+  createdAt         DateTime            @default(now())
+  UserMessageReaction UserMessageReaction[]
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  userName  String   @unique
-  email     String   @unique
-  password  String?
-  googleId  String?  @unique
-  avatarUrl String?
-  createdAt DateTime @default(now())
+  id                Int                 @id @default(autoincrement())
+  userName          String              @unique
+  email             String              @unique
+  password          String?
+  googleId          String?             @unique
+  avatarUrl         String?
+  createdAt         DateTime            @default(now())
+  UserMessageReaction UserMessageReaction[]
+}
+
+model UserMessageReaction {
+  id                Int                 @id @default(autoincrement())
+  userId            Int
+  userName          String
+  messageId         Int
+  reaction          String              
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message           Message             @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  @@unique([userId, messageId])
 }
