@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface TabProps {
-  length: string;
+  length: number;
   details: string[];
 }
 
