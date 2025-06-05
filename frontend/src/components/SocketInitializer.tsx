@@ -42,6 +42,7 @@ const SocketInitializer: React.FC = () => {
       console.log("Received new message:", newMessage);
       dispatch(addMessage(newMessage));
     });
+
     socket.on("message_deleted", (deletedMessage: any) => {
       dispatch(deleteMessage(deletedMessage.id));
     });
