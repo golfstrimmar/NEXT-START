@@ -1,4 +1,4 @@
-export default (io,socket, prisma) => {
+export default (io, socket, prisma) => {
   socket.on("edit_message", async (data) => {
     try {
       console.log("Received edit message request:", data);
@@ -13,7 +13,7 @@ export default (io,socket, prisma) => {
         return;
       }
       console.log("Existing message:", existingMessage);
-      if (existingMessage.author !== data.authorID) {
+      if (existingMessage.author !== data.author) {
         console.error("Unauthorized edit attempt by:", data.author);
         socket.emit("error", "You are not authorized to edit this message");
         return;
