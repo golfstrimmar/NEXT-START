@@ -21,13 +21,13 @@ interface UserReaction {
 
 interface CommentState {
   comments: Comment[];
-  usersLikedDisliked: UserReaction[];
+  commentsLikedDisliked: UserReaction[];
   error: string | null;
 }
 
 const initialState: CommentState = {
   comments: [],
-  usersLikedDisliked: [],
+  commentsLikedDisliked: [],
   error: null,
 };
 
@@ -56,13 +56,17 @@ const commentsSlice = createSlice({
       state.comments = state.comments.filter(
         (comment) => comment.id !== action.payload
       );
-      state.usersLikedDisliked = state.usersLikedDisliked.filter(
+      state.commentsLikedDisliked = state.commentsLikedDisliked.filter(
         (reaction) => reaction.commentId !== action.payload
       );
       state.error = null;
     },
-    setUsersLikedDisliked: (state, action: PayloadAction<UserReaction[]>) => {
-      state.usersLikedDisliked = action.payload;
+
+    setCommentsLikedDisliked: (
+      state,
+      action: PayloadAction<UserReaction[]>
+    ) => {
+      state.commentsLikedDisliked = action.payload;
       state.error = null;
     },
 
@@ -71,7 +75,7 @@ const commentsSlice = createSlice({
     },
     clearComments: (state) => {
       state.comments = [];
-      state.usersLikedDisliked = [];
+      state.commentsLikedDisliked = [];
       state.error = null;
     },
   },
@@ -88,7 +92,7 @@ export const {
   addComment,
   updateComment,
   deleteComment,
-  setUsersLikedDisliked,
+  setCommentsLikedDisliked,
   setError,
   clearComments,
 } = commentsSlice.actions;

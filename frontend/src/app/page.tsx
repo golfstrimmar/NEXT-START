@@ -19,8 +19,17 @@ export default function Home() {
   const usersLikedDisliked = useSelector(
     (state) => state.messages.usersLikedDisliked
   );
+  const commentsLikedDisliked = useSelector(
+    (state) => state.comments.commentsLikedDisliked
+  );
   const [showModal, setShowModal] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    if (commentsLikedDisliked) {
+      console.log("<==== commentsLikedDisliked====>", commentsLikedDisliked);
+    }
+  }, [commentsLikedDisliked]);
 
   return (
     <div className=" min-h-screen  font-[family-name:var(--font-geist-sans)]">
@@ -65,6 +74,19 @@ export default function Home() {
           <h3>users Liked Disliked:</h3>
           {usersLikedDisliked &&
             usersLikedDisliked.map((foo) => {
+              return (
+                <div key={foo.id} className="flex gap-2">
+                  <p>userId:{foo.userId}</p>
+                  <p>messageId:{foo.messageId}</p>
+                  <p>reaction:{foo.reaction}</p>
+                </div>
+              );
+            })}
+        </div>
+        <div className="border border-gray-500 p-2 mt-2 mb-2">
+          <h3>comments Liked Disliked:</h3>
+          {commentsLikedDisliked &&
+            commentsLikedDisliked.map((foo) => {
               return (
                 <div key={foo.id} className="flex gap-2">
                   <p>userId:{foo.userId}</p>

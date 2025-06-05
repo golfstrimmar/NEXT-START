@@ -33,6 +33,9 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
   const usersLikedDisliked = useSelector(
     (state) => state.messages.usersLikedDisliked
   );
+  const commentsLikedDisliked = useSelector(
+    (state) => state.comments.commentsLikedDisliked
+  );
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isAuthor, setIsAuthor] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string>("");
@@ -40,6 +43,8 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [usersLiked, setusersLiked] = useState<number[]>([]);
   const [usersDisliked, setusersDisliked] = useState<number[]>([]);
+  const [commentsLiked, setcommentsLiked] = useState<number[]>([]);
+  const [commentsDisliked, setcommentsDisliked] = useState<number[]>([]);
   const [isModalCommentOpen, setIsModalCommentOpen] = useState<boolean>(false);
   // ------------------------------
 
@@ -72,6 +77,36 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       );
     }
   }, [usersLikedDisliked]);
+
+  useEffect(() => {
+    if (commentsLikedDisliked) {
+      console.log("<==== comments L D====>", commentsLikedDisliked);
+
+      setcommentsLiked(
+        commentsLikedDisliked
+          .filter((reaction: any) => reaction.messageId === msg.id)
+          .filter((reaction: any) => reaction.reaction === "like")
+          .map((reaction: any) => reaction.userName)
+      );
+      setcommentsDisliked(
+        commentsLikedDisliked
+          .filter((reaction: any) => reaction.messageId === msg.id)
+          .filter((reaction: any) => reaction.reaction === "dislike")
+          .map((reaction: any) => reaction.userName)
+      );
+    }
+  }, [commentsLikedDisliked]);
+
+  useEffect(() => {
+    if (commentsLiked) {
+      console.log("<==== message commentsLiked====>", commentsLiked);
+    }
+  }, [commentsLiked]);
+  useEffect(() => {
+    if (commentsDisliked) {
+      console.log("<==== message Disliked====>", commentsDisliked);
+    }
+  }, [commentsDisliked]);
 
   useEffect(() => {
     if (user && user?.userName === msg?.author) {
@@ -189,10 +224,18 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         userId: user?._id,
         userName: user?.userName,
       });
-
-      socket.on("comment_liked", (comment: MessageType) =>
-        dispatch(updateComment(comment))
-      );
+      if (!commentsLiked.includes(user?.userName)) {
+        setcommentsLiked((prev) => [...prev, user?.userName]);
+      } else {
+        setSuccessMessage("You already liked this comment.");
+        setOpenModalMessage(true);
+        setIsModalVisible(true);
+        setTimeout(() => {
+          setOpenModalMessage(false);
+          setSuccessMessage("");
+        }, 1500);
+      }
+      setcommentsDisliked((prev) => prev.filter((id) => id !== user?.userName));
     }
   };
   const handleCommentDislike = (id: number) => {
@@ -202,9 +245,18 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         userId: user?._id,
         userName: user?.userName,
       });
-      socket.on("comment_disliked", (comment: MessageType) =>
-        dispatch(updateComment(comment))
-      );
+      if (!commentsDisliked.includes(user?.userName)) {
+        setcommentsDisliked((prev) => [...prev, user?.userName]);
+      } else {
+        setSuccessMessage("You already disliked this comment.");
+        setOpenModalMessage(true);
+        setIsModalVisible(true);
+        setTimeout(() => {
+          setOpenModalMessage(false);
+          setSuccessMessage("");
+        }, 1500);
+      }
+      setcommentsLiked((prev) => prev.filter((id) => id !== user?.userName));
     }
   };
   // -------------!!!!!!!!!!!!---------------
@@ -310,7 +362,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
                     handleCommentLike(comment.id);
                   }}
                 />
-                <span className="text-[10px]">{comment.likes}</span>
+                <span className="text-[10px]">{commentsLiked.length}</span>
                 <div className="transform rotate-[180deg]">
                   <Image
                     src="/assets/svg/like.svg"
@@ -323,7 +375,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
                     }}
                   />
                 </div>
-                <span className="text-[10px] ">{comment.dislikes}</span>
+                <span className="text-[10px] ">{commentsDisliked.length}</span>
               </div>
 
               <p className="text-gray-600 leading-none">{comment.text}</p>

@@ -10,7 +10,11 @@ import {
   updateMessage,
 } from "@/app/redux/slices/messagesSlice";
 import { setUsers, addUser } from "@/app/redux/slices/authSlice";
-import { setComments, addComment } from "@/app/redux/slices/commentsSlice";
+import {
+  setComments,
+  addComment,
+  setCommentsLikedDisliked,
+} from "@/app/redux/slices/commentsSlice";
 
 const SocketInitializer: React.FC = () => {
   const dispatch = useDispatch();
@@ -29,6 +33,7 @@ const SocketInitializer: React.FC = () => {
       socket.emit("get_users");
       socket.emit("get_users_liked_disliked");
       socket.emit("get_comments");
+      socket.emit("get_commets_liked_disliked");
     });
 
     // Получение всех сообщений
@@ -67,6 +72,11 @@ const SocketInitializer: React.FC = () => {
 
     socket.on("comments", (comments: any) => {
       dispatch(setComments(comments));
+    });
+
+    socket.on("commets_liked_disliked", (comments: any) => {
+      console.log("init socket commets_liked_disliked", comments);
+      dispatch(setCommentsLikedDisliked(comments));
     });
 
     socket.on("comment_created", (comment: any) => {
