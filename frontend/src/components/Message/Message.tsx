@@ -216,7 +216,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
 
   return (
     <div>
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-start ">
         <span className="text-gray-500 text-xs">id:{msg?.id}</span>
         <span className="text-gray-500 text-xs">{msg?.author}</span>
         <div className="flex items-center gap-2">
@@ -281,37 +281,52 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
           </div>
         </div>
       </div>
-      <h5
-        className="my-2 text-[10px] text-gray-500 leading-none"
+      <button
+        type="button"
+        className="my-2 text-[10px] text-gray-500 leading-none border border-gray-400 rounded-md p-1 hover:bg-gray-300 transition-colors duration-150 cursor-pointer"
         onClick={() => {
           setIsModalCommentOpen(true);
         }}
       >
         Add comment
-      </h5>
+      </button>
 
-      <div className="border border-gray-400 rounded-md mt-2 p-2 ">
+      <div className="border border-gray-400 rounded-md mt-2 p-2 ml-3 ">
         {comments
           .filter((comment) => comment.messageId === msg.id)
           .map((comment) => (
             <div key={comment.id}>
-              <p className="text-gray-600 leading-none">
-                {comment.userName}: {comment.text}
-              </p>
-              <span
-                onClick={() => {
-                  handleCommentLike(comment.id);
-                }}
-              >
-                {comment.likes}
-              </span>
-              <span
-                onClick={() => {
-                  handleCommentDislike(comment.id);
-                }}
-              >
-                {comment.dislikes}
-              </span>
+              <div className="flex items-center gap-2 mr-4">
+                <p className="text-gray-400 text-[12px] leading-none ">
+                  {comment.userName}
+                </p>
+                <Image
+                  src="/assets/svg/like.svg"
+                  width={15}
+                  height={15}
+                  alt="dislike"
+                  className="object-cover cursor-pointer ml-auto"
+                  onClick={() => {
+                    handleCommentLike(comment.id);
+                  }}
+                />
+                <span className="text-[10px]">{comment.likes}</span>
+                <div className="transform rotate-[180deg]">
+                  <Image
+                    src="/assets/svg/like.svg"
+                    width={15}
+                    height={15}
+                    alt="dislike"
+                    className="object-cover cursor-pointer"
+                    onClick={() => {
+                      handleCommentDislike(comment.id);
+                    }}
+                  />
+                </div>
+                <span className="text-[10px] ">{comment.dislikes}</span>
+              </div>
+
+              <p className="text-gray-600 leading-none">{comment.text}</p>
             </div>
           ))}
       </div>
