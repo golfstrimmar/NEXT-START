@@ -16,11 +16,13 @@ export default function Home() {
   const socket: Socket = useSelector((state) => state.socket.socket);
   const user: User = useSelector((state) => state.auth.user);
   const users: User[] = useSelector((state) => state.auth.users);
+  const comments = useSelector((state) => state.comments.comments);
   const usersLikedDisliked = useSelector(
     (state) => state.messages.usersLikedDisliked
   );
   const [showModal, setShowModal] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+
   return (
     <div className=" min-h-screen  font-[family-name:var(--font-geist-sans)]">
       {error && <ModalMessage message={error} open={showModal} />}
@@ -69,6 +71,21 @@ export default function Home() {
                   <p>userId:{foo.userId}</p>
                   <p>messageId:{foo.messageId}</p>
                   <p>reaction:{foo.reaction}</p>
+                </div>
+              );
+            })}
+        </div>
+        <div className="border border-gray-500 p-2 mt-2 mb-2">
+          <h3>comments:</h3>
+          {comments &&
+            comments.map((foo) => {
+              return (
+                <div key={foo.id} className="flex gap-2">
+                  <p>id:{foo.id}</p>
+                  <p>userId:{foo.userId}</p>
+                  <p>userName:{foo.userName}</p>
+                  <p>reaction:{foo.reaction}</p>
+                  <p>createdAt:{foo.createdAt}</p>
                 </div>
               );
             })}

@@ -9,6 +9,7 @@ import {
   setUsersLikedDisliked,
 } from "@/app/redux/slices/messagesSlice";
 import { setUsers, addUser } from "@/app/redux/slices/authSlice";
+import { setComments } from "@/app/redux/slices/commentsSlice";
 
 const SocketInitializer: React.FC = () => {
   const dispatch = useDispatch();
@@ -26,6 +27,7 @@ const SocketInitializer: React.FC = () => {
       socket.emit("get_messages");
       socket.emit("get_users");
       socket.emit("get_users_liked_disliked");
+      socket.emit("get_comments");
     });
 
     // Получение всех сообщений
@@ -66,6 +68,9 @@ const SocketInitializer: React.FC = () => {
       dispatch(addUser(newUser.user)); // Берем user из объекта события
     });
 
+    socket.on("comments", (comments: any) => {
+      dispatch(setComments(comments));
+    });
     socket.on("connect_error", (error: any) => {
       console.error(
         "Connection error:",

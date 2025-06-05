@@ -1,40 +1,35 @@
+Общее описание
+Система лайков реализована для сообщений в чат-приложении с использованием Socket.IO для реального времени, Prisma для работы с базой данных и React/Redux на клиенте. Реакции (лайки и дизлайки) хранятся в таблице UserMessageReaction, а счётчики — в таблице Message (поля likes, dislikes). Пользователи могут ставить лайк или дизлайк, а также видеть список тех, кто отреагировал.
 
-
-
-
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Сервер (server.js)
+События:
+like_message: Обрабатывает лайк сообщения.
+dislike_message: Обрабатывает дизлайк сообщения.
+Логика:
+Валидация: Проверяет messageId (число) и userId (не пустой).
+Проверка сообщения: Убеждается, что сообщение существует (prisma.message.findUnique).
+Проверка реакции: Ищет существующую реакцию пользователя (prisma.userMessageReaction.findUnique).
+Если реакция уже есть (например, лайк для like_message), выдаёт ошибку.
+Если есть противоположная реакция (например, дизлайк), удаляет её.
+Создание реакции: Добавляет новую запись в UserMessageReaction с userId, messageId, reaction ("like" или "dislike") и userName.
+Уведомление: Отправляет событие message_liked или message_disliked всем клиентам через io.emit с данными сообщения, userId и userName.
+Проблемы:
+Отсутствие транзакций: риск рассинхронизации.
+userName передаётся клиентом, что небезопасно.
+Счётчики likes/dislikes не обновляются в этом коде (вероятно, ошибка).
+Клиент (Message.tsx)
+Компонент: Отображает сообщение, его автора, дату, текст и реакции (лайки/дизлайки).
+Состояние:
+usersLiked/usersDisliked: Локальные массивы с userName тех, кто лайкнул/дизлайкнул, фильтруются из usersLikedDisliked (Redux).
+isAuthor: Проверяет, является ли текущий пользователь автором сообщения.
+Эффекты:
+Синхронизирует usersLiked/usersDisliked с usersLikedDisliked из Redux.
+Проверяет авторство сообщения (user.userName === msg.author).
+Обрабатывает сокет-события (message_liked, message_disliked, message_deleted) для обновления сообщения или удаления.
+Обработчики:
+handleLike: Отправляет like_message через сокет, добавляет userName в usersLiked, удаляет из usersDisliked. Если лайк уже есть, показывает сообщение об ошибке.
+handleDisLike: Аналогично для дизлайка.
+handleDelete: Отправляет delete_message для удаления сообщения.
+UI:
+Показывает иконки лайка/дизлайка, количество реакций через Tab (компонент с выпадающим списком userName).
+Автор может редактировать/удалять сообщение.

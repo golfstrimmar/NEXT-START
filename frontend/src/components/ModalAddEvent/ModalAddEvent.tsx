@@ -47,7 +47,8 @@ const ModalAddEvent = ({ onClose }) => {
       setNewMessage((prev) => {
         return {
           ...prev,
-          author: user?._id,
+          author: user?.userName,
+          authorID: Number(user?._id),
           text: text,
         };
       });

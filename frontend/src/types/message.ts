@@ -2,8 +2,6 @@ export interface MessageType {
   id: number;
   text: string;
   author: string;
-  authorID: string;
-  likes: number;
-  dislikes: number;
+  authorID: number;
   createdAt: string;
 }

@@ -8,31 +8,64 @@ datasource db {
 }
 
 model Message {
-  id                Int                 @id @default(autoincrement())
-  text              String
-  author            String
-  createdAt         DateTime            @default(now())
+  id                  Int                 @id @default(autoincrement())
+  text                String
+  author              String
+  authorID            Int
+  createdAt           DateTime            @default(now())
   UserMessageReaction UserMessageReaction[]
+  comments            Comment[]           @relation
+  commentReactions    CommentReaction[]   @relation
 }
 
 model User {
-  id                Int                 @id @default(autoincrement())
-  userName          String              @unique
-  email             String              @unique
-  password          String?
-  googleId          String?             @unique
-  avatarUrl         String?
-  createdAt         DateTime            @default(now())
+  id                  Int                 @id @default(autoincrement())
+  userName            String              @unique
+  email               String              @unique
+  password            String?
+  googleId            String?             @unique
+  avatarUrl           String?
+  createdAt           DateTime            @default(now())
   UserMessageReaction UserMessageReaction[]
+  comments            Comment[]           @relation
+  commentReactions    CommentReaction[]   @relation
 }
 
 model UserMessageReaction {
-  id                Int                 @id @default(autoincrement())
-  userId            Int
-  userName          String
-  messageId         Int
-  reaction          String              
-  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  message           Message             @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  id                  Int                 @id @default(autoincrement())
+  userId              Int
+  userName            String
+  messageId           Int
+  reaction            String
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message             Message             @relation(fields: [messageId], references: [id], onDelete: Cascade)
   @@unique([userId, messageId])
+}
+
+model Comment {
+  id                  Int                 @id @default(autoincrement())
+  text                String
+  userId              Int
+  userName            String
+  messageId           Int
+  createdAt           DateTime            @default(now())
+  likes               Int                 @default(0)
+  dislikes            Int                 @default(0)
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message             Message             @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  commentReactions    CommentReaction[]   @relation
+}
+
+model CommentReaction {
+  id                  Int                 @id @default(autoincrement())
+  userId              Int
+  userName            String
+  commentId           Int
+  messageId           Int
+  reaction            String
+  createdAt           DateTime            @default(now())
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment             Comment             @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  message             Message             @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  @@unique([userId, commentId])
 }

@@ -35,6 +35,7 @@ import handlerGetMessages from "./components/handlerGetMessages.js";
 import handlerDeleteMessage from "./components/handlerDeleteMessage.js";
 import handlerLikeMessage from "./components/handlerLikeMessage.js";
 import handlerGetUsersLikedDisliked from "./components/handlerGetUsersLikedDisliked.js";
+import handlerComments from "./components/handlerComments.js";
 // ====================================================
 // Настройка CORS с конкретными доменами
 const corsOptions = {
@@ -120,6 +121,8 @@ io.on("connection", (socket) => {
   handlerGetUsersLikedDisliked(socket, prisma);
   // ---------------------
   handlerDeleteMessage(socket, prisma);
+  // ---------------------
+  handlerComments(socket, prisma, io);
   // ---------------------
 });
 
