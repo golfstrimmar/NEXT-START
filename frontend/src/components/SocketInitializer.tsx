@@ -9,7 +9,7 @@ import {
   setUsersLikedDisliked,
 } from "@/app/redux/slices/messagesSlice";
 import { setUsers, addUser } from "@/app/redux/slices/authSlice";
-import { setComments } from "@/app/redux/slices/commentsSlice";
+import { setComments, addComment } from "@/app/redux/slices/commentsSlice";
 
 const SocketInitializer: React.FC = () => {
   const dispatch = useDispatch();
@@ -71,6 +71,11 @@ const SocketInitializer: React.FC = () => {
     socket.on("comments", (comments: any) => {
       dispatch(setComments(comments));
     });
+
+    socket.on("comment_created", (comment: any) => {
+      dispatch(addComment(comment));
+    });
+
     socket.on("connect_error", (error: any) => {
       console.error(
         "Connection error:",
