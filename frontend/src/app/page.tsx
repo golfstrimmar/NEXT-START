@@ -8,7 +8,6 @@ import { useSelector } from "react-redux";
 import { AnimatePresence } from "framer-motion";
 import MessageType from "@/types/message";
 import User from "@/types/user";
-
 import ModalMessage from "@/components/ModalMessage/ModalMessage";
 
 export default function Home() {

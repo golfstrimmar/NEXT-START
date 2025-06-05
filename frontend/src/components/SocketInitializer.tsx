@@ -33,43 +33,32 @@ const SocketInitializer: React.FC = () => {
 
     // Получение всех сообщений
     socket.on("messages", (messages: any) => {
-      console.log("Received messages:", messages);
       dispatch(setMessages(messages));
     });
 
     // Получение нового сообщения
     socket.on("new_message", (newMessage: any) => {
-      console.log("Received new message:", newMessage);
       dispatch(addMessage(newMessage));
-    });
-
-    socket.on("message_deleted", (deletedMessage: any) => {
-      dispatch(deleteMessage(deletedMessage.id));
     });
 
     // Получение всех пользователей
     socket.on("users", (users: any) => {
-      console.log("Received users:", users);
       dispatch(setUsers(users));
     });
 
     // Получение нового пользователя
     socket.on("new_user", (newUser: any) => {
-      console.log("Received new user:", newUser);
       dispatch(addUser(newUser));
     });
 
     socket.on("users_liked_disliked", (users: any) => {
-      console.log("===Received users_liked_disliked:===", users);
       dispatch(setUsersLikedDisliked(users));
     });
     socket.on("registrationSuccess", (newUser: any) => {
-      console.log("Received new user from registrationSuccess:", newUser);
       dispatch(addUser(newUser.user)); // Берем user из объекта события
     });
 
     socket.on("googleRegisterSuccess", (newUser: any) => {
-      console.log("Received new google user:", newUser);
       dispatch(addUser(newUser.user)); // Берем user из объекта события
     });
 
@@ -89,7 +78,6 @@ const SocketInitializer: React.FC = () => {
     });
 
     socket.on("disconnect", () => {
-      console.log("Disconnected from server");
       dispatch(disconnectSocket());
     });
 

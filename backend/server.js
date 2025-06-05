@@ -118,9 +118,9 @@ io.on("connection", (socket) => {
   // ---------------------
   handlerLikeMessage(socket, prisma, io);
   // ---------------------
-  handlerGetUsersLikedDisliked(socket, prisma);
+  handlerGetUsersLikedDisliked(socket, prisma, io);
   // ---------------------
-  handlerDeleteMessage(socket, prisma);
+  handlerDeleteMessage(socket, prisma, io);
   // ---------------------
   handlerComments(socket, prisma, io);
   // ---------------------

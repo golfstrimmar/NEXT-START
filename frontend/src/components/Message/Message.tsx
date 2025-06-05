@@ -10,13 +10,15 @@ import {
 import { User } from "@/types/user";
 import ModalEditMessage from "@/components/ModalEditMessage/ModalEditMessage";
 import Image from "next/image";
-import dynamic from "next/dynamic";
 import Tab from "@/components/ui/Tab/Tab";
 import ModalAddComment from "@/components/ModalAddComment/ModalAddComment";
 
+import dynamic from "next/dynamic";
 const ModalMessage = dynamic(
   () => import("@/components/ModalMessage/ModalMessage"),
-  { ssr: false }
+  {
+    ssr: false,
+  }
 );
 
 interface MessageProps {
@@ -40,6 +42,12 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
   const [usersDisliked, setusersDisliked] = useState<number[]>([]);
   const [isModalCommentOpen, setIsModalCommentOpen] = useState<boolean>(false);
   // ------------------------------
+
+  useEffect(() => {
+    if (msg) {
+      console.log("<==== msg====>", msg);
+    }
+  }, [msg]);
 
   useEffect(() => {
     if (comments) {
@@ -91,15 +99,17 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
           dispatch(updateMessage(dislikedMessage));
         }
       };
+
       const handleMessageDeleted = (deletedMessage: MessageType) => {
         if (deletedMessage.id === msg.id) {
-          dispatch(deleteMessage(deletedMessage.id));
+          console.log('<===="Message deleted successfully."====>');
           setSuccessMessage("Message deleted successfully.");
           setOpenModalMessage(true);
           setIsModalVisible(true);
           setTimeout(() => {
             setOpenModalMessage(false);
             setSuccessMessage("");
+            dispatch(deleteMessage(deletedMessage.id));
           }, 1500);
         }
       };
@@ -197,26 +207,15 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       );
     }
   };
-  // ----------------------------
+  // -------------!!!!!!!!!!!!---------------
   const handleDelete = (id: number) => {
-    if (socket?.connected) {
+    if (socket) {
       socket.emit("delete_message", { id: Number(id) });
     }
   };
 
-  const handleModalExitComplete = () => {
-    setIsModalVisible(false);
-  };
-
   return (
     <div>
-      {isModalVisible && (
-        <ModalMessage
-          message={successMessage}
-          open={openModalMessage}
-          onExitComplete={handleModalExitComplete}
-        />
-      )}
       <div className="flex justify-between items-start">
         <span className="text-gray-500 text-xs">id:{msg?.id}</span>
         <span className="text-gray-500 text-xs">{msg?.author}</span>
@@ -316,6 +315,9 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
             </div>
           ))}
       </div>
+      {isModalVisible && (
+        <ModalMessage message={successMessage} open={openModalMessage} />
+      )}
       {isModalOpen && (
         <ModalEditMessage message={msg} onClose={() => setIsModalOpen(false)} />
       )}

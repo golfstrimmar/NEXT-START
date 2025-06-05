@@ -7,12 +7,17 @@ import Button from "@/components/ui/Button/Button";
 import { useSelector } from "react-redux";
 import Image from "next/image";
 import Input from "@/components/ui/Input/Input";
-import ModalMessage from "@/components/ModalMessage/ModalMessage";
+
 import { Socket } from "dgram";
 import { useRouter, useParams, usePathname } from "next/navigation";
 import { User } from "@/types/user";
 // ----------------------------
-
+const ModalMessage = dynamic(
+  () => import("@/components/ModalMessage/ModalMessage"),
+  {
+    ssr: false,
+  }
+);
 interface Message {
   id: string;
   text: string;
@@ -30,8 +35,9 @@ const ModalAddEvent = ({ onClose }) => {
     createdAt: "",
   });
   const [text, setText] = useState<string>("");
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
+  const [openModalMessage, setOpenModalMessage] = useState<boolean>(false);
+  const [isModalVisible, setisModalVisible] = useState<boolean>(false);
 
   // ----------------------------
 
@@ -58,21 +64,30 @@ const ModalAddEvent = ({ onClose }) => {
   const handleCreateMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (NewMessage.text === "") {
-      console.log("<==== Text is required====>");
-      setError("Text is required");
-      setShowModal(true);
+      setSuccessMessage("Text is required");
+      setOpenModalMessage(true);
+      setisModalVisible(true);
       setTimeout(() => {
-        setShowModal(false);
-        setError("");
-      }, 1500);
+        setSuccessMessage("");
+        setOpenModalMessage(false);
+      }, 2000);
       return;
     }
 
     console.log("<==== NewMessage====>", NewMessage);
     socket.emit("send_message", NewMessage);
     socket.on("new_message", (message) => {
-      console.log("<====New message from server====>", message);
-      onClose();
+      console.log("<====message from backend====>", message);
+      setSuccessMessage("Message created successfully.");
+      setOpenModalMessage(true);
+      setisModalVisible(true);
+      setTimeout(() => {
+        setSuccessMessage("");
+        setOpenModalMessage(false);
+      }, 2000);
+      setTimeout(() => {
+        onClose();
+      }, 2500);
     });
     // onClose();
   };
@@ -92,7 +107,9 @@ const ModalAddEvent = ({ onClose }) => {
           exit={{ scale: 0.9, y: 20 }}
           className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white border border-gray-300 rounded-lg p-1 sm:p-4 "
         >
-          {error && <ModalMessage message={error} open={showModal} />}
+          {isModalVisible && (
+            <ModalMessage message={successMessage} open={openModalMessage} />
+          )}
           <Image
             onClick={() => onClose()}
             src="/assets/svg/cross.svg"
