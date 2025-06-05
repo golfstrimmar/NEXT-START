@@ -38,7 +38,6 @@ export default (socket, prisma, io) => {
           reaction: "like",
         },
       });
-      // io.emit("message_liked", messageExists, userId, userName);
       try {
         const users = await prisma.userMessageReaction.findMany({ take: 1000 });
         io.emit("users_liked_disliked", users);
@@ -93,7 +92,12 @@ export default (socket, prisma, io) => {
           reaction: "dislike",
         },
       });
-      io.emit("message_disliked", messageExists, userId, userName);
+      try {
+        const users = await prisma.userMessageReaction.findMany({ take: 1000 });
+        io.emit("users_liked_disliked", users);
+      } catch (error) {
+        console.error("Error getting users_liked_disliked:", error);
+      }
     } catch (error) {
       console.error("Error disliking message:", error);
       socket.emit("error", {
