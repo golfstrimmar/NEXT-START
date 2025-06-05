@@ -27,7 +27,10 @@ export default function Home() {
 
   useEffect(() => {
     if (commentsLikedDisliked) {
-      console.log("<==== commentsLikedDisliked====>", commentsLikedDisliked);
+      console.log(
+        "<====PAGE comments Liked Disliked====>",
+        commentsLikedDisliked
+      );
     }
   }, [commentsLikedDisliked]);
 

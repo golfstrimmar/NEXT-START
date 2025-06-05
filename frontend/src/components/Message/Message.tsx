@@ -49,20 +49,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
   // ------------------------------
 
   useEffect(() => {
-    if (msg) {
-      console.log("<==== msg====>", msg);
-    }
-  }, [msg]);
-
-  useEffect(() => {
-    if (comments) {
-      console.log("<==== comments====>", comments);
-    }
-  }, [comments]);
-
-  useEffect(() => {
     if (usersLikedDisliked) {
-      console.log("<==== usersLikedDisliked====>", usersLikedDisliked);
       setusersLiked(
         usersLikedDisliked
           .filter((reaction: any) => reaction.messageId === msg.id)
@@ -80,8 +67,6 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
 
   useEffect(() => {
     if (commentsLikedDisliked) {
-      console.log("<==== comments L D====>", commentsLikedDisliked);
-
       setcommentsLiked(
         commentsLikedDisliked
           .filter((reaction: any) => reaction.messageId === msg.id)
@@ -96,17 +81,6 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       );
     }
   }, [commentsLikedDisliked]);
-
-  useEffect(() => {
-    if (commentsLiked) {
-      console.log("<==== message commentsLiked====>", commentsLiked);
-    }
-  }, [commentsLiked]);
-  useEffect(() => {
-    if (commentsDisliked) {
-      console.log("<==== message Disliked====>", commentsDisliked);
-    }
-  }, [commentsDisliked]);
 
   useEffect(() => {
     if (user && user?.userName === msg?.author) {
