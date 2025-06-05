@@ -7,7 +7,7 @@ import {
   setMessages,
   addMessage,
   setUsersLikedDisliked,
-  deleteMessage,
+  updateMessage,
 } from "@/app/redux/slices/messagesSlice";
 import { setUsers, addUser } from "@/app/redux/slices/authSlice";
 import { setComments, addComment } from "@/app/redux/slices/commentsSlice";
@@ -39,6 +39,9 @@ const SocketInitializer: React.FC = () => {
     // Получение нового сообщения
     socket.on("new_message", (newMessage: any) => {
       dispatch(addMessage(newMessage));
+    });
+    socket.on("message_updated", (updatedMessage: any) => {
+      dispatch(updateMessage(updatedMessage));
     });
 
     // Получение всех пользователей

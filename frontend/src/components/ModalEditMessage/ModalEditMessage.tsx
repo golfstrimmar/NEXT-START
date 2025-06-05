@@ -38,12 +38,6 @@ const ModalEditMessage: React.FC<ModalEditMessageProps> = ({
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    if (message) {
-      console.log("<==== message====>", message);
-    }
-  }, [message]);
-
-  useEffect(() => {
     if (!user) {
       router.push("/");
     }
