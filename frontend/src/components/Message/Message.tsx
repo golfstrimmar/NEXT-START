@@ -15,6 +15,7 @@ import Tab from "@/components/ui/Tab/Tab";
 import ModalAddComment from "@/components/ModalAddComment/ModalAddComment";
 
 import dynamic from "next/dynamic";
+import MessageComments from "../MessageComments/MessageComments";
 const ModalMessage = dynamic(
   () => import("@/components/ModalMessage/ModalMessage"),
   {
@@ -42,6 +43,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
   const [usersLiked, setusersLiked] = useState<number[]>([]);
   const [usersDisliked, setusersDisliked] = useState<number[]>([]);
   const [isModalCommentOpen, setIsModalCommentOpen] = useState<boolean>(false);
+
   // ------------------------------
   useEffect(() => {
     if (usersLikedDisliked) {
@@ -106,7 +108,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         setTimeout(() => {
           setOpenModalMessage(false);
           setSuccessMessage("");
-        }, 1500);
+        }, 2000);
         dispatch(deleteComment(data.commentId));
       };
       const handleUpdateComment = (updatedComment: MessageType) => {
@@ -130,7 +132,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         setTimeout(() => {
           setOpenModalMessage(false);
           setSuccessMessage("");
-        }, 1500);
+        }, 2000);
       });
 
       return () => {
@@ -161,7 +163,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         setTimeout(() => {
           setOpenModalMessage(false);
           setSuccessMessage("");
-        }, 1500);
+        }, 2000);
       }
       setusersDisliked((prev) => prev.filter((id) => id !== user?.userName));
     } else {
@@ -171,7 +173,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       setTimeout(() => {
         setOpenModalMessage(false);
         setSuccessMessage("");
-      }, 1500);
+      }, 2000);
     }
   };
 
@@ -191,7 +193,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         setTimeout(() => {
           setOpenModalMessage(false);
           setSuccessMessage("");
-        }, 1500);
+        }, 2000);
       }
 
       setusersLiked((prev) => prev.filter((id) => id !== user?.userName));
@@ -202,7 +204,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       setTimeout(() => {
         setOpenModalMessage(false);
         setSuccessMessage("");
-      }, 1500);
+      }, 2000);
     }
   };
   // ------------comments----------------
@@ -220,7 +222,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       setTimeout(() => {
         setOpenModalMessage(false);
         setSuccessMessage("");
-      }, 1500);
+      }, 2000);
     }
   };
   const handleCommentDislike = (id: number) => {
@@ -237,7 +239,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       setTimeout(() => {
         setOpenModalMessage(false);
         setSuccessMessage("");
-      }, 1500);
+      }, 2000);
     }
   };
 
@@ -337,7 +339,15 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       </button>
 
       {/* ===========comments============= */}
-      <div>
+      <MessageComments
+        user={user}
+        comments={comments}
+        handleCommentDislike={handleCommentDislike}
+        handleCommentLike={handleCommentLike}
+        handleCommentDelete={handleCommentDelete}
+        msg={msg}
+      />
+      {/* <div>
         {comments
           .filter((comment) => comment.messageId === msg.id)
           .map((comment) => (
@@ -388,7 +398,8 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
               <p className="text-gray-600 leading-none">{comment.text}</p>
             </div>
           ))}
-      </div>
+      </div> */}
+
       {isModalVisible && (
         <ModalMessage message={successMessage} open={openModalMessage} />
       )}

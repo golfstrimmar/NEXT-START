@@ -45,7 +45,7 @@ const Tab: React.FC<TabProps> = ({ length, details }) => {
               animate={{ height: "auto", opacity: 1, y: 0 }}
               exit={{ height: 0, opacity: 0, y: 0 }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="absolute top-full bg-white border border-gray-200 rounded-b-md shadow-md z-10 w-fit min-w-[150px] max-w-full"
+              className="absolute right-0 top-full bg-white border border-gray-200 rounded-b-md shadow-md z-10 w-fit min-w-[150px] max-w-full"
             >
               <div className="p-3 space-y-2">
                 {details.map((detail, index) => (
