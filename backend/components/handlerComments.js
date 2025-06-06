@@ -155,7 +155,7 @@ export default (socket, prisma, io) => {
               userId: Number(userId),
               userName: user.userName,
               commentId: Number(commentId),
-              messageId: comment.messageId, // Добавлено обязательное поле
+              messageId: comment.messageId,
               reaction: "like",
             },
           });
@@ -167,13 +167,12 @@ export default (socket, prisma, io) => {
       });
 
       console.log("Comment liked:", updatedComment);
-      io.emit("comment_liked", updatedComment);
+      io.emit("comment_updated", updatedComment);
     } catch (error) {
       console.error("Error liking comment:", {
         error: error.message,
         commentId,
         userId,
-        stack: error.stack,
       });
       socket.emit("error", {
         message: error.message || "Failed to like comment",
@@ -239,13 +238,12 @@ export default (socket, prisma, io) => {
       });
 
       console.log("Comment disliked:", updatedComment);
-      io.emit("comment_disliked", updatedComment);
+      io.emit("comment_updated", updatedComment);
     } catch (error) {
       console.error("Error disliking comment:", {
         error: error.message,
         commentId,
         userId,
-        stack: error.stack,
       });
       socket.emit("error", {
         message: error.message || "Failed to dislike comment",

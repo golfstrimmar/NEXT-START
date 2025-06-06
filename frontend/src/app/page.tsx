@@ -24,21 +24,19 @@ export default function Home() {
   );
   const [showModal, setShowModal] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-
+  // -----------------------------------------
   useEffect(() => {
-    if (commentsLikedDisliked) {
-      console.log(
-        "<====PAGE comments Liked Disliked====>",
-        commentsLikedDisliked
-      );
+    if (comments) {
+      console.log("<==== comments====>", comments);
     }
-  }, [commentsLikedDisliked]);
+  }, [comments]);
+  // -----------------------------------------
 
   return (
     <div className=" min-h-screen  font-[family-name:var(--font-geist-sans)]">
       {error && <ModalMessage message={error} open={showModal} />}
       <div>
-        <Image
+        {/* <Image
           src="/assets/svg/home.svg"
           className="inline-block mr-2 w-8 h-8"
           width={30}
@@ -63,7 +61,7 @@ export default function Home() {
             alt="Picture of the author"
             fill
           />
-        </div>
+        </div> */}
         {users &&
           users.map((user) => {
             return (
@@ -106,15 +104,16 @@ export default function Home() {
               return (
                 <div key={foo.id} className="flex gap-2">
                   <p>id:{foo.id}</p>
+                  <p>messageId:{foo.messageId}</p>
                   <p>userId:{foo.userId}</p>
                   <p>userName:{foo.userName}</p>
-                  <p>reaction:{foo.reaction}</p>
-                  <p>createdAt:{foo.createdAt}</p>
+                  <p>likes:{foo.likes}</p>
+                  <p>dislikes:{foo.dislikes}</p>
                 </div>
               );
             })}
         </div>
-        <MessageList />
+
         <Button
           buttonText="Add Message"
           onClick={() => {
@@ -130,6 +129,8 @@ export default function Home() {
             }
           }}
         ></Button>
+        <MessageList />
+
         <AnimatePresence>
           {AddModalOpen && (
             <ModalAddEvent onClose={() => setAddModalOpen(false)} />

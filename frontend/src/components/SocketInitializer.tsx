@@ -75,7 +75,6 @@ const SocketInitializer: React.FC = () => {
     });
 
     socket.on("commets_liked_disliked", (comments: any) => {
-      console.log("init socket commets_liked_disliked", comments);
       dispatch(setCommentsLikedDisliked(comments));
     });
 

@@ -17,7 +17,6 @@ export default function MessageList() {
       setLoading(false);
       const updatedMessages = messages.map((msg) => {
         const user = users.find((u) => u.id === Number(msg.author));
-        console.log("<====== user mes list=====>", user as User);
         return user
           ? { ...msg, author: user.userName, authorID: String(user.id) }
           : msg;
@@ -39,7 +38,7 @@ export default function MessageList() {
   }
 
   return (
-    <div className="space-y-4 max-w-4xl mx-auto">
+    <div className="space-y-4 max-w-4xl mx-auto mt-2">
       {memoizedMessages.length === 0 ? (
         <p className="text-center text-gray-500">No messages yet</p>
       ) : (

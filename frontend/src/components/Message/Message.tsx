@@ -6,6 +6,7 @@ import { deleteMessage, updateMessage } from "@/app/redux/slices/messagesSlice";
 import {
   addUserReaction,
   updateComment,
+  deleteComment,
 } from "@/app/redux/slices/commentsSlice";
 import { User } from "@/types/user";
 import ModalEditMessage from "@/components/ModalEditMessage/ModalEditMessage";
@@ -33,9 +34,6 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
   const usersLikedDisliked = useSelector(
     (state) => state.messages.usersLikedDisliked
   );
-  const commentsLikedDisliked = useSelector(
-    (state) => state.comments.commentsLikedDisliked
-  );
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isAuthor, setIsAuthor] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string>("");
@@ -43,11 +41,8 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [usersLiked, setusersLiked] = useState<number[]>([]);
   const [usersDisliked, setusersDisliked] = useState<number[]>([]);
-  const [commentsLiked, setcommentsLiked] = useState<number[]>([]);
-  const [commentsDisliked, setcommentsDisliked] = useState<number[]>([]);
   const [isModalCommentOpen, setIsModalCommentOpen] = useState<boolean>(false);
   // ------------------------------
-
   useEffect(() => {
     if (usersLikedDisliked) {
       setusersLiked(
@@ -64,23 +59,6 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       );
     }
   }, [usersLikedDisliked]);
-
-  useEffect(() => {
-    if (commentsLikedDisliked) {
-      setcommentsLiked(
-        commentsLikedDisliked
-          .filter((reaction: any) => reaction.messageId === msg.id)
-          .filter((reaction: any) => reaction.reaction === "like")
-          .map((reaction: any) => reaction.userName)
-      );
-      setcommentsDisliked(
-        commentsLikedDisliked
-          .filter((reaction: any) => reaction.messageId === msg.id)
-          .filter((reaction: any) => reaction.reaction === "dislike")
-          .map((reaction: any) => reaction.userName)
-      );
-    }
-  }, [commentsLikedDisliked]);
 
   useEffect(() => {
     if (user && user?.userName === msg?.author) {
@@ -110,31 +88,57 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       };
 
       const handleMessageDeleted = (deletedMessage: MessageType) => {
-        if (deletedMessage.id === msg.id) {
-          console.log('<===="Message deleted successfully."====>');
-          setSuccessMessage("Message deleted successfully.");
-          setOpenModalMessage(true);
-          setIsModalVisible(true);
-          setTimeout(() => {
-            setOpenModalMessage(false);
-            setSuccessMessage("");
-            dispatch(deleteMessage(deletedMessage.id));
-          }, 1500);
-        }
+        dispatch(deleteMessage(deletedMessage.id));
+        console.log('<===="Message deleted successfully."====>');
+        setSuccessMessage("Message deleted successfully.");
+        setOpenModalMessage(true);
+        setIsModalVisible(true);
+        setTimeout(() => {
+          setOpenModalMessage(false);
+          setSuccessMessage("");
+        }, 2000);
       };
 
-      const handleAddComment = (comment: MessageType) => {
-        console.log("<====comment created====>", comment);
+      const handleDeliteComment = (data: any) => {
+        setSuccessMessage("Comment deleted successfully.");
+        setOpenModalMessage(true);
+        setIsModalVisible(true);
+        setTimeout(() => {
+          setOpenModalMessage(false);
+          setSuccessMessage("");
+        }, 1500);
+        dispatch(deleteComment(data.commentId));
       };
+      const handleUpdateComment = (updatedComment: MessageType) => {
+        console.log("<====comment updated====>", updatedComment);
+        dispatch(updateComment(updatedComment));
+      };
+      // -----------------------
 
       socket.on("message_liked", handleMessageLiked);
       socket.on("message_disliked", handleMessageDisliked);
       socket.on("message_deleted", handleMessageDeleted);
-      socket.on("comment_created", handleAddComment);
+
+      socket.on("comment_updated", handleUpdateComment);
+      socket.on("comment_deleted", handleDeliteComment);
+
+      socket.on("error", (error: any) => {
+        console.error("Socket error:", error);
+        setSuccessMessage(error.message);
+        setOpenModalMessage(true);
+        setIsModalVisible(true);
+        setTimeout(() => {
+          setOpenModalMessage(false);
+          setSuccessMessage("");
+        }, 1500);
+      });
+
       return () => {
         socket.off("message_liked", handleMessageLiked);
         socket.off("message_disliked", handleMessageDisliked);
         socket.off("message_deleted", handleMessageDeleted);
+        socket.off("comment_updated", handleUpdateComment);
+        socket.off("comment_deleted", handleDeliteComment);
       };
     }
   }, [socket, dispatch, msg.id]);
@@ -161,7 +165,13 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       }
       setusersDisliked((prev) => prev.filter((id) => id !== user?.userName));
     } else {
-      console.error("Socket or user not available");
+      setSuccessMessage("Login to like this message.");
+      setOpenModalMessage(true);
+      setIsModalVisible(true);
+      setTimeout(() => {
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+      }, 1500);
     }
   };
 
@@ -186,11 +196,16 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
 
       setusersLiked((prev) => prev.filter((id) => id !== user?.userName));
     } else {
-      console.error("Socket or user not available");
+      setSuccessMessage("Login to dislike this message.");
+      setOpenModalMessage(true);
+      setIsModalVisible(true);
+      setTimeout(() => {
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+      }, 1500);
     }
   };
-  // ----------------------------
-  // ----------------------------
+  // ------------comments----------------
   const handleCommentLike = (id: number) => {
     if (socket && user?._id) {
       socket.emit("like_comment", {
@@ -198,18 +213,14 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         userId: user?._id,
         userName: user?.userName,
       });
-      if (!commentsLiked.includes(user?.userName)) {
-        setcommentsLiked((prev) => [...prev, user?.userName]);
-      } else {
-        setSuccessMessage("You already liked this comment.");
-        setOpenModalMessage(true);
-        setIsModalVisible(true);
-        setTimeout(() => {
-          setOpenModalMessage(false);
-          setSuccessMessage("");
-        }, 1500);
-      }
-      setcommentsDisliked((prev) => prev.filter((id) => id !== user?.userName));
+    } else {
+      setSuccessMessage("Login to like this comment.");
+      setOpenModalMessage(true);
+      setIsModalVisible(true);
+      setTimeout(() => {
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+      }, 1500);
     }
   };
   const handleCommentDislike = (id: number) => {
@@ -219,32 +230,40 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         userId: user?._id,
         userName: user?.userName,
       });
-      if (!commentsDisliked.includes(user?.userName)) {
-        setcommentsDisliked((prev) => [...prev, user?.userName]);
-      } else {
-        setSuccessMessage("You already disliked this comment.");
-        setOpenModalMessage(true);
-        setIsModalVisible(true);
-        setTimeout(() => {
-          setOpenModalMessage(false);
-          setSuccessMessage("");
-        }, 1500);
-      }
-      setcommentsLiked((prev) => prev.filter((id) => id !== user?.userName));
-    }
-  };
-  // -------------!!!!!!!!!!!!---------------
-  const handleDelete = (id: number) => {
-    if (socket) {
-      socket.emit("delete_message", { id: Number(id) });
+    } else {
+      setSuccessMessage("Login to dislike this comment.");
+      setOpenModalMessage(true);
+      setIsModalVisible(true);
+      setTimeout(() => {
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+      }, 1500);
     }
   };
 
+  // -------------!!!!!!!!!!!!---------------
+  const handleDelete = (id: number) => {
+    if (socket) {
+      socket.emit("delete_message", {
+        id: Number(id),
+      });
+    }
+  };
+  // -------------!!!!!!!!!!!!---------------
+  const handleCommentDelete = (id: number) => {
+    if (socket) {
+      socket.emit("delete_comment", {
+        commentId: Number(id),
+        userId: user?._id,
+      });
+    }
+  };
+  // ----------------------------
   return (
     <div>
       <div className="flex justify-between items-start ">
         <span className="text-gray-500 text-xs">id:{msg?.id}</span>
-        <span className="text-gray-500 text-xs">{msg?.author}</span>
+        <span className="text-gray-500 text-xs">author:{msg?.author}</span>
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">
             {new Date(msg.createdAt).toLocaleString("ru-RU", {
@@ -309,7 +328,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       </div>
       <button
         type="button"
-        className="my-2 text-[10px] text-gray-500 leading-none border border-gray-400 rounded-md p-1 hover:bg-gray-300 transition-colors duration-150 cursor-pointer"
+        className="mt-6 text-[10px] text-gray-500 leading-none border border-gray-400 rounded-md p-1 hover:bg-gray-300 transition-colors duration-150 cursor-pointer ml-3"
         onClick={() => {
           setIsModalCommentOpen(true);
         }}
@@ -317,12 +336,16 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         Add comment
       </button>
 
-      <div className="border border-gray-400 rounded-md mt-2 p-2 ml-3 ">
+      {/* ===========comments============= */}
+      <div>
         {comments
           .filter((comment) => comment.messageId === msg.id)
           .map((comment) => (
-            <div key={comment.id}>
-              <div className="flex items-center gap-2 mr-4">
+            <div
+              key={comment.id}
+              className="border border-gray-400 rounded-md mt-2 p-2 ml-3 "
+            >
+              <div className="flex items-center gap-2 ">
                 <p className="text-gray-400 text-[12px] leading-none ">
                   {comment.userName}
                 </p>
@@ -336,7 +359,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
                     handleCommentLike(comment.id);
                   }}
                 />
-                <span className="text-[10px]">{commentsLiked.length}</span>
+                <span>{comment.likes}</span>
                 <div className="transform rotate-[180deg]">
                   <Image
                     src="/assets/svg/like.svg"
@@ -349,7 +372,17 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
                     }}
                   />
                 </div>
-                <span className="text-[10px] ">{commentsDisliked.length}</span>
+                <span>{comment.dislikes}</span>
+                {user && Number(user?._id) === comment?.userId && (
+                  <Image
+                    src="/assets/svg/cross.svg"
+                    width={15}
+                    height={15}
+                    alt="delete"
+                    className="cursor-pointer hover:scale-110 transition-transform duration-150"
+                    onClick={() => handleCommentDelete(comment.id)}
+                  />
+                )}
               </div>
 
               <p className="text-gray-600 leading-none">{comment.text}</p>

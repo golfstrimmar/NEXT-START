@@ -10,7 +10,13 @@ import { Socket } from "dgram";
 import { User } from "@/types/user";
 import { useSelector, useDispatch } from "react-redux";
 import { addComment } from "@/app/redux/slices/commentsSlice";
-
+import dynamic from "next/dynamic";
+const ModalMessage = dynamic(
+  () => import("@/components/ModalMessage/ModalMessage"),
+  {
+    ssr: false,
+  }
+);
 interface Comment {
   id: string;
   text: string;
@@ -29,6 +35,9 @@ const ModalAddComment = ({ onClose, messageId }: ModalAddCommentProps) => {
   const dispatch = useDispatch();
   const user: User = useSelector((state) => state.auth.user);
   const socket: Socket = useSelector((state) => state.socket.socket);
+  const [successMessage, setSuccessMessage] = useState<string>("");
+  const [openModalMessage, setOpenModalMessage] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [comment, setComment] = useState<Comment>({
     id: "",
     text: "",
@@ -64,8 +73,15 @@ const ModalAddComment = ({ onClose, messageId }: ModalAddCommentProps) => {
   useEffect(() => {
     socket.on("comment_created", (newComment) => {
       console.log("<==== New comment created ====>", newComment);
+      setSuccessMessage("Comment created successfully.");
+      setOpenModalMessage(true);
+      setIsModalVisible(true);
+      setTimeout(() => {
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+        onClose();
+      }, 2000);
       dispatch(addComment(newComment));
-      onClose();
     });
 
     socket.on("error", ({ message }) => {
@@ -87,12 +103,13 @@ const ModalAddComment = ({ onClose, messageId }: ModalAddCommentProps) => {
   const handleCreateComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (comment.text.trim() === "") {
-      setError("Comment text is required");
-      setShowModal(true);
+      setSuccessMessage("Comment text is required.");
+      setOpenModalMessage(true);
+      setIsModalVisible(true);
       setTimeout(() => {
-        setShowModal(false);
-        setError("");
-      }, 1500);
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+      }, 2000);
       return;
     }
 
@@ -119,7 +136,6 @@ const ModalAddComment = ({ onClose, messageId }: ModalAddCommentProps) => {
           exit={{ scale: 0.9, y: 20 }}
           className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white border border-gray-300 rounded-lg p-1 sm:p-4"
         >
-          {error && <ModalMessage message={error} open={showModal} />}
           <Image
             onClick={onClose}
             src="/assets/svg/cross.svg"
@@ -149,6 +165,9 @@ const ModalAddComment = ({ onClose, messageId }: ModalAddCommentProps) => {
               onClick={handleCreateComment}
             />
           </form>
+          {isModalVisible && (
+            <ModalMessage message={successMessage} open={openModalMessage} />
+          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>
