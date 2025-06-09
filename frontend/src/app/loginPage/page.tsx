@@ -9,7 +9,7 @@ import "./LoginPage.scss";
 import { setUser } from "@/app/redux/slices/authSlice";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import Input from "@/components/ui/Input/Input";
-
+import Loading from "@/components/ui/Loading/Loading";
 import dynamic from "next/dynamic";
 const ModalMessage = dynamic(
   () => import("@/components/ModalMessage/ModalMessage"),
@@ -51,7 +51,7 @@ const LoginPage = () => {
     password: "",
   });
   const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   useEffect(() => {
     if (socket) {
       const handleLoginSuccess = (data: SocketData) => {
@@ -60,6 +60,7 @@ const LoginPage = () => {
         console.log("===--- user ---====", data.user);
         console.log("===--- token ---====", data.token);
         dispatch(setUser({ user: data.user, token: data.token }));
+        setIsLoading(false);
         setSuccessMessage(data.message);
         setOpenModalMessage(true);
         setisModalVisible(true);
@@ -75,6 +76,7 @@ const LoginPage = () => {
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("token", data.token);
         dispatch(setUser({ user: data.user, token: data.token }));
+        setIsLoading(false);
         setSuccessMessage("Google login successful");
         setOpenModalMessage(true);
         setIsGoogleLoading(false);
@@ -90,6 +92,7 @@ const LoginPage = () => {
         console.error(data.message, data.error);
         if (data.message === "Invalid email or password") {
           setSuccessMessage("User not found. Please register.");
+          setIsLoading(false);
           setOpenModalMessage(true);
           setisModalVisible(true);
           setTimeout(() => {
@@ -114,6 +117,7 @@ const LoginPage = () => {
         ) {
           setOpenModalMessage(true);
           setIsGoogleLoading(false);
+          setIsLoading(false);
           setSuccessMessage("User not found. Please register.");
           setisModalVisible(true);
           setTimeout(() => {
@@ -124,6 +128,7 @@ const LoginPage = () => {
         }
         if (data.error === "User not found") {
           setSuccessMessage("User not found. Please register.");
+          setIsLoading(false);
           setOpenModalMessage(true);
           setisModalVisible(true);
           setIsGoogleLoading(false);
@@ -168,6 +173,7 @@ const LoginPage = () => {
 
   const handleLogin = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+
     const { isValid, errors } = validateForm();
     if (!isValid) {
       console.log("===--- formErrors ---====", formErrors);
@@ -184,6 +190,7 @@ const LoginPage = () => {
     }
     if (socket && isValid) {
       socket.emit("login", { email, password });
+      setIsLoading(true);
     }
   };
 
@@ -228,6 +235,7 @@ const LoginPage = () => {
 
   return (
     <div className="">
+      {isLoading && <Loading></Loading>}
       {isModalVisible && (
         <ModalMessage message={successMessage} open={openModalMessage} />
       )}
