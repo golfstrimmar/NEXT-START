@@ -272,6 +272,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
   // ----------------------------
   return (
     <div>
+      {isLoading && <Loading></Loading>}
       <div className="flex justify-between items-start ">
         <span className="text-gray-500 text-xs">id:{msg?.id}</span>
         <span className="text-gray-500 text-xs">author:{msg?.author}</span>
