@@ -79,17 +79,3 @@ const Input: React.FC<InputProps> = ({
 };
 
 export default Input;
-
-{
-  /* <Input
-  typeInput="text"
-  id="name"
-  data="Name"
-  name="name"
-  value={name}
-  onChange={(e) => setName(e.target.value)}
-  inputRef={inputRef}
-  onClick={handleClick}
-  activ={activ}
-/> */
-}
