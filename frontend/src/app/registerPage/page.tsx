@@ -9,7 +9,7 @@ import Input from "@/components/ui/Input/Input";
 import Button from "@/components/ui/Button/Button";
 import { addUser } from "@/app/redux/slices/authSlice";
 import dynamic from "next/dynamic";
-
+import Loading from "@/components/ui/Loading/Loading";
 const ModalMessage = dynamic(
   () => import("@/components/ModalMessage/ModalMessage"),
   {
@@ -53,6 +53,7 @@ const RegisterPage: React.FC = () => {
     email: "",
     password: "",
   });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const passwordInputRef = useRef<HTMLInputElement | null>(null);
   const passwordGoogleInputRef = useRef<HTMLInputElement | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>("");
@@ -77,7 +78,7 @@ const RegisterPage: React.FC = () => {
       if (data.user) {
         dispatch(addUser(data.user));
       }
-      // Очистка полей формы
+      setIsLoading(false);
       setUsername("");
       setEmail("");
       setPassword("");
@@ -96,7 +97,7 @@ const RegisterPage: React.FC = () => {
       if (data.user) {
         dispatch(addUser(data.user));
       }
-      // Очистка полей формы
+      setIsLoading(false);
       setUsername("");
       setEmail("");
       setPassword("");
@@ -119,6 +120,7 @@ const RegisterPage: React.FC = () => {
     });
 
     socket.on("registrationError", (data: SocketData) => {
+      setIsLoading(false);
       setSuccessMessage(data.message || data.error || "Registration failed");
       setOpenModalMessage(true);
       setIsModalVisible(true);
@@ -166,6 +168,7 @@ const RegisterPage: React.FC = () => {
     if (!isValid) {
       const errorList = Object.values(errors).filter((error) => error !== "");
       const newFormErrors = errorList.join(", ");
+      setIsLoading(true);
       setSuccessMessage(newFormErrors);
       setOpenModalMessage(true);
       setIsModalVisible(true);
@@ -207,6 +210,7 @@ const RegisterPage: React.FC = () => {
       return;
     }
     if (socket) {
+      setIsLoading(true);
       socket.emit("googleRegister", { token: credential });
     }
   };
@@ -233,6 +237,7 @@ const RegisterPage: React.FC = () => {
       return;
     }
     if (googleData && socket) {
+      setIsLoading(true);
       socket.emit("setPassword", {
         email: googleData.email,
         password: googlePassword,
@@ -256,6 +261,7 @@ const RegisterPage: React.FC = () => {
 
   return (
     <div className="">
+      {isLoading && <Loading></Loading>}
       {isModalVisible && (
         <ModalMessage
           message={successMessage}

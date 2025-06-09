@@ -13,6 +13,7 @@ import ModalEditMessage from "@/components/ModalEditMessage/ModalEditMessage";
 import Image from "next/image";
 import Tab from "@/components/ui/Tab/Tab";
 import ModalAddComment from "@/components/ModalAddComment/ModalAddComment";
+import Loading from "@/components/ui/Loading/Loading";
 
 import dynamic from "next/dynamic";
 import MessageComments from "../MessageComments/MessageComments";
@@ -43,7 +44,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
   const [usersLiked, setusersLiked] = useState<number[]>([]);
   const [usersDisliked, setusersDisliked] = useState<number[]>([]);
   const [isModalCommentOpen, setIsModalCommentOpen] = useState<boolean>(false);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   // ------------------------------
   useEffect(() => {
     if (usersLikedDisliked) {
@@ -76,6 +77,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         likedMessage: MessageType,
         userId: number
       ) => {
+        setIsLoading(false);
         if (likedMessage.id === msg.id) {
           dispatch(updateMessage(likedMessage));
         }
@@ -84,6 +86,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         dislikedMessage: MessageType,
         userId: number
       ) => {
+        setIsLoading(false);
         if (dislikedMessage.id === msg.id) {
           dispatch(updateMessage(dislikedMessage));
         }
@@ -113,6 +116,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       };
       const handleUpdateComment = (updatedComment: MessageType) => {
         console.log("<====comment updated====>", updatedComment);
+        setIsLoading(false);
         dispatch(updateComment(updatedComment));
       };
       // -----------------------
@@ -126,6 +130,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
 
       socket.on("error", (error: any) => {
         console.error("Socket error:", error);
+        setIsLoading(false);
         setSuccessMessage(error.message);
         setOpenModalMessage(true);
         setIsModalVisible(true);
@@ -149,6 +154,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
   // -------------------------
   const handleLike = (id: number) => {
     if (socket && user?._id) {
+      setIsLoading(true);
       socket.emit("like_message", {
         messageId: Number(id),
         userId: user?._id,
@@ -179,6 +185,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
 
   const handleDisLike = (id: number) => {
     if (socket && user?._id) {
+      setIsLoading(true);
       socket.emit("dislike_message", {
         messageId: Number(id),
         userId: user?._id,
@@ -210,6 +217,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
   // ------------comments----------------
   const handleCommentLike = (id: number) => {
     if (socket && user?._id) {
+      setIsLoading(true);
       socket.emit("like_comment", {
         commentId: Number(id),
         userId: user?._id,
@@ -227,6 +235,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
   };
   const handleCommentDislike = (id: number) => {
     if (socket && user?._id) {
+      setIsLoading(true);
       socket.emit("dislike_comment", {
         commentId: Number(id),
         userId: user?._id,

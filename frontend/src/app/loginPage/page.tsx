@@ -212,6 +212,7 @@ const LoginPage = () => {
     setFormErrors({ email: "", password: "" });
     if (socket) {
       socket.emit("googleLogin", { token: credential });
+      setIsLoading(true);
     }
   };
 
