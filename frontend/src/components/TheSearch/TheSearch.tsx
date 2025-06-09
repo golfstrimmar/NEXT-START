@@ -43,7 +43,10 @@ const TheSearch = ({ onSearch }: Props) => {
         {search !== "" && (
           <button
             type="button"
-            onClick={() => setSearch("")}
+            onClick={() => {
+              onSearch("");
+              setSearch("");
+            }}
             className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10"
           >
             <Image
