@@ -65,7 +65,7 @@ export default function Select({
           alt="chevron-down"
           width={15}
           height={15}
-          className={`transform transition-transform duration-300 ${
+          className={`ml-4 transform transition-transform duration-300 ${
             isOpen ? "rotate-180" : ""
           }`}
         />

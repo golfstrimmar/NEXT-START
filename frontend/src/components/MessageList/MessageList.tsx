@@ -1,61 +1,70 @@
+"use client";
 import { useEffect, useState, useMemo } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { setMessages } from "@/app/redux/slices/messagesSlice";
 import Message from "@/components/Message/Message";
 import Image from "next/image";
 import { MessageType } from "@/types/message";
-import { useSelector, useDispatch } from "react-redux";
 import User from "@/types/user";
 import Loading from "@/components/ui/Loading/Loading";
-import { setMessages } from "@/app/redux/slices/messagesSlice"; // Предполагаемый action для Redux
 import Select from "@/components/ui/Select/Select";
+import TheSearch from "@/components/TheSearch/TheSearch";
 
 export default function MessageList() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const users: User[] = useSelector((state) => state.auth.users);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [selectedAuthorId, setSelectedAuthorId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const users: User[] = useSelector((state: any) => state.auth.users);
   const messages: MessageType[] = useSelector(
-    (state) => state.messages.messages
+    (state: any) => state.messages.messages
+  );
+  const socket: Socket | null = useSelector(
+    (state: any) => state.socket.socket
   );
   const dispatch = useDispatch();
-  const socket: Socket = useSelector((state) => state.socket.socket);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  // ----------------------------------
+
+  // Запрос сообщений через WebSocket
   useEffect(() => {
-    setIsLoading(true);
-    if (socket) {
-      socket.emit("get_messages", { page: currentPage, limit: 5, sortOrder });
-
-      socket.on(
-        "messages",
-        ({ messages, totalPages, sortOrder: receivedSortOrder }) => {
-          console.log(
-            "Received messages:",
-            messages,
-            "Total pages:",
-            totalPages,
-            "Sort order:",
-            receivedSortOrder
-          );
-          dispatch(setMessages(messages));
-          setTotalPages(totalPages);
-          setIsLoading(false);
-        }
-      );
-
-      socket.on("error", (error) => {
-        setIsLoading(false);
-        console.error("Socket error:", error);
-        setIsLoading(false);
-      });
-
-      return () => {
-        socket.off("messages");
-        socket.off("error");
-      };
+    if (!socket) {
+      setIsLoading(false);
+      return;
     }
-    setIsLoading(false);
-  }, [currentPage, socket, dispatch, sortOrder]);
 
+    setIsLoading(true);
+    socket.emit("get_messages", {
+      page: currentPage,
+      limit: 5,
+      sortOrder,
+      authorId: selectedAuthorId,
+      search: searchQuery,
+    });
+
+    socket.on(
+      "messages",
+      ({ messages, totalPages, sortOrder: receivedSortOrder, authorId }) => {
+        console.log("Received messages:", messages, "Total pages:", totalPages);
+        dispatch(setMessages(messages));
+        setTotalPages(totalPages);
+        setIsLoading(false);
+      }
+    );
+
+    socket.on("error", (error) => {
+      console.error("Socket error:", error);
+      setIsLoading(false);
+    });
+
+    return () => {
+      socket.off("messages");
+      socket.off("error");
+    };
+  }, [currentPage, sortOrder, selectedAuthorId, searchQuery, socket, dispatch]);
+
+  // Мемоизация сообщений с добавлением имени автора
   const memoizedMessages = useMemo(() => {
     if (!users || !messages) return [];
     return messages.map((msg) => {
@@ -65,6 +74,21 @@ export default function MessageList() {
         : msg;
     });
   }, [users, messages]);
+
+  // Опции для выбора автора
+  const authorSelectItems = useMemo(
+    () => [
+      { name: "All authors", value: "" },
+      ...users.map((user) => ({ name: user.userName, value: String(user.id) })),
+    ],
+    [users]
+  );
+
+  // Обработчик поиска
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1); // Сбрасываем на первую страницу
+  };
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
@@ -84,39 +108,61 @@ export default function MessageList() {
     setCurrentPage(1);
   };
 
-  useEffect(() => {
-    if (currentPage === 0) {
-      setCurrentPage(1);
-    }
-  }, [currentPage]);
+  const handleAuthorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newAuthorId = e.target.value || null;
+    setSelectedAuthorId(newAuthorId);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="space-y-4 max-w-4xl mx-auto mt-2">
-      <div>
-        <label htmlFor="sortOrder" className="mr-2 text-gray-600">
-          Sort by:
-        </label>
-        {/* <select
-          id="sortOrder"
-          value={sortOrder}
-          onChange={handleSortChange}
-          className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="desc">Newest first</option>
-          <option value="asc">Oldest first</option>
-        </select> */}
-        <Select
-          selectItems={[
-            { name: "Newest first", value: "desc" },
-            { name: "Oldest first", value: "asc" },
-          ]}
-          value={sortOrder}
-          onChange={handleSortChange}
-        />
+      <h2 className="text-lg font-semibold text-gray-700">Messages</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex items-center">
+            <label
+              htmlFor="sortOrder"
+              className="mr-2 text-gray-600 text-sm whitespace-nowrap"
+            >
+              Sort by date:
+            </label>
+            <Select
+              selectItems={[
+                { name: "Newest first", value: "desc" },
+                { name: "Oldest first", value: "asc" },
+              ]}
+              value={sortOrder}
+              onChange={handleSortChange}
+            />
+          </div>
+          <div className="flex items-center">
+            <label
+              htmlFor="authorFilter"
+              className="mr-2 text-gray-600 text-sm whitespace-nowrap"
+            >
+              Filter by author:
+            </label>
+            <Select
+              id="authorFilter"
+              selectItems={authorSelectItems}
+              value={selectedAuthorId || ""}
+              onChange={handleAuthorChange}
+            />
+          </div>
+          <div className="flex items-center">
+            <label
+              htmlFor="search"
+              className="mr-2 text-gray-600 text-sm whitespace-nowrap"
+            >
+              Search:
+            </label>
+            <TheSearch onSearch={handleSearch} />
+          </div>
+        </div>
       </div>
       {isLoading && <Loading />}
       {!isLoading && memoizedMessages.length === 0 ? (
-        <p className="text-center text-gray-500">No messages yet</p>
+        <p className="text-center text-gray-500">No messages found</p>
       ) : (
         <>
           <ul className="space-y-4">
@@ -133,17 +179,15 @@ export default function MessageList() {
             <button
               onClick={handlePrevPage}
               disabled={currentPage === 1}
-              className="p-2 bg-gray-200 border  border-gray-400  transition  transition-duration-300 rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-300 cursor-pointer"
+              className="p-2 bg-gray-200 border border-gray-400 transition duration-300 rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-300 cursor-pointer"
             >
               <Image
                 src="/assets/svg/chevron-left.svg"
-                alt="arrow"
+                alt="Previous"
                 width={8}
                 height={8}
-                onClick={handlePrevPage}
               />
             </button>
-
             <span className="self-center text-gray-400 font-medium text-[14px]">
               Page{" "}
               <span className="font-semibold text-gray-600 text-[16px] mx-2">
@@ -154,11 +198,11 @@ export default function MessageList() {
             <button
               onClick={handleNextPage}
               disabled={currentPage === totalPages}
-              className="p-2 bg-gray-200 border  border-gray-400  transition  transition-duration-300 rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-300 cursor-pointer"
+              className="p-2 bg-gray-200 border border-gray-400 transition duration-300 rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-300 cursor-pointer"
             >
               <Image
                 src="/assets/svg/chevron-right.svg"
-                alt="arrow"
+                alt="Next"
                 width={8}
                 height={8}
               />

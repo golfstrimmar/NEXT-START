@@ -59,7 +59,7 @@ export default function Home() {
             fill
           />
         </div> */}
-        {users &&
+        {/* {users &&
           users.map((user) => {
             return (
               <div key={user.id}>
@@ -67,8 +67,8 @@ export default function Home() {
                 <p>{user.email}</p>
               </div>
             );
-          })}
-        <div className="border border-gray-500 p-2 mt-2 mb-2">
+          })} */}
+        {/* <div className="border border-gray-500 p-2 mt-2 mb-2">
           <h3>users Liked Disliked:</h3>
           {usersLikedDisliked &&
             usersLikedDisliked.map((foo) => {
@@ -109,7 +109,7 @@ export default function Home() {
                 </div>
               );
             })}
-        </div>
+        </div> */}
 
         <Button
           buttonText="Add Message"
