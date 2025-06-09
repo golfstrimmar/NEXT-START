@@ -162,7 +162,7 @@ const LoginPage = () => {
       errors.password = "Password must be at least 6 characters";
       isValid = false;
     }
-    setFormErrors(errors);
+
     return { isValid, errors };
   };
 
@@ -174,6 +174,7 @@ const LoginPage = () => {
       const errorList = Object.values(errors).filter((error) => error !== "");
       const newFormErrors = errorList.join(", ");
       setSuccessMessage(newFormErrors);
+      setisModalVisible(true);
       setOpenModalMessage(true);
       setTimeout(() => {
         setSuccessMessage("");
@@ -181,7 +182,7 @@ const LoginPage = () => {
       }, 2000);
       return;
     }
-    if (socket) {
+    if (socket && isValid) {
       socket.emit("login", { email, password });
     }
   };
