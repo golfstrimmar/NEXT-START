@@ -166,14 +166,6 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       });
       if (!usersLiked.includes(user?.userName)) {
         setusersLiked((prev) => [...prev, user?.userName]);
-      } else {
-        // setSuccessMessage("You already liked this message.");
-        // setOpenModalMessage(true);
-        // setIsModalVisible(true);
-        // setTimeout(() => {
-        //   setOpenModalMessage(false);
-        //   setSuccessMessage("");
-        // }, 2000);
       }
       setusersDisliked((prev) => prev.filter((id) => id !== user?.userName));
     } else {
@@ -197,14 +189,6 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
       });
       if (!usersDisliked.includes(user?.userName)) {
         setusersDisliked((prev) => [...prev, user?.userName]);
-      } else {
-        // setSuccessMessage("You already disliked this message.");
-        // setOpenModalMessage(true);
-        // setIsModalVisible(true);
-        // setTimeout(() => {
-        //   setOpenModalMessage(false);
-        //   setSuccessMessage("");
-        // }, 2000);
       }
 
       setusersLiked((prev) => prev.filter((id) => id !== user?.userName));

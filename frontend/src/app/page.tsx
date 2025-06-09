@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import Image from "next/image";
 import MessageList from "@/components/MessageList/MessageList";
 import ModalAddEvent from "@/components/ModalAddEvent/ModalAddEvent";
@@ -24,12 +24,9 @@ export default function Home() {
   );
   const [showModal, setShowModal] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+
   // -----------------------------------------
-  useEffect(() => {
-    if (comments) {
-      console.log("<==== comments====>", comments);
-    }
-  }, [comments]);
+
   // -----------------------------------------
 
   return (

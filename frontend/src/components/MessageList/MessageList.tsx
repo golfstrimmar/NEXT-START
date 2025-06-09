@@ -3,18 +3,25 @@ import Message from "@/components/Message/Message";
 import { MessageType } from "@/types/message";
 import { useSelector } from "react-redux";
 import User from "@/types/user"; // Добавлен импорт User
-
+import Loading from "@/components/ui/Loading/Loading";
 export default function MessageList() {
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const users: User[] = useSelector((state) => state.auth.users);
   const [newMessages, setNewMessages] = useState<MessageType[]>([]);
   const messages: MessageType[] = useSelector(
     (state) => state.messages.messages
   );
-
+  useEffect(() => {
+    setIsLoading(true);
+  }, []);
+  useEffect(() => {
+    if (users || messages) {
+      setIsLoading(false);
+    }
+  }, [users, messages]);
   useEffect(() => {
     if (users && messages) {
-      setLoading(false);
+      setIsLoading(false);
       const updatedMessages = messages.map((msg) => {
         const user = users.find((u) => u.id === Number(msg.author));
         return user
@@ -29,12 +36,8 @@ export default function MessageList() {
     return newMessages.length === 0 ? [] : newMessages;
   }, [newMessages]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    );
+  {
+    isLoading && <Loading></Loading>;
   }
 
   return (
