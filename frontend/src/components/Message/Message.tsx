@@ -332,7 +332,17 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         type="button"
         className="mt-6 text-[10px] text-gray-500 leading-none border border-gray-400 rounded-md p-1 hover:bg-gray-300 transition-colors duration-150 cursor-pointer ml-3"
         onClick={() => {
-          setIsModalCommentOpen(true);
+          if (user) {
+            setIsModalCommentOpen(true);
+          } else {
+            setSuccessMessage("Login to comment this message.");
+            setOpenModalMessage(true);
+            setIsModalVisible(true);
+            setTimeout(() => {
+              setOpenModalMessage(false);
+              setSuccessMessage("");
+            }, 2000);
+          }
         }}
       >
         Add comment
