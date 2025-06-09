@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import User from "@/types/user";
 import Loading from "@/components/ui/Loading/Loading";
 import { setMessages } from "@/app/redux/slices/messagesSlice"; // Предполагаемый action для Redux
+import Select from "@/components/ui/Select/Select";
 
 export default function MessageList() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -17,17 +18,29 @@ export default function MessageList() {
   );
   const dispatch = useDispatch();
   const socket: Socket = useSelector((state) => state.socket.socket);
-
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  // ----------------------------------
   useEffect(() => {
     setIsLoading(true);
     if (socket) {
-      socket.emit("get_messages", { page: currentPage, limit: 5 });
-      socket.on("messages", ({ messages, totalPages }) => {
-        dispatch(setMessages(messages));
-        setIsLoading(false);
-        setTotalPages(totalPages);
-        setIsLoading(false);
-      });
+      socket.emit("get_messages", { page: currentPage, limit: 5, sortOrder });
+
+      socket.on(
+        "messages",
+        ({ messages, totalPages, sortOrder: receivedSortOrder }) => {
+          console.log(
+            "Received messages:",
+            messages,
+            "Total pages:",
+            totalPages,
+            "Sort order:",
+            receivedSortOrder
+          );
+          dispatch(setMessages(messages));
+          setTotalPages(totalPages);
+          setIsLoading(false);
+        }
+      );
 
       socket.on("error", (error) => {
         setIsLoading(false);
@@ -41,7 +54,7 @@ export default function MessageList() {
       };
     }
     setIsLoading(false);
-  }, [currentPage, socket, dispatch]);
+  }, [currentPage, socket, dispatch, sortOrder]);
 
   const memoizedMessages = useMemo(() => {
     if (!users || !messages) return [];
@@ -64,6 +77,13 @@ export default function MessageList() {
       setCurrentPage((prev) => prev - 1);
     }
   };
+
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newSortOrder = e.target.value as "asc" | "desc";
+    setSortOrder(newSortOrder);
+    setCurrentPage(1);
+  };
+
   useEffect(() => {
     if (currentPage === 0) {
       setCurrentPage(1);
@@ -72,6 +92,28 @@ export default function MessageList() {
 
   return (
     <div className="space-y-4 max-w-4xl mx-auto mt-2">
+      <div>
+        <label htmlFor="sortOrder" className="mr-2 text-gray-600">
+          Sort by:
+        </label>
+        {/* <select
+          id="sortOrder"
+          value={sortOrder}
+          onChange={handleSortChange}
+          className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="desc">Newest first</option>
+          <option value="asc">Oldest first</option>
+        </select> */}
+        <Select
+          selectItems={[
+            { name: "Newest first", value: "desc" },
+            { name: "Oldest first", value: "asc" },
+          ]}
+          value={sortOrder}
+          onChange={handleSortChange}
+        />
+      </div>
       {isLoading && <Loading />}
       {!isLoading && memoizedMessages.length === 0 ? (
         <p className="text-center text-gray-500">No messages yet</p>

@@ -2,12 +2,12 @@ export default (socket, prisma) => {
   socket.on("get_messages", async (data = {}) => {
     const page = Number(data.page) || 1;
     const limit = Number(data.limit) || 5;
-
+    const sortOrder = data.sortOrder === "asc" ? "asc" : "desc";
     try {
       const skip = (page - 1) * limit;
       const [messages, totalMessages] = await Promise.all([
         prisma.message.findMany({
-          orderBy: { createdAt: "desc" },
+          orderBy: { createdAt: sortOrder },
           skip,
           take: limit,
         }),
@@ -16,13 +16,14 @@ export default (socket, prisma) => {
 
       const totalPages = Math.ceil(totalMessages / limit);
       console.log(
-        `Send to client by Socket.io: ${messages.length} messages, page ${page}, total pages: ${totalPages}`
+        `Send to client by Socket.io: ${messages.length} messages, page ${page}, sortOrder ${sortOrder}, total pages: ${totalPages}`
       );
 
       socket.emit("messages", {
         messages,
         page,
         limit,
+        sortOrder,
         totalPages,
         totalMessages,
       });
