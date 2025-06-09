@@ -96,7 +96,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         dispatch(deleteMessage(deletedMessage.id));
         console.log('<===="Message deleted successfully."====>');
         setSuccessMessage("Message deleted successfully.");
-        setIsLoading(false);
+
         setOpenModalMessage(true);
         setIsModalVisible(true);
         setTimeout(() => {
@@ -122,11 +122,14 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         dispatch(updateComment(updatedComment));
       };
       // -----------------------
-      // -----------------------
 
-      socket.on("users_liked_disliked", handleMessageLiked);
-      socket.on("users_liked_disliked", handleMessageDisliked);
+      socket.on("message_liked", handleMessageLiked);
+      socket.on("message_disliked", handleMessageDisliked);
+      socket.on("users_liked_disliked", () => {
+        setIsLoading(false);
+      });
       socket.on("message_deleted", handleMessageDeleted);
+
       socket.on("comment_updated", handleUpdateComment);
       socket.on("comment_deleted", handleDeliteComment);
 
