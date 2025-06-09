@@ -111,6 +111,7 @@ export default function Home() {
             })}
         </div> */}
 
+        <MessageList />
         <Button
           buttonText="Add Message"
           onClick={() => {
@@ -126,8 +127,6 @@ export default function Home() {
             }
           }}
         ></Button>
-        <MessageList />
-
         <AnimatePresence>
           {AddModalOpen && (
             <ModalAddEvent onClose={() => setAddModalOpen(false)} />

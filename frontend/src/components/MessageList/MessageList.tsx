@@ -116,7 +116,6 @@ export default function MessageList() {
 
   return (
     <div className="space-y-4 max-w-4xl mx-auto mt-2">
-      <h2 className="text-lg font-semibold text-gray-700">Messages</h2>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex items-center">
