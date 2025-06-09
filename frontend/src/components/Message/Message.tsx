@@ -122,6 +122,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         dispatch(updateComment(updatedComment));
       };
       // -----------------------
+      // -----------------------
 
       socket.on("users_liked_disliked", handleMessageLiked);
       socket.on("users_liked_disliked", handleMessageDisliked);
