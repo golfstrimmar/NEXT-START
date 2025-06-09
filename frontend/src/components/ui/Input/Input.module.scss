@@ -133,3 +133,9 @@
   //   border: 1px solid grey !important;
   // }
 }
+
+.no-search-cancel::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}

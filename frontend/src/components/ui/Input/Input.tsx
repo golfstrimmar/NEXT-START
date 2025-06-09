@@ -64,9 +64,12 @@ const Input: React.FC<InputProps> = ({
           value={value}
           onChange={onChange}
           onClick={onClick}
-          className={`${
-            activ ? "bg-emerald-400  " : ""
-          } cursor-pointer border rounded  px-1   border-emerald-900`}
+          className={
+            styles["no-search-cancel"] +
+            `${
+              activ ? "bg-emerald-400  " : ""
+            }   cursor-pointer border rounded  px-1   border-emerald-900`
+          }
           required
         />
       )}
