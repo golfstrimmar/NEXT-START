@@ -3,7 +3,7 @@ import React, { useState, useCallback } from "react";
 import { debounce } from "lodash"; // Установите: npm install lodash
 import Input from "@/components/ui/Input/Input";
 import Button from "@/components/ui/Button/Button";
-
+import Image from "next/image";
 interface Props {
   onSearch: (query: string) => void;
 }
@@ -32,14 +32,29 @@ const TheSearch = ({ onSearch }: Props) => {
 
   return (
     <div className="search-container">
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className="flex gap-2 relative bg-white">
         <Input
           typeInput="search"
           data=""
           value={search}
           onChange={handleInputChange}
-          placeholder="Search messages..."
+          className="bg-white"
         />
+        {search !== "" && (
+          <button
+            type="button"
+            onClick={() => setSearch("")}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10"
+          >
+            <Image
+              src="/assets/svg/cross.svg"
+              alt="close"
+              width={12}
+              height={12}
+              className="cursor-pointer hover:transform hover:scale-110 transition-transform"
+            />
+          </button>
+        )}
       </form>
     </div>
   );
