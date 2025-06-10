@@ -16,6 +16,7 @@ model Message {
   UserMessageReaction UserMessageReaction[]
   comments            Comment[]           @relation
   commentReactions    CommentReaction[]   @relation
+  @@index([authorID, createdAt])
 }
 
 model User {
@@ -29,6 +30,7 @@ model User {
   UserMessageReaction UserMessageReaction[]
   comments            Comment[]           @relation
   commentReactions    CommentReaction[]   @relation
+  @@index([email, userName])
 }
 
 model UserMessageReaction {
@@ -40,6 +42,7 @@ model UserMessageReaction {
   user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   message             Message             @relation(fields: [messageId], references: [id], onDelete: Cascade)
   @@unique([userId, messageId])
+  @@index([userId, messageId])
 }
 
 model Comment {
@@ -54,6 +57,7 @@ model Comment {
   user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   message             Message             @relation(fields: [messageId], references: [id], onDelete: Cascade)
   commentReactions    CommentReaction[]   @relation
+  @@index([userId, messageId, createdAt])
 }
 
 model CommentReaction {
@@ -68,4 +72,6 @@ model CommentReaction {
   comment             Comment             @relation(fields: [commentId], references: [id], onDelete: Cascade)
   message             Message             @relation(fields: [messageId], references: [id], onDelete: Cascade)
   @@unique([userId, commentId])
+  @@index([userId, commentId])
 }
+
