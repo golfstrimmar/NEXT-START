@@ -96,7 +96,6 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         dispatch(deleteMessage(deletedMessage.id));
         console.log('<===="Message deleted successfully."====>');
         setSuccessMessage("Message deleted successfully.");
-
         setOpenModalMessage(true);
         setIsModalVisible(true);
         setTimeout(() => {

@@ -1,0 +1,170 @@
+"use client";
+import React, { useEffect, useState } from "react";
+import styles from "./Room.module.scss";
+import Chat from "@/types/chats";
+import Image from "next/image";
+import { useSelector, useDispatch } from "react-redux";
+import dynamic from "next/dynamic";
+import { div } from "framer-motion/client";
+const ModalMessage = dynamic(
+  () => import("@/components/ModalMessage/ModalMessage"),
+  {
+    ssr: false,
+  }
+);
+interface RoomProps {
+  chat: Chat;
+}
+
+const Room: React.FC<RoomProps> = ({ chat }) => {
+  const dispatch = useDispatch();
+  const socket: Socket = useSelector((state) => state.socket.socket);
+  const user: User = useSelector((state) => state.auth.user);
+  const [messages, setMessages] = useState<string[]>([]);
+  const [messageChat, setMessageChat] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
+  const [openModalMessage, setOpenModalMessage] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+
+  //  ---------------------------------
+  useEffect(() => {
+    socket?.emit("get_private_messages", {
+      senderId: Number(user._id),
+      chatId: chat.id,
+    });
+  }, [socket]);
+
+  useEffect(() => {
+    if (!chat || !user || !socket) return;
+    console.log("<========>", chat);
+
+    const handlePMS = (data) => {
+      console.log("<===chat messages=====>", data.messages);
+      if (data.messages.length === 0) return;
+      if (data.chatId === chat.id) {
+        setMessages(data.messages);
+      }
+    };
+    const handleCMS = (data) => {
+      console.log("<===new message=====>", data.data);
+      setMessages((prev) => [...prev, data.data]);
+    };
+
+    const handleChatMessageError = (Error) => {
+      console.log("<===error=====>", Error);
+      setSuccessMessage("Something went wrong.", Error);
+      setOpenModalMessage(true);
+      setIsModalVisible(true);
+      setTimeout(() => {
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+      }, 2000);
+    };
+
+    socket.on("getPrivateMessagesSuccess", handlePMS);
+    socket.on("createChatMessageSuccess", handleCMS);
+    socket.on("createChatMessageError", handleChatMessageError);
+
+    return () => {
+      setMessageChat("");
+      socket.off("getPrivateMessagesSuccess", handlePMS);
+      socket.off("createChatMessageSuccess", handleCMS);
+      socket.off("createChatMessageError", handleChatMessageError);
+    };
+  }, [chat, socket, user]);
+
+  //  ---------------------------------
+  const handleAddChatMessage = () => {
+    if (messageChat !== "") {
+      console.log("<==messageChat==>", messageChat);
+      socket.emit("create_chat_message", {
+        senderId: Number(user._id),
+        receiverId: chat.otherParticipant.id,
+        text: messageChat,
+        chatId: chat.id,
+      });
+      setMessageChat("");
+    } else {
+      setSuccessMessage("Text is required.");
+      setOpenModalMessage(true);
+      setIsModalVisible(true);
+      setTimeout(() => {
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+      }, 2000);
+    }
+  };
+  //  ---------------------------------
+  return (
+    <div className={styles.room}>
+      {isModalVisible && (
+        <ModalMessage message={successMessage} open={openModalMessage} />
+      )}
+      <div className="border border-gray-400 rounded-md px-2 py-1 gap-2">
+        {/* <div>chat id: {chat.id}</div> */}
+        <p className="flex items-center gap-2 mb-4">
+          {/* <span>{chat.otherParticipant.id}</span> */}
+          <span>{chat.otherParticipant.userName}</span>
+          <span>
+            {chat.otherParticipant.avatarUrl && (
+              <div className="rounded-full overflow-hidden ">
+                <Image
+                  src={chat.otherParticipant.avatarUrl}
+                  alt="avatar"
+                  width={20}
+                  height={20}
+                />
+              </div>
+            )}
+          </span>
+        </p>
+        {/* <span>last message:</span>
+        {chat.lastMessage ? (
+          <span> {JSON.stringify(chat.lastMessage, null, 2)}</span>
+        ) : (
+          <span>==========</span>
+        )} */}
+        {messages.length > 0 ? (
+          messages.map((message) => (
+            <>
+              {/* <p key={message}>{JSON.stringify(message, null, 2)}</p> */}
+              <div
+                key={message.id}
+                className="border border-gray-400 bg-white rounded-md px-2 py-1 mb-2 gap-2"
+              >
+                <h3>{message.text}</h3>
+              </div>
+            </>
+          ))
+        ) : (
+          <p>no messages yet</p>
+        )}
+        <form
+          action=""
+          className="flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleAddChatMessage();
+          }}
+        >
+          <input
+            type="text"
+            value={messageChat}
+            onChange={(e) => {
+              setMessageChat(e.target.value);
+            }}
+            className="bg-white border border-gray-400 rounded-md px-2 py-1"
+          />
+          <button
+            type="submit"
+            className="text-white bg-blue-500 hover:bg-blue-600 transition-colors cursor-pointer rounded-md px-2 py-1"
+          >
+            <span>Send</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default Room;
