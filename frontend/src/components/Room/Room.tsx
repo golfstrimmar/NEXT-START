@@ -45,6 +45,13 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
 
   //  ---------------------------------
   useEffect(() => {
+    if (!socket && !user) return;
+    socket.emit("join", {
+      senderId: Number(user._id),
+    });
+  }, [socket, user]);
+
+  useEffect(() => {
     socket?.emit("get_private_messages", {
       senderId: Number(user._id),
       chatId: chat.id,
@@ -78,15 +85,21 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
       }, 2000);
     };
 
+    const handlenewChatMessage = (data) => {
+      console.log("<====new chat message====>", data.data);
+      setMessages((prev) => [...prev, data.data]);
+    };
     socket.on("getPrivateMessagesSuccess", handlePMS);
     socket.on("createChatMessageSuccess", handleCMS);
     socket.on("createChatMessageError", handleChatMessageError);
+    socket.on("newChatMessage", handlenewChatMessage);
 
     return () => {
       setMessageChat("");
       socket.off("getPrivateMessagesSuccess", handlePMS);
       socket.off("createChatMessageSuccess", handleCMS);
       socket.off("createChatMessageError", handleChatMessageError);
+      socket.off("newChatMessage", handlenewChatMessage);
     };
   }, [chat, socket, user]);
 
