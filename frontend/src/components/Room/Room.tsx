@@ -140,7 +140,7 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
       )}
       <div className="border border-gray-400 rounded-md px-2 py-1 gap-2">
         {/* <div>chat id: {chat.id}</div> */}
-        <p className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-4">
           {/* <span>{chat.otherParticipant.id}</span> */}
           <span>{chat.otherParticipant.userName}</span>
           <span>
@@ -155,7 +155,7 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
               </div>
             )}
           </span>
-        </p>
+        </div>
         {/* <span>last message:</span>
         {chat.lastMessage ? (
           <span> {JSON.stringify(chat.lastMessage, null, 2)}</span>
