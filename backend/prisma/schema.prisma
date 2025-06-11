@@ -20,20 +20,21 @@ model Message {
 }
 
 model User {
-  id                  Int                 @id @default(autoincrement())
-  userName            String              @unique
-  email               String              @unique
-  password            String?
-  googleId            String?             @unique
-  avatarUrl           String?
-  createdAt           DateTime            @default(now())
-  UserMessageReaction UserMessageReaction[]
-  comments            Comment[]           @relation
-  commentReactions    CommentReaction[]   @relation
-  sentPrivateMessages PrivateMessage[]    @relation("Sender")
-  receivedPrivateMessages PrivateMessage[] @relation("Receiver")
-  privateChatsAsParticipant1 PrivateChat[] @relation("Participant1")
-  privateChatsAsParticipant2 PrivateChat[] @relation("Participant2")
+  id                         Int                    @id @default(autoincrement())
+  userName                   String                 @unique
+  email                      String                 @unique
+  password                   String?
+  googleId                   String?                @unique
+  avatarUrl                  String?
+  createdAt                  DateTime               @default(now())
+  UserMessageReaction        UserMessageReaction[]
+  comments                   Comment[]              @relation
+  commentReactions           CommentReaction[]      @relation
+  sentPrivateMessages        PrivateMessage[]       @relation("Sender")
+  receivedPrivateMessages    PrivateMessage[]       @relation("Receiver")
+  privateChatsAsParticipant1 PrivateChat[]          @relation("Participant1")
+  privateChatsAsParticipant2 PrivateChat[]          @relation("Participant2")
+  onlineUser                 OnlineUser?            @relation("UserToOnlineUser")
   @@index([email, userName])
 }
 
@@ -102,4 +103,11 @@ model PrivateMessage {
   sender              User                @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
   receiver            User                @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
   @@index([chatId, createdAt])
+}
+
+model OnlineUser {
+  userId     Int      @id
+  socketId   String   @unique
+  lastActive DateTime @default(now())
+  user       User     @relation("UserToOnlineUser", fields: [userId], references: [id], onDelete: Cascade)
 }

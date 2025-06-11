@@ -110,6 +110,7 @@ const RegisterPage: React.FC = () => {
     });
 
     socket.on("requirePassword", (data: SocketData) => {
+      setIsLoading(false);
       setGoogleData({
         email: data.email || "",
         userName: data.userName || "",

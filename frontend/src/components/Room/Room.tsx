@@ -60,24 +60,20 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
 
   useEffect(() => {
     if (!chat || !user || !socket) return;
-    console.log("<========>", chat);
 
     const handlePMS = (data) => {
-      console.log("<===chat messages=====>", data.messages);
       if (data.messages.length === 0) return;
       if (data.chatId === chat.id) {
         setMessages(data.messages);
       }
     };
     const handleCMS = (data) => {
-      console.log("<===new message=====>", data.data);
       if (data.data.chatId === chat.id) {
         setMessages((prev) => [...prev, data.data]);
       }
     };
 
     const handleChatMessageError = (Error) => {
-      console.log("<===error=====>", Error);
       setSuccessMessage("Something went wrong.", Error);
       setOpenModalMessage(true);
       setIsModalVisible(true);
@@ -88,7 +84,6 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
     };
 
     const handlenewChatMessage = (data) => {
-      console.log("<====new chat message====>", data.data);
       if (data.data.chatId === chat.id) {
         setMessages((prev) => [...prev, data.data]);
       }
@@ -119,7 +114,6 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
   //  ---------------------------------
   const handleAddChatMessage = () => {
     if (messageChat !== "") {
-      console.log("<==messageChat==>", messageChat);
       socket.emit("create_chat_message", {
         senderId: Number(user._id),
         receiverId: chat.otherParticipant.id,
@@ -169,26 +163,23 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
         )} */}
         {messages.length > 0 ? (
           sortedMessages(messages).map((message: Message) => (
-            <>
-              {/* <p key={message}>{JSON.stringify(message, null, 2)}</p> */}
-              <div
-                key={message.id}
-                className="border border-gray-400 bg-white rounded-md px-2 py-1 mb-2 gap-2"
-              >
-                {/* <p>{message.receiver.userName}</p>
+            <div
+              key={message.id}
+              className="border border-gray-400 bg-white rounded-md px-2 py-1 mb-2 gap-2"
+            >
+              {/* <p>{message.receiver.userName}</p>
                 <p>{message.sender.userName}</p> */}
-                <p className="text-xs text-gray-400">
-                  {new Date(message.createdAt).toLocaleString("de-DE", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-                <h3>{message.text}</h3>
-              </div>
-            </>
+              <p className="text-xs text-gray-400">
+                {new Date(message.createdAt).toLocaleString("de-DE", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+              <h3>{message.text}</h3>
+            </div>
           ))
         ) : (
           <p>no messages yet</p>

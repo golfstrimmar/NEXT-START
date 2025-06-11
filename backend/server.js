@@ -1,13 +1,3 @@
-// const express = require("express");
-// const { createServer } = require("http");
-// const { Server } = require("socket.io");
-// const { PrismaClient } = require("@prisma/client");
-// const cors = require("cors");
-// const bcrypt = require("bcrypt");
-// const jwt = require("jsonwebtoken");
-// const app = express();
-// const prisma = new PrismaClient();
-
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -95,8 +85,18 @@ app.get("/messages", async (req, res) => {
 });
 
 // WebSocket логика
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   console.log("👉Socket client:", socket.id);
+  const onlineUsers = await prisma.onlineUser.findMany({
+    select: { userId: true },
+  });
+  console.log(
+    "<====onlineUsers====>",
+    onlineUsers.map((u) => u.userId)
+  );
+  io.emit("onlineUsersUpdate", {
+    onlineUsers: onlineUsers.map((u) => u.userId),
+  });
   // ------------
   handlerGetMessages(socket, prisma);
   // ------------
@@ -114,9 +114,9 @@ io.on("connection", (socket) => {
   // ---------------------Set Password Register
   handlerSetPassword(socket, prisma, bcrypt, saltRounds);
   // ---------------------Login
-  handlerLogin(socket, prisma, jwt, bcrypt);
+  handlerLogin(socket, prisma, jwt, bcrypt, io);
   // --------------------- Google login
-  googleLogin(socket, prisma, googleClient, jwt);
+  googleLogin(socket, prisma, googleClient, jwt, io);
   // ---------------------
   handlerLikeMessage(socket, prisma, io);
   // ---------------------
@@ -130,6 +130,23 @@ io.on("connection", (socket) => {
   // ---------------------
   handlerChatMessages(socket, prisma, io);
   // ---------------------
+  socket.on("disconnect", () => {
+    // Находим userId по socketId
+    let disconnectedUserId = null;
+    for (const [userId, socketId] of onlineUsers.entries()) {
+      if (socketId === socket.id) {
+        disconnectedUserId = userId;
+        onlineUsers.delete(userId);
+        break;
+      }
+    }
+    if (disconnectedUserId) {
+      console.log(`====User ${disconnectedUserId} disconnected`);
+      io.emit("onlineUsersUpdate", {
+        onlineUsers: Array.from(onlineUsers.keys()),
+      });
+    }
+  });
 });
 
 const PORT = process.env.PORT || 3005;

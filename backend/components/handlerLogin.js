@@ -1,4 +1,4 @@
-export default (socket, prisma, jwt, bcrypt) => {
+export default (socket, prisma, jwt, bcrypt, io) => {
   socket.on("login", async ({ email, password }) => {
     try {
       // Поиск пользователя
@@ -27,7 +27,25 @@ export default (socket, prisma, jwt, bcrypt) => {
         process.env.JWT_SECRET || "your_jwt_secret",
         { expiresIn: "1h" }
       );
-
+      // Добавляем/обновляем в OnlineUser
+      await prisma.onlineUser.upsert({
+        where: { userId: user.id.toString() },
+        update: {
+          socketId: socket.id,
+          lastActive: new Date(),
+        },
+        create: {
+          userId: user.id.toString(),
+          socketId: socket.id,
+          lastActive: new Date(),
+        },
+      });
+      const onlineUsers = await prisma.onlineUser.findMany({
+        select: { userId: true },
+      });
+      io.emit("onlineUsersUpdate", {
+        onlineUsers: onlineUsers.map((u) => u.userId),
+      });
       // Формирование ответа
       socket.emit("loginSuccess", {
         message: "Login successful",

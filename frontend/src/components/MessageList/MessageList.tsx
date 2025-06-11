@@ -27,6 +27,12 @@ export default function MessageList() {
   );
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    if (messages.length === 0) {
+      setIsLoading(false);
+    }
+  }, [messages]);
+
   // Запрос сообщений через WebSocket
   useEffect(() => {
     if (!socket) {
@@ -67,7 +73,7 @@ export default function MessageList() {
   // Мемоизация сообщений с добавлением имени автора
   const memoizedMessages = useMemo(() => {
     if (!users || !messages) return [];
-    return messages.map((msg) => {
+    return messages?.map((msg) => {
       const user = users.find((u) => u.id === Number(msg.author));
       return user
         ? { ...msg, author: user.userName, authorID: String(user.id) }
@@ -159,7 +165,7 @@ export default function MessageList() {
           </div>
         </div>
       </div>
-      {isLoading && <Loading />}
+      {/* {isLoading && <Loading />} */}
       {!isLoading && memoizedMessages.length === 0 ? (
         <p className="text-center text-gray-500">No messages found</p>
       ) : (

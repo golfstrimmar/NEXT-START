@@ -11,6 +11,7 @@ import Chat from "@/types/chats";
 import User from "@/types/user";
 import dynamic from "next/dynamic";
 import Room from "@/components/Room/Room";
+import { span } from "framer-motion/client";
 const ModalMessage = dynamic(
   () => import("@/components/ModalMessage/ModalMessage"),
   {
@@ -33,11 +34,13 @@ export default function Home() {
   const [openModalMessage, setOpenModalMessage] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [chats, setChats] = useState<Chat[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
   // -----------------------------------------
   useEffect(() => {
-    if (!socket) {
+    if (!socket || !user) {
       return;
     }
+
     try {
       socket.emit("get_private_chats", { senderId: Number(user._id) });
     } catch (error) {
@@ -45,6 +48,20 @@ export default function Home() {
     }
   }, [socket]);
 
+  // -----------------------------------------
+
+  useEffect(() => {
+    if (users) {
+      console.log("<==== users====>", users);
+    }
+  }, [users]);
+  // -----------------------------------------
+
+  useEffect(() => {
+    if (onlineUsers) {
+      console.log("<==== onlineUsers====>", onlineUsers);
+    }
+  }, [onlineUsers]);
   // -----------------------------------------
   useEffect(() => {
     if (!socket) {
@@ -92,13 +109,24 @@ export default function Home() {
       );
     };
 
+    const handleOnlineUsersUpdate = ({ onlineUsers }) => {
+      console.log("=======Online users:", onlineUsers);
+      setOnlineUsers(onlineUsers);
+    };
+
+    // socket.on("disconnect", () => {
+    //   setOnlineUsers(onlineUsers);
+    // });
     socket.on("createPrivateChatSuccess", handlePrivateChat);
     socket.on("getPrivateChatsSuccess", handlegetPrivateChats);
     socket.on("deletePrivateChatSuccess", handleDelitePrivateChat);
+    socket.on("onlineUsersUpdate", handleOnlineUsersUpdate);
+
     return () => {
       socket.off("createPrivateChatSuccess", handlePrivateChat);
       socket.off("getPrivateChatsSuccess", handlegetPrivateChats);
       socket.off("deletePrivateChatSuccess", handleDelitePrivateChat);
+      socket.off("onlineUsersUpdate", handleOnlineUsersUpdate);
     };
   }, [socket]);
   // -----------------------------------------
@@ -151,10 +179,19 @@ export default function Home() {
 
         {users &&
           users
-            .filter((foo) => foo.id !== Number(user?._id))
-            .map((foo) => {
+            // .filter((foo) => foo.id !== Number(user?._id))
+            .map((foo, index) => {
               return (
-                <div key={foo.id} className="flex gap-2">
+                <div key={index} className="flex gap-2">
+                  {onlineUsers && onlineUsers?.includes(foo.id) ? (
+                    <span className="text-green-500 rounded-full px-2 py-1 bg-green-100 text-xs">
+                      online
+                    </span>
+                  ) : (
+                    <span className="text-gray-500 rounded-full px-2 py-1 bg-gray-100 text-xs">
+                      offline
+                    </span>
+                  )}
                   <p>id: {foo.id}</p>
                   <h3 className="font-semibold">userName: {foo.userName}</h3>
                   <p className="text-gray-400 text-sm">email: {foo.email}</p>
