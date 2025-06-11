@@ -16,6 +16,23 @@ interface RoomProps {
   chat: Chat;
 }
 
+interface Message {
+  id: number;
+  chatId: number;
+  text: string;
+  receiver: {
+    id: number;
+    userName: string;
+    avatar: string;
+  };
+  sender: {
+    id: number;
+    userName: string;
+    avatar: string;
+  };
+  createdAt: string;
+}
+
 const Room: React.FC<RoomProps> = ({ chat }) => {
   const dispatch = useDispatch();
   const socket: Socket = useSelector((state) => state.socket.socket);
@@ -74,6 +91,14 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
   }, [chat, socket, user]);
 
   //  ---------------------------------
+
+  const sortedMessages = (messages: Message[]) => {
+    const sorted = messages.sort((a, b) => {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+    return sorted;
+  };
+  //  ---------------------------------
   const handleAddChatMessage = () => {
     if (messageChat !== "") {
       console.log("<==messageChat==>", messageChat);
@@ -125,13 +150,24 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
           <span>==========</span>
         )} */}
         {messages.length > 0 ? (
-          messages.map((message) => (
+          sortedMessages(messages).map((message: Message) => (
             <>
               {/* <p key={message}>{JSON.stringify(message, null, 2)}</p> */}
               <div
                 key={message.id}
                 className="border border-gray-400 bg-white rounded-md px-2 py-1 mb-2 gap-2"
               >
+                {/* <p>{message.receiver.userName}</p>
+                <p>{message.sender.userName}</p> */}
+                <p className="text-xs text-gray-400">
+                  {new Date(message.createdAt).toLocaleString("de-DE", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
                 <h3>{message.text}</h3>
               </div>
             </>
