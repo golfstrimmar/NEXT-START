@@ -71,7 +71,9 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
     };
     const handleCMS = (data) => {
       console.log("<===new message=====>", data.data);
-      setMessages((prev) => [...prev, data.data]);
+      if (data.data.chatId === chat.id) {
+        setMessages((prev) => [...prev, data.data]);
+      }
     };
 
     const handleChatMessageError = (Error) => {
@@ -87,8 +89,11 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
 
     const handlenewChatMessage = (data) => {
       console.log("<====new chat message====>", data.data);
-      setMessages((prev) => [...prev, data.data]);
+      if (data.data.chatId === chat.id) {
+        setMessages((prev) => [...prev, data.data]);
+      }
     };
+
     socket.on("getPrivateMessagesSuccess", handlePMS);
     socket.on("createChatMessageSuccess", handleCMS);
     socket.on("createChatMessageError", handleChatMessageError);
