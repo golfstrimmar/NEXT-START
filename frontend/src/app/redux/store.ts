@@ -4,6 +4,7 @@ import socketReducer from "./slices/socketSlice";
 import authReducer from "./slices/authSlice";
 import commentsReducer from "./slices/commentsSlice";
 import messagesReducer from "./slices/messagesSlice";
+import chatsSlice from "./slices/chatsSlice";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
 export const store = configureStore({
@@ -13,6 +14,7 @@ export const store = configureStore({
     auth: authReducer,
     messages: messagesReducer,
     comments: commentsReducer,
+    chats: chatsSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

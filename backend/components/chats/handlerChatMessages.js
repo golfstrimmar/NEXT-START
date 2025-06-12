@@ -1,129 +1,10 @@
 export default (socket, prisma, io) => {
-  socket.on("create_private_chat", async ({ senderId, receiverId }) => {
-    try {
-      // console.log("<====Server on create private chat====>", {
-      //   senderId,
-      //   receiverId,
-      // });
-
-      // Валидация входных данных
-      if (!senderId || !receiverId) {
-        // console.log("<====Invalid input====>", { senderId, receiverId });
-        socket.emit("createPrivateChatError", {
-          message: "Invalid input",
-          error: "senderId and receiverId are required",
-        });
-        return;
-      }
-
-      // Проверка, что отправитель и получатель разные
-      if (senderId === receiverId) {
-        socket.emit("createPrivateChatError", {
-          message: "Cannot create chat with yourself",
-          error: "Invalid receiverId",
-        });
-        return;
-      }
-
-      // Поиск существующего чата
-      let chat = await prisma.privateChat.findFirst({
-        where: {
-          OR: [
-            {
-              participant1Id: Math.min(senderId, receiverId),
-              participant2Id: Math.max(senderId, receiverId),
-            },
-            {
-              participant1Id: Math.min(receiverId, senderId),
-              participant2Id: Math.max(receiverId, senderId),
-            },
-          ],
-        },
-        include: {
-          participant1: {
-            select: { id: true, userName: true, avatarUrl: true },
-          },
-          participant2: {
-            select: { id: true, userName: true, avatarUrl: true },
-          },
-        },
-      });
-      // console.log("<====Chat found====>", chat);
-      // Если чат существует, отправляем уведомление об этом
-      if (chat) {
-        const formattedChat = {
-          id: chat.id,
-          otherParticipant:
-            chat.participant1Id === senderId
-              ? chat.participant2
-              : chat.participant1,
-        };
-
-        socket.emit("createPrivateChatSuccess", {
-          message: "Private chat already exists",
-          chat: formattedChat,
-        });
-
-        // console.log("<====Private chat already exists====>", { id: chat.id });
-        return; // Прерываем выполнение, так как чат уже существует
-      }
-
-      // Если чат не существует, создаём новый
-      chat = await prisma.privateChat.create({
-        data: {
-          participant1Id: Math.min(senderId, receiverId),
-          participant2Id: Math.max(senderId, receiverId),
-        },
-        include: {
-          participant1: {
-            select: { id: true, userName: true, avatarUrl: true },
-          },
-          participant2: {
-            select: { id: true, userName: true, avatarUrl: true },
-          },
-        },
-      });
-      // console.log("<====New private chat====>", chat);
-      // Форматирование данных чата для ответа
-      const formattedChat = {
-        id: chat.id,
-        otherParticipant: chat.participant2,
-      };
-
-      // Отправка ответа отправителю
-      socket.emit("createPrivateChatSuccess", {
-        message: "Private chat created",
-        chat: formattedChat,
-      });
-
-      // Уведомление получателя
-      io.to(`user_${receiverId}`).emit("newPrivateChat", {
-        message: "New private chat created",
-        chat: {
-          id: chat.id,
-          otherParticipant:
-            chat.participant1Id === receiverId
-              ? chat.participant1
-              : chat.participant2,
-        },
-      });
-
-      // console.log("<====Private chat created====>", { chat });
-    } catch (error) {
-      // console.error("Error creating private chat:", error.message);
-      socket.emit("createPrivateChatError", {
-        message: "Failed to create private chat",
-        error: error.message || "Unknown error",
-      });
-    }
-  });
-
   socket.on("delete_private_chat", async ({ senderId, chatId }) => {
     try {
-      // console.log("<====Server on delete private chat====>", {
-      //   senderId,
-      //   chatId,
-      // });
+      console.log("<====Server on delete private chat====>", {
+        senderId,
+        chatId,
+      });
 
       // Валидация входных данных
       if (!senderId || !chatId) {
@@ -184,7 +65,7 @@ export default (socket, prisma, io) => {
       });
 
       // Уведомление другого участника
-      io.to(`user_${otherParticipantId}`).emit("privateChatDeleted", {
+      io.to(`user_${otherParticipantId}`).emit("deletePrivateChatSuccess", {
         message: "Private chat deleted",
         chatId,
       });
@@ -203,64 +84,6 @@ export default (socket, prisma, io) => {
   socket.on("join", ({ senderId }) => {
     socket.join(`user_${senderId}`);
     // console.log(`<====User joined room====> user_${senderId}`);
-  });
-
-  // Получение списка чатов
-  socket.on("get_private_chats", async ({ senderId }) => {
-    try {
-      // console.log("<====Server on get private chats====>", senderId);
-      if (!senderId) {
-        socket.emit("getPrivateChatsError", {
-          message: "Invalid input",
-          error: "senderId is required",
-        });
-        return;
-      }
-      const chats = await prisma.privateChat.findMany({
-        where: {
-          OR: [{ participant1Id: senderId }, { participant2Id: senderId }],
-        },
-        include: {
-          participant1: {
-            select: { id: true, userName: true, avatarUrl: true },
-          },
-          participant2: {
-            select: { id: true, userName: true, avatarUrl: true },
-          },
-          messages: {
-            orderBy: { createdAt: "desc" },
-            take: 1,
-            select: { id: true, text: true, createdAt: true, senderId: true },
-          },
-        },
-      });
-      const formattedChats = chats.map((chat) => ({
-        id: chat.id,
-        otherParticipant:
-          chat.participant1Id === senderId
-            ? chat.participant2
-            : chat.participant1,
-        lastMessage: chat.messages[0]
-          ? {
-              id: chat.messages[0].id,
-              text: chat.messages[0].text,
-              createdAt: chat.messages[0].createdAt.toISOString(),
-              senderId: chat.messages[0].senderId,
-            }
-          : null,
-      }));
-      socket.emit("getPrivateChatsSuccess", {
-        message: "Private chats retrieved",
-        chats: formattedChats,
-      });
-      // console.log("<====Private chats sent====>", chats.length);
-    } catch (error) {
-      // console.error("Error getting private chats:", error.message);
-      socket.emit("getPrivateChatsError", {
-        message: "Failed to retrieve private chats",
-        error: error.message || "Unknown error",
-      });
-    }
   });
 
   // Получение сообщений в чате

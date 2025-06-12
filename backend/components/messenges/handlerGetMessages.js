@@ -1,6 +1,5 @@
 export default (socket, prisma) => {
   socket.on("get_messages", async (data = {}) => {
-    console.log("Received request to get messages:", data);
 
     const page = Number(data.page) || 1;
     const limit = Number(data.limit) || 5;

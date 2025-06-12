@@ -18,13 +18,11 @@ export default function MessageList() {
   const [selectedAuthorId, setSelectedAuthorId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const users: User[] = useSelector((state: any) => state.auth.users);
+  const users: User[] = useSelector((state: any) => state.auth.users || []);
   const messages: MessageType[] = useSelector(
-    (state: any) => state.messages.messages
+    (state: any) => state.messages.messages || []
   );
-  const socket: Socket | null = useSelector(
-    (state: any) => state.socket.socket
-  );
+  const socket: any | null = useSelector((state: any) => state.socket.socket);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -52,8 +50,8 @@ export default function MessageList() {
     socket.on(
       "messages",
       ({ messages, totalPages, sortOrder: receivedSortOrder, authorId }) => {
-        console.log("Received messages:", messages, "Total pages:", totalPages);
-        dispatch(setMessages(messages));
+        console.log("Получены сообщения:", messages); // Отладка
+        dispatch(setMessages(Array.isArray(messages) ? messages : []));
         setTotalPages(totalPages);
         setIsLoading(false);
       }
@@ -72,12 +70,11 @@ export default function MessageList() {
 
   // Мемоизация сообщений с добавлением имени автора
   const memoizedMessages = useMemo(() => {
-    if (!users || !messages) return [];
-    return messages?.map((msg) => {
+    console.log("messages в useMemo:", messages); // Отладка
+    if (!users || !Array.isArray(messages) || messages.length === 0) return [];
+    return messages.map((msg) => {
       const user = users.find((u) => u.id === Number(msg.author));
-      return user
-        ? { ...msg, author: user.userName, authorID: String(user.id) }
-        : msg;
+      return user ? { ...msg, author: user.userName, authorID: user.id } : msg;
     });
   }, [users, messages]);
 
@@ -85,7 +82,7 @@ export default function MessageList() {
   const authorSelectItems = useMemo(
     () => [
       { name: "All authors", value: "" },
-      ...users.map((user) => ({ name: user.userName, value: String(user.id) })),
+      ...users.map((user) => ({ name: user.userName, value: user.id })),
     ],
     [users]
   );
@@ -93,7 +90,7 @@ export default function MessageList() {
   // Обработчик поиска
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1); // Сбрасываем на первую страницу
+    setCurrentPage(1);
   };
 
   const handleNextPage = () => {
@@ -165,7 +162,7 @@ export default function MessageList() {
           </div>
         </div>
       </div>
-      {/* {isLoading && <Loading />} */}
+      {isLoading && <Loading />}
       {!isLoading && memoizedMessages.length === 0 ? (
         <p className="text-center text-gray-500">No messages found</p>
       ) : (

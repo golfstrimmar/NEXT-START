@@ -1,24 +1,35 @@
 "use client";
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 import { io } from "socket.io-client";
+import { useSelector, useDispatch } from "react-redux";
 import { setSocket, disconnectSocket } from "@/app/redux/slices/socketSlice";
+import {
+  setChats,
+  addChat,
+  deleteChat,
+  clearChats,
+} from "@/app/redux/slices/chatsSlice";
 import {
   setMessages,
   addMessage,
   setUsersLikedDisliked,
   updateMessage,
 } from "@/app/redux/slices/messagesSlice";
-import { setUsers, addUser } from "@/app/redux/slices/authSlice";
+import {
+  setUsers,
+  addUser,
+  setOnlineUsers,
+} from "@/app/redux/slices/authSlice";
 import {
   setComments,
   addComment,
   setCommentsLikedDisliked,
 } from "@/app/redux/slices/commentsSlice";
-
+import Chat from "@/types/chats";
+import User from "@/types/user";
 const SocketInitializer: React.FC = () => {
+  const user: User = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
-
   useEffect(() => {
     const serverUrl =
       process.env.NEXT_PUBLIC_API_URL || "http://localhost:5005";
@@ -26,14 +37,19 @@ const SocketInitializer: React.FC = () => {
       transports: ["websocket"],
     });
 
+    console.log("<====user====>", user);
+
     socket.on("connect", () => {
-      console.log("Connected to server with id:", socket.id);
+      console.log("+++++Connected to server with id:", socket.id);
       dispatch(setSocket(socket));
       socket.emit("get_messages");
       socket.emit("get_users");
       socket.emit("get_users_liked_disliked");
       socket.emit("get_comments");
       socket.emit("get_commets_liked_disliked");
+      if (user) {
+        socket.emit("get_private_chats", { senderId: Number(user._id) });
+      }
     });
 
     // Получение всех сообщений
@@ -51,7 +67,8 @@ const SocketInitializer: React.FC = () => {
 
     // Получение всех пользователей
     socket.on("users", (users: any) => {
-      dispatch(setUsers(users));
+      dispatch(setUsers(users.users));
+      dispatch(setOnlineUsers(users.onlineUsers));
     });
 
     // Получение нового пользователя
@@ -78,15 +95,24 @@ const SocketInitializer: React.FC = () => {
       dispatch(setCommentsLikedDisliked(comments));
     });
 
-    socket.on("comment_created", (comment: any) => {
-      dispatch(addComment(comment));
-    });
-
     socket.on("connect_error", (error: any) => {
       console.error(
         "Connection error:",
         error instanceof Error ? error.message : error
       );
+    });
+    socket.on("onlineUsersUpdate", (data) => {
+      dispatch(setOnlineUsers(data.onlineUsers));
+    });
+    const handleCreateComment = (comment: Comment) => {
+      dispatch(addComment(comment));
+      console.log("<==== New comment created ====>", comment);
+    };
+
+    socket.on("comment_created", handleCreateComment);
+
+    socket.on("getPrivateChatsSuccess", (chats: Chat[]) => {
+      dispatch(setChats(chats.chats));
     });
 
     socket.on("disconnect", () => {
@@ -104,10 +130,12 @@ const SocketInitializer: React.FC = () => {
       socket.off("registrationSuccess");
       socket.off("googleRegisterSuccess");
       socket.off("users_liked_disliked");
+      socket.off("onlineUsersUpdate");
+      socket.off("comment_created", handleCreateComment);
       socket.disconnect();
       dispatch(disconnectSocket());
     };
-  }, [dispatch]);
+  }, [dispatch, user]);
 
   return null;
 };

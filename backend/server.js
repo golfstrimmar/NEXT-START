@@ -12,22 +12,24 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // ====================================================
 const app = express();
 // ====================================================
-import googleRegister from "./components/googleRegister.js";
-import handlerRegister from "./components/handlerRegister.js";
-import handlerLogin from "./components/handlerLogin.js";
-import googleLogin from "./components/googleLogin.js";
-import handlerSetPassword from "./components/handlerSetPassword.js";
-import handlerGetUsers from "./components/handlerGetUsers.js";
-import handlerFindUser from "./components/handlerFindUser.js";
-import handlerEditMessage from "./components/handlerEditMessage.js";
-import handlerSendMessage from "./components/handlerSendMessage.js";
-import handlerGetMessages from "./components/handlerGetMessages.js";
-import handlerDeleteMessage from "./components/handlerDeleteMessage.js";
-import handlerLikeMessage from "./components/handlerLikeMessage.js";
-import handlerGetUsersLikedDisliked from "./components/handlerGetUsersLikedDisliked.js";
-import handlerComments from "./components/handlerComments.js";
-import handlerGetCommentsLikeDislike from "./components/handlerGetCommentsLikeDislike.js";
-import handlerChatMessages from "./components/handlerChatMessages.js";
+import googleRegister from "./components/auth/googleRegister.js";
+import handlerRegister from "./components/auth/handlerRegister.js";
+import handlerLogin from "./components/auth/handlerLogin.js";
+import googleLogin from "./components/auth/googleLogin.js";
+import handlerSetPassword from "./components/auth/handlerSetPassword.js";
+import handlerGetUsers from "./components/auth/handlerGetUsers.js";
+import handlerFindUser from "./components/auth/handlerFindUser.js";
+import handlerEditMessage from "./components/messenges/handlerEditMessage.js";
+import handlerSendMessage from "./components/messenges/handlerSendMessage.js";
+import handlerGetMessages from "./components/messenges/handlerGetMessages.js";
+import handlerDeleteMessage from "./components/messenges/handlerDeleteMessage.js";
+import handlerLikeMessage from "./components/messenges/handlerLikeMessage.js";
+import handlerGetUsersLikedDisliked from "./components/messenges/handlerGetUsersLikedDisliked.js";
+import handlerComments from "./components/comments/handlerComments.js";
+import handlerGetCommentsLikeDislike from "./components/comments/handlerGetCommentsLikeDislike.js";
+import handlerChatMessages from "./components/chats/handlerChatMessages.js";
+import chatCreate from "./components/chats/chatCreate.js";
+import getChats from "./components/chats/getChats.js";
 // ====================================================
 // Настройка CORS с конкретными доменами
 const corsOptions = {
@@ -87,16 +89,7 @@ app.get("/messages", async (req, res) => {
 // WebSocket логика
 io.on("connection", async (socket) => {
   console.log("👉Socket client:", socket.id);
-  const onlineUsers = await prisma.onlineUser.findMany({
-    select: { userId: true },
-  });
-  console.log(
-    "<====onlineUsers====>",
-    onlineUsers.map((u) => u.userId)
-  );
-  io.emit("onlineUsersUpdate", {
-    onlineUsers: onlineUsers.map((u) => u.userId),
-  });
+
   // ------------
   handlerGetMessages(socket, prisma);
   // ------------
@@ -106,7 +99,7 @@ io.on("connection", async (socket) => {
   // ------------------
   handlerFindUser(socket, prisma);
   // ------------------
-  handlerGetUsers(socket, prisma);
+  handlerGetUsers(socket, prisma, io);
   // ---------------------Register
   handlerRegister(socket, prisma, bcrypt, saltRounds);
   // ---------------------Google Register
@@ -130,23 +123,27 @@ io.on("connection", async (socket) => {
   // ---------------------
   handlerChatMessages(socket, prisma, io);
   // ---------------------
-  socket.on("disconnect", () => {
-    // Находим userId по socketId
-    let disconnectedUserId = null;
-    for (const [userId, socketId] of onlineUsers.entries()) {
-      if (socketId === socket.id) {
-        disconnectedUserId = userId;
-        onlineUsers.delete(userId);
-        break;
-      }
-    }
-    if (disconnectedUserId) {
-      console.log(`====User ${disconnectedUserId} disconnected`);
-      io.emit("onlineUsersUpdate", {
-        onlineUsers: Array.from(onlineUsers.keys()),
-      });
-    }
-  });
+  chatCreate(socket, prisma, io);
+  // ---------------------
+  getChats(socket, prisma, io);
+  // ---------------------
+  // socket.on("disconnect", () => {
+  //   // Находим userId по socketId
+  //   let disconnectedUserId = null;
+  //   for (const [userId, socketId] of onlineUsers.entries()) {
+  //     if (socketId === socket.id) {
+  //       disconnectedUserId = userId;
+  //       onlineUsers.delete(userId);
+  //       break;
+  //     }
+  //   }
+  //   if (disconnectedUserId) {
+  //     console.log(`====User ${disconnectedUserId} disconnected`);
+  //     io.emit("onlineUsersUpdate", {
+  //       onlineUsers: Array.from(onlineUsers.keys()),
+  //     });
+  //   }
+  // });
 });
 
 const PORT = process.env.PORT || 3005;

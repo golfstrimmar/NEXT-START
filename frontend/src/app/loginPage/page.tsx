@@ -6,7 +6,7 @@ import Image from "next/image";
 import Button from "@/components/ui/Button/Button";
 import { useSelector, useDispatch } from "react-redux";
 import "./LoginPage.scss";
-import { setUser } from "@/app/redux/slices/authSlice";
+import { setUser, setOnlineUsers } from "@/app/redux/slices/authSlice";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import Input from "@/components/ui/Input/Input";
 import Loading from "@/components/ui/Loading/Loading";
@@ -60,12 +60,13 @@ const LoginPage = () => {
         console.log("===--- user ---====", data.user);
         console.log("===--- token ---====", data.token);
         dispatch(setUser({ user: data.user, token: data.token }));
+        dispatch(setOnlineUsers(data.onlineUsers));
         setIsLoading(false);
         setSuccessMessage(data.message);
         setOpenModalMessage(true);
         setisModalVisible(true);
         setTimeout(() => {
-          router.replace("/profile");
+          router.replace("/");
           setSuccessMessage("");
           setOpenModalMessage(false);
         }, 2000);
@@ -76,13 +77,14 @@ const LoginPage = () => {
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("token", data.token);
         dispatch(setUser({ user: data.user, token: data.token }));
+        dispatch(setOnlineUsers(data.onlineUsers));
         setIsLoading(false);
-        setSuccessMessage("Google login successful");
+        setSuccessMessage(data.message);
         setOpenModalMessage(true);
         setIsGoogleLoading(false);
         setisModalVisible(true);
         setTimeout(() => {
-          router.replace("/profile");
+          router.replace("/");
           setSuccessMessage("");
           setOpenModalMessage(false);
         }, 2000);

@@ -47,8 +47,6 @@ const ModalAddComment = ({ onClose, messageId }: ModalAddCommentProps) => {
     createdAt: "",
   });
   const [text, setText] = useState<string>("");
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     if (!user) {
@@ -70,36 +68,6 @@ const ModalAddComment = ({ onClose, messageId }: ModalAddCommentProps) => {
     }));
   }, [text]);
 
-  useEffect(() => {
-    socket.on("comment_created", (newComment) => {
-      console.log("<==== New comment created ====>", newComment);
-      setSuccessMessage("Comment created successfully.");
-      setOpenModalMessage(true);
-      setIsModalVisible(true);
-      setTimeout(() => {
-        setOpenModalMessage(false);
-        setSuccessMessage("");
-        onClose();
-      }, 2000);
-      dispatch(addComment(newComment));
-    });
-
-    socket.on("error", ({ message }) => {
-      console.log("<==== Error from server ====>", message);
-      setError(message);
-      setShowModal(true);
-      setTimeout(() => {
-        setShowModal(false);
-        setError("");
-      }, 1500);
-    });
-
-    return () => {
-      socket.off("comment_created");
-      socket.off("error");
-    };
-  }, [socket, onClose]);
-
   const handleCreateComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (comment.text.trim() === "") {
@@ -120,6 +88,7 @@ const ModalAddComment = ({ onClose, messageId }: ModalAddCommentProps) => {
       text: comment.text,
       createdAt: new Date().toISOString(),
     });
+    onClose();
   };
 
   return (

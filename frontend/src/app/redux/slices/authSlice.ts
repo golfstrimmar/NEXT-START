@@ -14,6 +14,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   users: User[];
+  onlineUsers: number[];
 }
 
 // Начальное состояние без обращения к localStorage
@@ -21,6 +22,7 @@ const initialState: AuthState = {
   user: null,
   token: null,
   users: [],
+  onlineUsers: [],
 };
 
 const authSlice = createSlice({
@@ -48,11 +50,15 @@ const authSlice = createSlice({
     setUsers: (state, action: PayloadAction<User[]>) => {
       state.users = action.payload;
     },
+    setOnlineUsers: (state, action: PayloadAction<number[]>) => {
+      state.onlineUsers = action.payload;
+    },
+
     addUser: (state, action: PayloadAction<User>) => {
       state.users.push(action.payload);
     },
   },
 });
 
-export const { setUser, clearUser, setUsers, addUser } = authSlice.actions;
+export const { setUser, clearUser, setUsers, addUser, setOnlineUsers } = authSlice.actions;
 export default authSlice.reducer;

@@ -5,6 +5,7 @@ import Burger from "../ui/Burger/Burger";
 import styles from "./Navbar.module.scss";
 import { useSelector, useDispatch } from "react-redux";
 import { clearUser } from "@/app/redux/slices/authSlice";
+
 import { useRouter, useParams, usePathname } from "next/navigation";
 import Image from "next/image";
 interface User {
@@ -19,18 +20,29 @@ const Navbar: React.FC = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const user = useSelector((state: any) => state.auth.user as User);
+  const socket: Socket = useSelector((state) => state.socket.socket);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const pathname = usePathname();
   const [activeLink, setactiveLink] = useState<string>("");
   useEffect(() => {
     setactiveLink(pathname);
   }, [pathname]);
+
   const handleLogout = () => {
     if (user) {
       localStorage.removeItem("user");
       localStorage.removeItem("token");
       dispatch(clearUser());
       router.replace("/");
+      if (socket) {
+        console.log(
+          "<====Отправляем log_out на сервер, userID:====>",
+          user._id
+        );
+        socket.emit("log_out", { userID: user._id });
+      } else {
+        console.warn("<====Сокет не инициализирован====>");
+      }
     }
   };
   useEffect(() => {

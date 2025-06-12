@@ -60,9 +60,17 @@ export default (socket, prisma, googleClient, jwt, io) => {
       const onlineUsers = await prisma.onlineUser.findMany({
         select: { userId: true },
       });
+      console.log(
+        "<====onlineUsers google login====>",
+        onlineUsers.map((u) => u.userId)
+      );
       io.emit("onlineUsersUpdate", {
-        onlineUsers: onlineUsers.map((u) => u.userId.toString()),
+        onlineUsers: onlineUsers.map((u) => u.userId),
       });
+
+      // Присоединяем пользователя к комнате
+      socket.join(`user_${user.id}`);
+
       // Ответ
       socket.emit("googleLoginSuccess", {
         message: "Google login successful",
@@ -78,6 +86,7 @@ export default (socket, prisma, googleClient, jwt, io) => {
           __v: 0,
         },
         token: jwtToken,
+        onlineUsers: onlineUsers.map((u) => u.userId),
       });
     } catch (error) {
       console.error("Google login error:", error);

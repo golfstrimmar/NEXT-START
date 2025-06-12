@@ -4,7 +4,18 @@ import Image from "next/image";
 import MessageList from "@/components/MessageList/MessageList";
 import ModalAddEvent from "@/components/ModalAddEvent/ModalAddEvent";
 import Button from "@/components/ui/Button/Button";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  setUsers,
+  addUser,
+  setOnlineUsers,
+} from "@/app/redux/slices/authSlice";
+import {
+  setChats,
+  addChat,
+  deleteChat,
+  clearChats,
+} from "@/app/redux/slices/chatsSlice";
 import { AnimatePresence } from "framer-motion";
 import MessageType from "@/types/message";
 import Chat from "@/types/chats";
@@ -19,10 +30,13 @@ const ModalMessage = dynamic(
   }
 );
 export default function Home() {
+  const dispatch = useDispatch();
   const [AddModalOpen, setAddModalOpen] = useState<boolean>(false);
   const socket: Socket = useSelector((state) => state.socket.socket);
   const user: User = useSelector((state) => state.auth.user);
   const users: User[] = useSelector((state) => state.auth.users);
+  const chats: Chat[] = useSelector((state) => state.chats.chats);
+  const onlineUsers: User[] = useSelector((state) => state.auth.onlineUsers);
   const comments = useSelector((state) => state.comments.comments);
   const usersLikedDisliked = useSelector(
     (state) => state.messages.usersLikedDisliked
@@ -33,29 +47,20 @@ export default function Home() {
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [openModalMessage, setOpenModalMessage] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
-  // -----------------------------------------
-  useEffect(() => {
-    if (!socket || !user) {
-      return;
-    }
 
-    try {
-      socket.emit("get_private_chats", { senderId: Number(user._id) });
-    } catch (error) {
-      console.log(error);
-    }
-  }, [socket]);
-
+  // const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
   // -----------------------------------------
 
   useEffect(() => {
-    if (users) {
-      console.log("<==== users====>", users);
+    if (!socket || !user) return;
+    socket.emit("join", { senderId: Number(user._id) });
+  }, [socket, user]);
+
+  useEffect(() => {
+    if (chats) {
+      console.log("<==== chats====>", chats);
     }
-  }, [users]);
-  // -----------------------------------------
+  }, [chats]);
 
   useEffect(() => {
     if (onlineUsers) {
@@ -68,8 +73,8 @@ export default function Home() {
       return;
     }
 
-    const handlePrivateChat = (data) => {
-      console.log("<====Private chat created====>", data.chat);
+    const handlePrivateChatSuccess = (data) => {
+      console.log("<====Private chat created Success====>", data.chat);
       if (data.message === "Private chat already exists") {
         console.log("<====Private chat already exists====>");
         setSuccessMessage("Private chat already exists.");
@@ -81,6 +86,7 @@ export default function Home() {
         }, 2000);
         return;
       }
+      dispatch(addChat(data.chat));
       setSuccessMessage("Private chat created.");
       setOpenModalMessage(true);
       setIsModalVisible(true);
@@ -88,15 +94,21 @@ export default function Home() {
         setOpenModalMessage(false);
         setSuccessMessage("");
       }, 2000);
-      setChats((prevChats) => [...prevChats, data.chat]);
     };
-    const handlegetPrivateChats = (data) => {
-      console.log("<====Private chats====>", data.chats);
-      setChats(data.chats);
+    const handleNewPrivateChat = (data) => {
+      console.log("-------New Private Chat:------", data.chat);
+      dispatch(addChat(data.chat));
+      setSuccessMessage("New Private Chat");
+      setOpenModalMessage(true);
+      setIsModalVisible(true);
+      setTimeout(() => {
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+      }, 2000);
     };
-
     const handleDelitePrivateChat = (data) => {
       console.log("<====Private chat deleted====>", data.chatId);
+      dispatch(deleteChat(data.chatId));
       setSuccessMessage("Private chat deleted.");
       setOpenModalMessage(true);
       setIsModalVisible(true);
@@ -104,38 +116,60 @@ export default function Home() {
         setOpenModalMessage(false);
         setSuccessMessage("");
       }, 2000);
-      setChats((prevChats) =>
-        prevChats.filter((chat) => chat.id !== data.chatId)
-      );
     };
 
-    const handleOnlineUsersUpdate = ({ onlineUsers }) => {
-      console.log("=======Online users:", onlineUsers);
-      setOnlineUsers(onlineUsers);
+    const handleCreatePrivateChatError = (data) => {
+      console.log("<====error====>", data.message);
+      setSuccessMessage("<====error====>", data.message);
+      setOpenModalMessage(true);
+      setIsModalVisible(true);
+      setTimeout(() => {
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+      }, 2000);
+    };
+    const handleGetPrivateChatsError = (message, error) => {
+      console.log("<====error====>", error);
+      setSuccessMessage("<====error====>", message);
+      setOpenModalMessage(true);
+      setIsModalVisible(true);
+      setTimeout(() => {
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+      }, 2000);
     };
 
-    // socket.on("disconnect", () => {
-    //   setOnlineUsers(onlineUsers);
-    // });
-    socket.on("createPrivateChatSuccess", handlePrivateChat);
-    socket.on("getPrivateChatsSuccess", handlegetPrivateChats);
+    socket.on("newPrivateChat", handleNewPrivateChat);
+    socket.on("createPrivateChatSuccess", handlePrivateChatSuccess);
     socket.on("deletePrivateChatSuccess", handleDelitePrivateChat);
-    socket.on("onlineUsersUpdate", handleOnlineUsersUpdate);
+    socket.on("createPrivateChatError", handleCreatePrivateChatError);
+    socket.on("getPrivateChatsError", handleGetPrivateChatsError);
 
     return () => {
-      socket.off("createPrivateChatSuccess", handlePrivateChat);
-      socket.off("getPrivateChatsSuccess", handlegetPrivateChats);
+      socket.off("newPrivateChat", handleNewPrivateChat);
+      socket.off("createPrivateChatSuccess", handlePrivateChatSuccess);
       socket.off("deletePrivateChatSuccess", handleDelitePrivateChat);
-      socket.off("onlineUsersUpdate", handleOnlineUsersUpdate);
+      socket.off("createPrivateChatError", handleCreatePrivateChatError);
+      socket.off("getPrivateChatsError", handleGetPrivateChatsError);
     };
   }, [socket]);
   // -----------------------------------------
 
   // -----------------------------------------
   const handlerChat = (receiver) => {
+    if (!socket || !user) {
+      setSuccessMessage("To create a private chat, you must be logged in.");
+      setOpenModalMessage(true);
+      setIsModalVisible(true);
+      setTimeout(() => {
+        setOpenModalMessage(false);
+        setSuccessMessage("");
+      }, 2000);
+      return;
+    }
     try {
       socket.emit("create_private_chat", {
-        senderId: user._id,
+        senderId: Number(user._id),
         receiverId: receiver,
       });
     } catch (error) {
@@ -179,7 +213,7 @@ export default function Home() {
 
         {users &&
           users
-            // .filter((foo) => foo.id !== Number(user?._id))
+            .filter((foo) => foo.id !== Number(user?._id))
             .map((foo, index) => {
               return (
                 <div key={index} className="flex gap-2">
@@ -193,8 +227,8 @@ export default function Home() {
                     </span>
                   )}
                   <p>id: {foo.id}</p>
-                  <h3 className="font-semibold">userName: {foo.userName}</h3>
-                  <p className="text-gray-400 text-sm">email: {foo.email}</p>
+                  <h3 className="font-semibold"> {foo.userName}</h3>
+
                   <button
                     type="button"
                     onClick={() => {
@@ -215,86 +249,29 @@ export default function Home() {
         {user && chats && (
           <div className="border border-gray-500 p-2 mt-2 mb-2">
             <h3 className="font-bold text-lg">Private Chats:</h3>
+
             {chats &&
-              chats.map((foo) => {
-                return (
-                  <div key={foo.id} className="mb-4">
-                    <div className="flex gap-2">
-                      {/* <p>Chat id:{foo.id}</p>
-                      <p>Other participant id:{foo.otherParticipant.id}</p>
-                      <p>Name:{foo.otherParticipant.userName}</p> */}
-                      {/* <p>{JSON.stringify(foo.lastMessage, null, 2)}</p> */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          try {
-                            socket.emit("delete_private_chat", {
-                              chatId: foo.id,
-                              senderId: Number(user._id),
-                            });
-                          } catch (error) {
-                            console.log(error);
-                          }
-                        }}
-                        className=" cursor-pointer"
-                      >
-                        <Image
-                          src="/assets/svg/cross.svg"
-                          width={15}
-                          height={15}
-                          alt="Picture of the author"
-                        />
-                      </button>
+              chats.length > 0 &&
+              chats
+                .filter((el) => el && el.id && el.otherParticipant)
+                .map((el, index) => {
+                  return (
+                    <div
+                      key={el.id} // Используем el.id вместо index для уникальности
+                      className="border border-gray-500 p-2 mt-2 mb-2 rounded-md bg-green-300"
+                    >
+                      <div className="flex items-center gap-2 ">
+                        <p>Chat #{el.id}</p>
+                        <p>{user?.userName || "Anonymous"}</p>
+                        <span>—</span>
+                        <p>{el.otherParticipant?.userName || "Unknown"}</p>
+                      </div>
+                      <Room chatRoom={el} />
                     </div>
-                    <Room chat={foo} />
-                  </div>
-                );
-              })}
+                  );
+                })}
           </div>
         )}
-        {/* <div className="border border-gray-500 p-2 mt-2 mb-2">
-          <h3>users Liked Disliked:</h3>
-          {usersLikedDisliked &&
-            usersLikedDisliked.map((foo) => {
-              return (
-                <div key={foo.id} className="flex gap-2">
-                  <p>userId:{foo.userId}</p>
-                  <p>messageId:{foo.messageId}</p>
-                  <p>reaction:{foo.reaction}</p>
-                </div>
-              );
-            })}
-        </div>
-        <div className="border border-gray-500 p-2 mt-2 mb-2">
-          <h3>comments Liked Disliked:</h3>
-          {commentsLikedDisliked &&
-            commentsLikedDisliked.map((foo) => {
-              return (
-                <div key={foo.id} className="flex gap-2">
-                  <p>userId:{foo.userId}</p>
-                  <p>messageId:{foo.messageId}</p>
-                  <p>reaction:{foo.reaction}</p>
-                </div>
-              );
-            })}
-        </div>
-        <div className="border border-gray-500 p-2 mt-2 mb-2">
-          <h3>comments:</h3>
-          {comments &&
-            comments.map((foo) => {
-              return (
-                <div key={foo.id} className="flex gap-2">
-                  <p>id:{foo.id}</p>
-                  <p>messageId:{foo.messageId}</p>
-                  <p>userId:{foo.userId}</p>
-                  <p>userName:{foo.userName}</p>
-                  <p>likes:{foo.likes}</p>
-                  <p>dislikes:{foo.dislikes}</p>
-                </div>
-              );
-            })}
-        </div> */}
-
         <MessageList />
         <Button
           buttonText="Add Message"

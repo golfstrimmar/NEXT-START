@@ -1,13 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-interface Message {
-  id: number;
-  text: string;
-  author: string;
-  likes: number;
-  dislikes: number;
-  createdAt: string;
-}
+import MessageType from "@/types/message";
 
 interface UserReaction {
   id: number;
@@ -18,7 +10,7 @@ interface UserReaction {
 }
 
 interface MessageState {
-  messages: Message[];
+  messages: MessageType[];
   usersLikedDisliked: UserReaction[];
 }
 
@@ -31,13 +23,13 @@ const messagesSlice = createSlice({
   name: "messages",
   initialState,
   reducers: {
-    setMessages: (state, action: PayloadAction<Message[]>) => {
+    setMessages: (state, action: PayloadAction<MessageType[]>) => {
       state.messages = action.payload;
     },
-    addMessage: (state, action: PayloadAction<Message>) => {
+    addMessage: (state, action: PayloadAction<MessageType>) => {
       state.messages.unshift(action.payload);
     },
-    updateMessage: (state, action: PayloadAction<Message>) => {
+    updateMessage: (state, action: PayloadAction<MessageType>) => {
       const index = state.messages.findIndex(
         (msg) => msg.id === action.payload.id
       );

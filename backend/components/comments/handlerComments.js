@@ -2,7 +2,6 @@ export default (socket, prisma, io) => {
   socket.on("get_comments", async () => {
     try {
       const comments = await prisma.comment.findMany();
-      console.log("Comments sent to client:", comments.length);
       socket.emit("comments", comments);
     } catch (error) {
       console.error("Error getting comments:", error);
@@ -40,7 +39,6 @@ export default (socket, prisma, io) => {
           },
         });
 
-        console.log("Comment created:", comment);
         io.emit("comment_created", comment);
       } catch (error) {
         console.error("Error creating comment:", error);
@@ -70,7 +68,6 @@ export default (socket, prisma, io) => {
         data: { text: text.trim() },
       });
 
-      console.log("Comment updated:", updatedComment);
       io.emit("comment_updated", updatedComment);
     } catch (error) {
       console.error("Error updating comment:", error);
@@ -96,7 +93,6 @@ export default (socket, prisma, io) => {
         where: { id: Number(commentId) },
       });
 
-      console.log("Comment deleted:", commentId);
       io.emit("comment_deleted", {
         commentId: Number(commentId),
         messageId: comment.messageId,
@@ -166,7 +162,6 @@ export default (socket, prisma, io) => {
         }
       });
 
-      console.log("Comment liked:", updatedComment);
       io.emit("comment_updated", updatedComment);
     } catch (error) {
       console.error("Error liking comment:", {
@@ -181,7 +176,6 @@ export default (socket, prisma, io) => {
   });
 
   socket.on("dislike_comment", async ({ commentId, userId }) => {
-    console.log("<====Comment dislike====>", { commentId, userId });
     try {
       if (isNaN(Number(commentId))) throw new Error("Invalid comment ID");
       if (!userId) throw new Error("User ID is required");
@@ -237,14 +231,8 @@ export default (socket, prisma, io) => {
         }
       });
 
-      console.log("Comment disliked:", updatedComment);
       io.emit("comment_updated", updatedComment);
     } catch (error) {
-      console.error("Error disliking comment:", {
-        error: error.message,
-        commentId,
-        userId,
-      });
       socket.emit("error", {
         message: error.message || "Failed to dislike comment",
       });

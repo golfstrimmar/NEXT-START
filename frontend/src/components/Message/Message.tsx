@@ -3,11 +3,7 @@ import React, { useState, useEffect } from "react";
 import { MessageType } from "@/types/message";
 import { useSelector, useDispatch } from "react-redux";
 import { deleteMessage, updateMessage } from "@/app/redux/slices/messagesSlice";
-import {
-  addUserReaction,
-  updateComment,
-  deleteComment,
-} from "@/app/redux/slices/commentsSlice";
+import { updateComment, deleteComment } from "@/app/redux/slices/commentsSlice";
 import { User } from "@/types/user";
 import ModalEditMessage from "@/components/ModalEditMessage/ModalEditMessage";
 import Image from "next/image";
@@ -103,6 +99,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
           setSuccessMessage("");
         }, 2000);
       };
+      // ----------------
 
       const handleDeliteComment = (data: any) => {
         setSuccessMessage("Comment deleted successfully.");
@@ -128,6 +125,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         setIsLoading(false);
       });
       socket.on("message_deleted", handleMessageDeleted);
+
       socket.on("comment_updated", handleUpdateComment);
       socket.on("comment_deleted", handleDeliteComment);
 
@@ -147,6 +145,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
         socket.off("message_liked", handleMessageLiked);
         socket.off("message_disliked", handleMessageDisliked);
         socket.off("message_deleted", handleMessageDeleted);
+
         socket.off("comment_updated", handleUpdateComment);
         socket.off("comment_deleted", handleDeliteComment);
       };

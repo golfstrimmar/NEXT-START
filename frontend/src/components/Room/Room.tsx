@@ -33,7 +33,7 @@ interface Message {
   createdAt: string;
 }
 
-const Room: React.FC<RoomProps> = ({ chat }) => {
+const Room: React.FC<RoomProps> = ({ chatRoom }) => {
   const dispatch = useDispatch();
   const socket: Socket = useSelector((state) => state.socket.socket);
   const user: User = useSelector((state) => state.auth.user);
@@ -54,21 +54,21 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
   useEffect(() => {
     socket?.emit("get_private_messages", {
       senderId: Number(user._id),
-      chatId: chat.id,
+      chatId: chatRoom.id,
     });
   }, [socket]);
 
   useEffect(() => {
-    if (!chat || !user || !socket) return;
+    if (!chatRoom || !user || !socket) return;
 
     const handlePMS = (data) => {
       if (data.messages.length === 0) return;
-      if (data.chatId === chat.id) {
+      if (data.chatId === chatRoom.id) {
         setMessages(data.messages);
       }
     };
     const handleCMS = (data) => {
-      if (data.data.chatId === chat.id) {
+      if (data.data.chatId === chatRoom.id) {
         setMessages((prev) => [...prev, data.data]);
       }
     };
@@ -84,7 +84,7 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
     };
 
     const handlenewChatMessage = (data) => {
-      if (data.data.chatId === chat.id) {
+      if (data.data.chatId === chatRoom.id) {
         setMessages((prev) => [...prev, data.data]);
       }
     };
@@ -101,7 +101,7 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
       socket.off("createChatMessageError", handleChatMessageError);
       socket.off("newChatMessage", handlenewChatMessage);
     };
-  }, [chat, socket, user]);
+  }, [chatRoom, socket, user]);
 
   //  ---------------------------------
 
@@ -116,9 +116,9 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
     if (messageChat !== "") {
       socket.emit("create_chat_message", {
         senderId: Number(user._id),
-        receiverId: chat.otherParticipant.id,
+        receiverId: chatRoom.otherParticipant.id,
         text: messageChat,
-        chatId: chat.id,
+        chatId: chatRoom.id,
       });
       setMessageChat("");
     } else {
@@ -133,27 +133,50 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
   };
   //  ---------------------------------
   return (
-    <div className={styles.room}>
+    <div className="bg-lime-200 border border-gray-400 rounded-md">
       {isModalVisible && (
         <ModalMessage message={successMessage} open={openModalMessage} />
       )}
       <div className="border border-gray-400 rounded-md px-2 py-1 gap-2">
         {/* <div>chat id: {chat.id}</div> */}
-        <div className="flex items-center gap-2 mb-4">
-          {/* <span>{chat.otherParticipant.id}</span> */}
-          <span>{chat.otherParticipant.userName}</span>
-          <span>
-            {chat.otherParticipant.avatarUrl && (
-              <div className="rounded-full overflow-hidden ">
-                <Image
-                  src={chat.otherParticipant.avatarUrl}
-                  alt="avatar"
-                  width={20}
-                  height={20}
-                />
-              </div>
-            )}
-          </span>
+        <div className="flex justify-between items-center mb-4 ">
+          <div className="inline-flex items-center gap-2 bg-slate-400 rounded-md px-1">
+            {/* <span>{chat.otherParticipant.id}</span> */}
+            <span>{chatRoom.otherParticipant.userName}</span>
+            <span>
+              {chatRoom.otherParticipant.avatarUrl && (
+                <div className="rounded-full overflow-hidden ">
+                  <Image
+                    src={chatRoom.otherParticipant.avatarUrl}
+                    alt="avatar"
+                    width={20}
+                    height={20}
+                  />
+                </div>
+              )}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              try {
+                socket.emit("delete_private_chat", {
+                  chatId: chatRoom.id,
+                  senderId: Number(user._id),
+                });
+              } catch (error) {
+                console.log(error);
+              }
+            }}
+            className=" cursor-pointer"
+          >
+            <Image
+              src="/assets/svg/cross.svg"
+              width={15}
+              height={15}
+              alt="Picture of the author"
+            />
+          </button>
         </div>
         {/* <span>last message:</span>
         {chat.lastMessage ? (
@@ -182,8 +205,9 @@ const Room: React.FC<RoomProps> = ({ chat }) => {
             </div>
           ))
         ) : (
-          <p>no messages yet</p>
+          <p className="text-blue-600 text-sm">no messages yet</p>
         )}
+        <h3 className="mt-4 text-slate-400 text-sm">Send a message</h3>
         <form
           action=""
           className="flex gap-2"
