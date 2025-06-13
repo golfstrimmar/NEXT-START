@@ -39,6 +39,8 @@ export default function MessageList() {
     }
 
     setIsLoading(true);
+
+    console.log("<====запрос на сервер====>");
     socket.emit("get_messages", {
       page: currentPage,
       limit: 5,
@@ -47,15 +49,16 @@ export default function MessageList() {
       search: searchQuery,
     });
 
-    socket.on(
-      "messages",
-      ({ messages, totalPages, sortOrder: receivedSortOrder, authorId }) => {
-        console.log("Получены сообщения:", messages); // Отладка
-        dispatch(setMessages(Array.isArray(messages) ? messages : []));
-        setTotalPages(totalPages);
-        setIsLoading(false);
-      }
-    );
+    socket.on("messages", ({ messages, totalPages }) => {
+      // console.log("Получены сообщения:", messages); // Отладка
+      // dispatch(setMessages(Array.isArray(messages) ? messages : []));
+      // setTotalPages(totalPages);
+      // setIsLoading(false);
+      console.log("Получены сообщения:", messages);
+      dispatch(setMessages(Array.isArray(messages) ? messages : []));
+      setTotalPages(totalPages || 1);
+      setIsLoading(false);
+    });
 
     socket.on("error", (error) => {
       console.error("Socket error:", error);
