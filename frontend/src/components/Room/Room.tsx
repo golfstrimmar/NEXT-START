@@ -132,30 +132,83 @@ const Room: React.FC<RoomProps> = ({ chatRoom }) => {
     }
   };
   //  ---------------------------------
+
+  useEffect(() => {
+    if (messages) {
+      console.log("<==== messages====>", messages);
+      console.log("<====user._id====>", user._id);
+    }
+  }, [messages]);
+  //  ---------------------------------
+
   return (
     <div className="bg-lime-200 border border-gray-400 rounded-md">
       {isModalVisible && (
         <ModalMessage message={successMessage} open={openModalMessage} />
       )}
       <div className="border border-gray-400 rounded-md px-2 py-1 gap-2">
-        {/* <div>chat id: {chat.id}</div> */}
-        <div className="flex justify-between items-center mb-4 ">
-          <div className="inline-flex items-center gap-2 bg-slate-400 rounded-md px-1">
-            {/* <span>{chat.otherParticipant.id}</span> */}
-            <span>{chatRoom.otherParticipant.userName}</span>
-            <span>
-              {chatRoom.otherParticipant.avatarUrl && (
-                <div className="rounded-full overflow-hidden ">
-                  <Image
-                    src={chatRoom.otherParticipant.avatarUrl}
-                    alt="avatar"
-                    width={20}
-                    height={20}
-                  />
-                </div>
-              )}
-            </span>
-          </div>
+        {messages.length > 0 ? (
+          sortedMessages(messages).map((message: Message) => (
+            <div
+              key={message.id}
+              className={`border border-gray-400  rounded-md px-2 py-1 mb-2 gap-2 ${
+                Number(user._id) === Number(message.sender.id)
+                  ? "ml-6 bg-gray-200"
+                  : "bg-white"
+              }`}
+            >
+              <div className="flex  items-center gap-2">
+                {Number(user._id) === Number(message.sender.id) ? (
+                  <span className="text-green-600 text-sm">
+                    {user.userName}
+                  </span>
+                ) : (
+                  <span className="text-green-600  text-sm">
+                    {chatRoom.otherParticipant.userName}
+                  </span>
+                )}
+
+                <p className={`text-xs text-gray-400 `}>
+                  {new Date(message.createdAt).toLocaleString("de-DE", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+              <h3>{message.text}</h3>
+            </div>
+          ))
+        ) : (
+          <p className="text-blue-600 text-sm">no messages yet</p>
+        )}
+        <h3 className="mt-4 text-slate-400 text-sm">Send a message</h3>
+        <div className="flex justify-between">
+          <form
+            action=""
+            className="flex gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleAddChatMessage();
+            }}
+          >
+            <input
+              type="text"
+              value={messageChat}
+              onChange={(e) => {
+                setMessageChat(e.target.value);
+              }}
+              className="bg-white border border-gray-400 rounded-md px-2 py-1"
+            />
+            <button
+              type="submit"
+              className="text-white bg-blue-500 hover:bg-blue-600 transition-colors cursor-pointer rounded-md px-2 py-1"
+            >
+              <span>Send</span>
+            </button>
+          </form>
           <button
             type="button"
             onClick={() => {
@@ -178,59 +231,6 @@ const Room: React.FC<RoomProps> = ({ chatRoom }) => {
             />
           </button>
         </div>
-        {/* <span>last message:</span>
-        {chat.lastMessage ? (
-          <span> {JSON.stringify(chat.lastMessage, null, 2)}</span>
-        ) : (
-          <span>==========</span>
-        )} */}
-        {messages.length > 0 ? (
-          sortedMessages(messages).map((message: Message) => (
-            <div
-              key={message.id}
-              className="border border-gray-400 bg-white rounded-md px-2 py-1 mb-2 gap-2"
-            >
-              {/* <p>{message.receiver.userName}</p>
-                <p>{message.sender.userName}</p> */}
-              <p className="text-xs text-gray-400">
-                {new Date(message.createdAt).toLocaleString("de-DE", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
-              <h3>{message.text}</h3>
-            </div>
-          ))
-        ) : (
-          <p className="text-blue-600 text-sm">no messages yet</p>
-        )}
-        <h3 className="mt-4 text-slate-400 text-sm">Send a message</h3>
-        <form
-          action=""
-          className="flex gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleAddChatMessage();
-          }}
-        >
-          <input
-            type="text"
-            value={messageChat}
-            onChange={(e) => {
-              setMessageChat(e.target.value);
-            }}
-            className="bg-white border border-gray-400 rounded-md px-2 py-1"
-          />
-          <button
-            type="submit"
-            className="text-white bg-blue-500 hover:bg-blue-600 transition-colors cursor-pointer rounded-md px-2 py-1"
-          >
-            <span>Send</span>
-          </button>
-        </form>
       </div>
     </div>
   );

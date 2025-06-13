@@ -261,7 +261,6 @@ export default function Home() {
                       className="border border-gray-500 p-2 mt-2 mb-2 rounded-md bg-green-300"
                     >
                       <div className="flex items-center gap-2 ">
-                        <p>Chat #{el.id}</p>
                         <p>{user?.userName || "Anonymous"}</p>
                         <span>—</span>
                         <p>{el.otherParticipant?.userName || "Unknown"}</p>

@@ -130,6 +130,61 @@ io.on("connection", async (socket) => {
   // ---------------------
   handleLogOut(socket, prisma, jwt, bcrypt, io);
   // ---------------------
+  socket.on("ping", async () => {
+    try {
+      console.log(`====Received ping from socket.id: ${socket.id}====`);
+      const onlineUser = await prisma.onlineUser.findFirst({
+        where: { socketId: socket.id },
+      });
+      if (onlineUser) {
+        await prisma.onlineUser.update({
+          where: { userId: onlineUser.userId },
+          data: { lastActive: new Date() },
+        });
+        console.log(`====Updated lastActive for user ${onlineUser.userId}====`);
+      }
+    } catch (error) {
+      console.error("Error handling ping:", error);
+    }
+  });
+  setInterval(async () => {
+    try {
+      console.log("====Checking inactive users====");
+      const threshold = new Date(Date.now() - 35 * 60 * 1000); // 35 минут
+      const inactiveUsers = await prisma.onlineUser.findMany({
+        where: { lastActive: { lt: threshold } },
+      });
+
+      if (inactiveUsers.length > 0) {
+        await prisma.onlineUser.deleteMany({
+          where: { lastActive: { lt: threshold } },
+        });
+        console.log(`====Removed ${inactiveUsers.length} inactive users====`);
+
+        // Обновляем список онлайн-пользователей
+        const onlineUsers = await prisma.onlineUser.findMany({
+          select: { userId: true },
+        });
+        io.emit("onlineUsersUpdate", {
+          onlineUsers: onlineUsers.map((u) => u.userId.toString()),
+        });
+
+        // Обновляем lastSeen для удалённых пользователей
+        for (const user of inactiveUsers) {
+          await prisma.user.update({
+            where: { id: user.userId },
+            data: { lastSeen: new Date() },
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error checking inactive users:", error);
+    }
+  }, 5 * 60 * 1000); // Каждые 5 минут
+
+  socket.on("disconnect", () => {
+    console.log(`====Socket disconnected, socket.id: ${socket.id}====`);
+  });
   // socket.on("disconnect", async () => {
   //   try {
   //     console.log(`====Socket disconnected, socket.id: ${socket.id}====`);
