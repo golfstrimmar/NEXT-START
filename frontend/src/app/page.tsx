@@ -272,7 +272,7 @@ export default function Home() {
                 })}
           </div>
         )}
-        <MessageList />
+        {/* <MessageList /> */}
         <Button
           buttonText="Add Message"
           buttonType="button"
