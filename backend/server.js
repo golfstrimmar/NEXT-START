@@ -30,6 +30,7 @@ import handlerGetCommentsLikeDislike from "./components/comments/handlerGetComme
 import handlerChatMessages from "./components/chats/handlerChatMessages.js";
 import chatCreate from "./components/chats/chatCreate.js";
 import getChats from "./components/chats/getChats.js";
+import handleLogOut from "./components/auth/handleLogOut.js";
 // ====================================================
 // Настройка CORS с конкретными доменами
 const corsOptions = {
@@ -127,21 +128,38 @@ io.on("connection", async (socket) => {
   // ---------------------
   getChats(socket, prisma, io);
   // ---------------------
-  // socket.on("disconnect", () => {
-  //   // Находим userId по socketId
-  //   let disconnectedUserId = null;
-  //   for (const [userId, socketId] of onlineUsers.entries()) {
-  //     if (socketId === socket.id) {
-  //       disconnectedUserId = userId;
-  //       onlineUsers.delete(userId);
-  //       break;
-  //     }
-  //   }
-  //   if (disconnectedUserId) {
-  //     console.log(`====User ${disconnectedUserId} disconnected`);
-  //     io.emit("onlineUsersUpdate", {
-  //       onlineUsers: Array.from(onlineUsers.keys()),
+  handleLogOut(socket, prisma, jwt, bcrypt, io);
+  // ---------------------
+  // socket.on("disconnect", async () => {
+  //   try {
+  //     console.log(`====Socket disconnected, socket.id: ${socket.id}====`);
+
+  //     // Находим пользователя по socketId
+  //     const onlineUser = await prisma.onlineUser.findFirst({
+  //       where: { socketId: socket.id },
   //     });
+
+  //     // Если пользователь найден, удаляем его
+  //     if (onlineUser) {
+  //       await prisma.onlineUser.delete({
+  //         where: { userId: onlineUser.userId },
+  //       });
+  //       console.log(`====User ${onlineUser.userId} disconnected====`);
+  //     } else {
+  //       console.warn(`No user found for socket.id: ${socket.id}`);
+  //     }
+
+  //     // Получаем обновлённый список онлайн-пользователей
+  //     const onlineUsers = await prisma.onlineUser.findMany({
+  //       select: { userId: true },
+  //     });
+
+  //     // Отправляем обновление всем клиентам
+  //     io.emit("onlineUsersUpdate", {
+  //       onlineUsers: onlineUsers.map((u) => u.userId.toString()),
+  //     });
+  //   } catch (error) {
+  //     console.error("Error handling disconnect:", error);
   //   }
   // });
 });
