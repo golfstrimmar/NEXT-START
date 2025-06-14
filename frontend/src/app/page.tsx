@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import MessageList from "@/components/MessageList/MessageList";
 import ModalAddEvent from "@/components/ModalAddEvent/ModalAddEvent";
@@ -22,7 +22,7 @@ import Chat from "@/types/chats";
 import User from "@/types/user";
 import dynamic from "next/dynamic";
 import Room from "@/components/Room/Room";
-import { span } from "framer-motion/client";
+import Chats from "@/components/Chats/Chats";
 const ModalMessage = dynamic(
   () => import("@/components/ModalMessage/ModalMessage"),
   {
@@ -47,8 +47,8 @@ export default function Home() {
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [openModalMessage, setOpenModalMessage] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-
-  // const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
+  const [OpenChats, setOpenChats] = useState<boolean>(false);
+  const [openChatId, setOpenChatId] = useState<number | null>(null);
   // -----------------------------------------
 
   useEffect(() => {
@@ -177,6 +177,22 @@ export default function Home() {
     }
   };
   // -----------------------------------------
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        event.target instanceof HTMLElement &&
+        !event.target.closest(".room") &&
+        !event.target.closest(".checkChat")
+      ) {
+        setOpenChatId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+  // -----------------------------------------
 
   return (
     <div className=" min-h-screen  font-[family-name:var(--font-geist-sans)]">
@@ -184,71 +200,53 @@ export default function Home() {
         <ModalMessage message={successMessage} open={openModalMessage} />
       )}
       <div>
-        {/* <Image
-          src="/assets/svg/home.svg"
-          className="inline-block mr-2 w-8 h-8"
-          width={30}
-          height={30}
-          alt="Picture of the author"
-        ></Image>
-        <h1 className="text-3xl font-semibold italic text-gray-800 text-center">
-          Home
-        </h1>
-        <div className="w-1/4">
-          <Image
-            alt="IMG10"
-            src="/assets/images/15.jpg"
-            width="50"
-            height="50"
-          />
+        <div className="border border-gray-500 p-2 mt-2 mb-2  rounded-md">
+          <h3 className="font-bold text-lg  mb-2">Users</h3>
+          {users &&
+            users
+              .filter((foo) => foo.id !== Number(user?._id))
+              .map((foo, index) => {
+                return (
+                  <div key={index} className="flex gap-2 items-center mb-2">
+                    {onlineUsers && onlineUsers?.includes(foo.id) ? (
+                      <span className="text-green-500 rounded-full px-2 py-1 bg-green-100 text-xs">
+                        online
+                      </span>
+                    ) : (
+                      <span className="text-gray-500 rounded-full px-2 py-1 bg-gray-100 text-xs">
+                        offline
+                      </span>
+                    )}
+
+                    <h3 className="font-semibold"> {foo.userName}</h3>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handlerChat(foo.id);
+                      }}
+                      className={`cursor-pointer bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full flex items-center gap-2 transition-colors duration-200 ease-in-out ${
+                        chats &&
+                        chats.some((el) => el.otherParticipant?.id === foo.id)
+                          ? "hidden"
+                          : ""
+                      }`}
+                    >
+                      Create Private Chat with: {foo.userName}
+                      <Image
+                        src="/assets/svg/click.svg"
+                        width={15}
+                        height={15}
+                        alt="Picture of the author"
+                      />
+                    </button>
+                  </div>
+                );
+              })}
         </div>
-        <div className="home-img relative aspect-[1.5/1] w-1/2 h-auto">
-          <Image
-            className="object-contain absolute"
-            src="/assets/images/image.jpg"
-            alt="Picture of the author"
-            fill
-          />
-        </div> */}
-
-        {users &&
-          users
-            .filter((foo) => foo.id !== Number(user?._id))
-            .map((foo, index) => {
-              return (
-                <div key={index} className="flex gap-2">
-                  {onlineUsers && onlineUsers?.includes(foo.id) ? (
-                    <span className="text-green-500 rounded-full px-2 py-1 bg-green-100 text-xs">
-                      online
-                    </span>
-                  ) : (
-                    <span className="text-gray-500 rounded-full px-2 py-1 bg-gray-100 text-xs">
-                      offline
-                    </span>
-                  )}
-                  <p>id: {foo.id}</p>
-                  <h3 className="font-semibold"> {foo.userName}</h3>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handlerChat(foo.id);
-                    }}
-                    className=" cursor-pointer"
-                  >
-                    <Image
-                      src="/assets/svg/click.svg"
-                      width={15}
-                      height={15}
-                      alt="Picture of the author"
-                    />
-                  </button>
-                </div>
-              );
-            })}
         {user && chats && (
-          <div className="border border-gray-500 p-2 mt-2 mb-2">
-            <h3 className="font-bold text-lg">Private Chats:</h3>
+          <div className="border border-gray-500 p-2 mt-2 mb-2 rounded-md">
+            <h3 className="font-bold text-lg">Private Chats</h3>
 
             {chats &&
               chats.length > 0 &&
@@ -257,15 +255,51 @@ export default function Home() {
                 .map((el, index) => {
                   return (
                     <div
-                      key={el.id} // Используем el.id вместо index для уникальности
-                      className="border border-gray-500 p-2 mt-2 mb-2 rounded-md bg-green-300"
+                      className="flex gap-2 items-center checkChat"
+                      key={el.id}
                     >
-                      <div className="flex items-center gap-2 ">
+                      <Room
+                        chatRoom={el}
+                        open={openChatId === el.id}
+                        setOpenChatId={setOpenChatId}
+                      />
+                      <div
+                        className=" border border-gray-500 px-2 mt-2 mb-2 rounded-md bg-green-300 inline-flex items-center gap-2 cursor-pointer"
+                        onClick={() => {
+                          setOpenChatId(openChatId === el.id ? null : el.id);
+                        }}
+                      >
                         <p>{user?.userName || "Anonymous"}</p>
                         <span>—</span>
                         <p>{el.otherParticipant?.userName || "Unknown"}</p>
+                        <Image
+                          src="/assets/svg/click.svg"
+                          width={15}
+                          height={15}
+                          alt="Picture of the author"
+                        />
                       </div>
-                      <Room chatRoom={el} />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          try {
+                            socket.emit("delete_private_chat", {
+                              chatId: el.id,
+                              senderId: Number(user._id),
+                            });
+                          } catch (error) {
+                            console.log(error);
+                          }
+                        }}
+                        className=" cursor-pointer bg-red-200 hover:bg-red-500  w-8 h-8 rounded-full flex justify-center items-center  transition-colors duration-200 ease-in-out"
+                      >
+                        <Image
+                          src="/assets/svg/cross.svg"
+                          width={10}
+                          height={10}
+                          alt="Picture of the author"
+                        />
+                      </button>
                     </div>
                   );
                 })}

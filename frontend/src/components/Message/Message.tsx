@@ -260,8 +260,7 @@ const Message: React.FC<MessageProps> = ({ msg }) => {
     <div>
       {isLoading && <Loading></Loading>}
       <div className="flex justify-between items-start ">
-        <span className="text-gray-500 text-xs">id:{msg?.id}</span>
-        <span className="text-gray-500 text-xs">author:{msg?.author}</span>
+        <span className="text-gray-500 text-xs">{msg?.author}</span>
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">
             {new Date(msg.createdAt).toLocaleString("ru-RU", {

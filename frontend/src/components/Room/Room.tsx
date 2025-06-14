@@ -14,6 +14,7 @@ const ModalMessage = dynamic(
 );
 interface RoomProps {
   chat: Chat;
+  open: boolean;
 }
 
 interface Message {
@@ -33,7 +34,7 @@ interface Message {
   createdAt: string;
 }
 
-const Room: React.FC<RoomProps> = ({ chatRoom }) => {
+const Room: React.FC<RoomProps> = ({ chatRoom, open, setOpenChatId }) => {
   const dispatch = useDispatch();
   const socket: Socket = useSelector((state) => state.socket.socket);
   const user: User = useSelector((state) => state.auth.user);
@@ -133,20 +134,24 @@ const Room: React.FC<RoomProps> = ({ chatRoom }) => {
   };
   //  ---------------------------------
 
-  useEffect(() => {
-    if (messages) {
-      console.log("<==== messages====>", messages);
-      console.log("<====user._id====>", user._id);
-    }
-  }, [messages]);
-  //  ---------------------------------
-
   return (
-    <div className="bg-lime-200 border border-gray-400 rounded-md">
+    <div
+      className={`room fixed bg-blue-300 w-full  h-full top-[64px] z-20 transition-all duration-300 bg-slate-300 border border-gray-400 rounded-md ${
+        open ? "right-0" : "right-[-100%]"
+      }`}
+    >
       {isModalVisible && (
         <ModalMessage message={successMessage} open={openModalMessage} />
       )}
-      <div className="border border-gray-400 rounded-md px-2 py-1 gap-2">
+      <Image
+        src="/assets/svg/cross-com.svg"
+        width={15}
+        height={15}
+        alt="Picture of the author"
+        onClick={() => setOpenChatId(null)}
+        className="m-2 cursor-pointer"
+      />
+      <div className=" px-2 py-1 gap-2">
         {messages.length > 0 ? (
           sortedMessages(messages).map((message: Message) => (
             <div
@@ -209,27 +214,6 @@ const Room: React.FC<RoomProps> = ({ chatRoom }) => {
               <span>Send</span>
             </button>
           </form>
-          <button
-            type="button"
-            onClick={() => {
-              try {
-                socket.emit("delete_private_chat", {
-                  chatId: chatRoom.id,
-                  senderId: Number(user._id),
-                });
-              } catch (error) {
-                console.log(error);
-              }
-            }}
-            className=" cursor-pointer"
-          >
-            <Image
-              src="/assets/svg/cross.svg"
-              width={15}
-              height={15}
-              alt="Picture of the author"
-            />
-          </button>
         </div>
       </div>
     </div>
