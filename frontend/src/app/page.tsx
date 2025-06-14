@@ -226,6 +226,7 @@ export default function Home() {
                         handlerChat(foo.id);
                       }}
                       className={`cursor-pointer bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full flex items-center gap-2 transition-colors duration-200 ease-in-out ${
+                        user &&
                         chats &&
                         chats.some((el) => el.otherParticipant?.id === foo.id)
                           ? "hidden"
