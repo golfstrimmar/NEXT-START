@@ -219,28 +219,28 @@ export default function Home() {
                     )}
 
                     <h3 className="font-semibold"> {foo.userName}</h3>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handlerChat(foo.id);
-                      }}
-                      className={`cursor-pointer bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full flex items-center gap-2 transition-colors duration-200 ease-in-out ${
-                        user &&
-                        chats &&
-                        chats.some((el) => el.otherParticipant?.id === foo.id)
-                          ? "hidden"
-                          : ""
-                      }`}
-                    >
-                      Create Private Chat with: {foo.userName}
-                      <Image
-                        src="/assets/svg/click.svg"
-                        width={15}
-                        height={15}
-                        alt="Picture of the author"
-                      />
-                    </button>
+                    {user && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handlerChat(foo.id);
+                        }}
+                        className={`cursor-pointer bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full flex items-center gap-2 transition-colors duration-200 ease-in-out ${
+                          chats &&
+                          chats.some((el) => el.otherParticipant?.id === foo.id)
+                            ? "hidden"
+                            : ""
+                        }`}
+                      >
+                        Create Private Chat with: {foo.userName}
+                        <Image
+                          src="/assets/svg/click.svg"
+                          width={15}
+                          height={15}
+                          alt="Picture of the author"
+                        />
+                      </button>
+                    )}
                   </div>
                 );
               })}
