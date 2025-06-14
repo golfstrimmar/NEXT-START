@@ -24,7 +24,7 @@ export default (socket, prisma, jwt, bcrypt, io) => {
 
       // Отправляем обновление всем клиентам
       io.emit("onlineUsersUpdate", {
-        onlineUsers: onlineUsers.map((u) => u.userId.toString()),
+        onlineUsers: onlineUsers.map((u) => u.userId),
       });
     } catch (error) {
       console.error("Error handling logout:", error);
