@@ -45,7 +45,7 @@ export const useActivityHandler = () => {
     // Проверка неактивности каждую минуту
     const checkInactivity = setInterval(() => {
       const inactiveTime = Date.now() - lastActivityRef.current;
-      if (inactiveTime >= 1 * 60 * 1000) {
+      if (inactiveTime >= 30 * 60 * 1000) {
         // 30 минут
         console.log("<====Неактивность 30 минут, выполняем log_out====>");
         handleLogout();
