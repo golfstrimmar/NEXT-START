@@ -12,7 +12,7 @@ import Room from "@/components/Room/Room";
 import type { RootState } from "@/app/redux/store"; // Импортируем тип RootState
 import type { Chat } from "@/types/chats";
 import type { User } from "@/types/user";
-
+import Loading from "@/components/ui/Loading/Loading";
 const ModalMessage = dynamic(
   () => import("@/components/ModalMessage/ModalMessage"),
   {
@@ -34,7 +34,7 @@ const Home: React.FC = () => {
   const [openModalMessage, setOpenModalMessage] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [openChatId, setOpenChatId] = useState<number | null>(null);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const socket = useSelector(
     (state: RootState) => state.socket.socket
   ) as Socket | null;
@@ -77,22 +77,8 @@ const Home: React.FC = () => {
     socket.emit("join", { senderId: Number(user._id) });
   }, [socket, user]);
 
-  // Логирование чатов
-  useEffect(() => {
-    if (chats) {
-      console.log("<==== chats====>", chats);
-    }
-  }, [chats]);
-
-  // Логирование онлайн-пользователей
-  useEffect(() => {
-    if (onlineUsers) {
-      console.log("<==== onlineUsers====>", onlineUsers);
-    }
-  }, [onlineUsers]);
-
   const handleChat = useCallback(
-    (receiverId: number): void => {
+    (receiver: number): void => {
       if (!socket || !user) {
         setSuccessMessage(
           "To create a private chat, you need to be logged in."
@@ -108,7 +94,7 @@ const Home: React.FC = () => {
       try {
         socket.emit("create_private_chat", {
           senderId: Number(user._id),
-          receiverId,
+          receiverId: Number(receiver),
         });
       } catch (error) {
         console.error("Error creating chat:", error);
@@ -122,7 +108,7 @@ const Home: React.FC = () => {
       if (!socket || !user) return;
       try {
         socket.emit("delete_private_chat", {
-          chatId,
+          chatId: chatId,
           senderId: Number(user._id),
         });
       } catch (error) {
@@ -221,26 +207,28 @@ const Home: React.FC = () => {
   }, [socket, dispatch]);
 
   // Обработчик создания чата
-  const handlerChat = (receiver: number): void => {
-    if (!socket || !user) {
-      setSuccessMessage("To create a private chat, you must be logged in.");
-      setOpenModalMessage(true);
-      setIsModalVisible(true);
-      setTimeout(() => {
-        setOpenModalMessage(false);
-        setSuccessMessage("");
-      }, 2000);
-      return;
-    }
-    try {
-      socket.emit("create_private_chat", {
-        senderId: Number(user._id),
-        receiverId: receiver,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const handlerChat = (receiver: number): void => {
+  //   setIsLoading(true);
+  //   if (!socket || !user) {
+  //     setSuccessMessage("To create a private chat, you must be logged in.");
+  //     setOpenModalMessage(true);
+  //     setIsModalVisible(true);
+  //     setIsLoading(false);
+  //     setTimeout(() => {
+  //       setOpenModalMessage(false);
+  //       setSuccessMessage("");
+  //     }, 2000);
+  //     return;
+  //   }
+  //   try {
+  //     socket.emit("create_private_chat", {
+  //       senderId: Number(user._id),
+  //       receiverId: receiver,
+  //     });
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   // Закрытие чата при клике вне области
   useEffect(() => {
@@ -264,7 +252,7 @@ const Home: React.FC = () => {
       {isModalVisible && (
         <ModalMessage message={successMessage} open={openModalMessage} />
       )}
-
+      {isLoading && <Loading />}
       <div>
         <div className="border border-gray-500 p-2 mt-2 mb-2 rounded-md  bg-white/70">
           <h3 className="font-thin text-sm  mb-2">Users</h3>
@@ -284,7 +272,7 @@ const Home: React.FC = () => {
                 {user && (
                   <button
                     type="button"
-                    onClick={() => handleChat(foo.userId)}
+                    onClick={() => handleChat(foo.id)}
                     className={`cursor-pointer bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full flex items-center gap-2 transition-colors duration-200 ease-in-out ${
                       chats &&
                       chats.some((el) => el.otherParticipant?.id === foo.id)
@@ -333,7 +321,7 @@ const Home: React.FC = () => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleDeleteChat(el.chatId)}
+                  onClick={() => handleDeleteChat(el.id)}
                   className="cursor-pointer bg-red-200 hover:bg-red-500 w-8 h-8 rounded-full flex justify-center items-center transition-colors duration-200 ease-in-out"
                 >
                   <Image
