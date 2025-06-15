@@ -7,14 +7,6 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
-  background-image: url('../../public/assets/images/chat.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  min-height: 100vh;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  // background-color: rgba(255, 255, 255, 0.3);
 }
 
 .next-hidden {
@@ -30,6 +22,21 @@ body {
   }
 }
 
+.imgs {
+  height: 100%;
+  width: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+
+  img {
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
+}
 
 .run {
   // animation-name: run;

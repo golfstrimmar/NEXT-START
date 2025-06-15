@@ -260,10 +260,11 @@ const Home: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen font-[family-name:var(--font-geist-sans)]">
+    <div className="min-h-screen font-[family-name:var(--font-geist-sans)] relative">
       {isModalVisible && (
         <ModalMessage message={successMessage} open={openModalMessage} />
       )}
+
       <div>
         <div className="border border-gray-500 p-2 mt-2 mb-2 rounded-md  bg-white/70">
           <h3 className="font-thin text-sm  mb-2">Users</h3>

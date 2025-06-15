@@ -30,6 +30,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-blue-100 text-gray-900`}
       >
+        <div className="imgs blur-[5px]">
+          <img src="./assets/images/chat.jpg" alt="chat" />
+        </div>
         <GoogleOAuthProvider clientId={googleClientId}>
           <ClientWrapper>
             <Navbar />
