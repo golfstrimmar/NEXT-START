@@ -265,8 +265,8 @@ const Home: React.FC = () => {
         <ModalMessage message={successMessage} open={openModalMessage} />
       )}
       <div>
-        <div className="border border-gray-500 p-2 mt-2 mb-2 rounded-md">
-          <h3 className="font-bold text-lg mb-2">Users</h3>
+        <div className="border border-gray-500 p-2 mt-2 mb-2 rounded-md  bg-white/70">
+          <h3 className="font-thin text-sm  mb-2">Users</h3>
           {users &&
             filteredUsers.map((foo, index) => (
               <div key={index} className="flex gap-2 items-center mb-2">
@@ -303,18 +303,19 @@ const Home: React.FC = () => {
               </div>
             ))}
         </div>
+
         {user && validChats.length > 0 && (
-          <div className="border border-gray-500 p-2 mt-2 mb-2 rounded-md">
-            <h3 className="font-bold text-lg">Private Chats</h3>
+          <div className="border border-gray-500 p-2 mt-2 mb-2 rounded-md  bg-white/70">
+            <h3 className="font-thin text-sm  mb-2">Private Chats</h3>
             {validChats.map((el) => (
-              <div className="flex gap-2 items-center checkChat" key={el.id}>
+              <div className="flex gap-2 items-center" key={el.id}>
                 <Room
                   chatRoom={el}
                   open={openChatId === el.id}
                   setOpenChatId={setOpenChatId}
                 />
                 <div
-                  className="border border-gray-500 px-2 mt-2 mb-2 rounded-md bg-green-300 inline-flex items-center gap-2 cursor-pointer"
+                  className="border  checkChat border-gray-500 px-2 mt-2 mb-2 rounded-md bg-green-300 inline-flex items-center gap-2 cursor-pointer"
                   onClick={() => {
                     setOpenChatId(openChatId === el.id ? null : el.id);
                   }}

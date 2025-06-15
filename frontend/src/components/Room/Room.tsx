@@ -136,21 +136,27 @@ const Room: React.FC<RoomProps> = ({ chatRoom, open, setOpenChatId }) => {
 
   return (
     <div
-      className={`room fixed bg-blue-300  w-full sm:w-[500px]  h-full top-[64px] z-20 transition-all duration-300 bg-slate-300 border border-gray-400 rounded-md ${
+      className={`room fixed bg-blue-300  w-full sm:w-[500px]  h-[100vh] top-[64px] z-20 transition-all duration-300 bg-slate-300 border border-gray-400 rounded-md ${
         open ? "right-0" : "right-[-100%]"
       }`}
     >
       {isModalVisible && (
         <ModalMessage message={successMessage} open={openModalMessage} />
       )}
-      <Image
-        src="/assets/svg/cross-com.svg"
-        width={15}
-        height={15}
-        alt="Picture of the author"
-        onClick={() => setOpenChatId(null)}
-        className="m-2 cursor-pointer"
-      />
+      <div className="flex items-center">
+        <Image
+          src="/assets/svg/cross-com.svg"
+          width={15}
+          height={15}
+          alt="Picture of the author"
+          onClick={() => setOpenChatId(null)}
+          className="m-2 cursor-pointer"
+        />
+        <span className="text-slate-600 text-sm">
+          {chatRoom.otherParticipant.userName}
+        </span>
+      </div>
+
       <div className=" px-2 py-1 gap-2">
         {messages.length > 0 ? (
           sortedMessages(messages).map((message: Message) => (
