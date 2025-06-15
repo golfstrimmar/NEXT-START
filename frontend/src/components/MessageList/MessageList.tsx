@@ -37,10 +37,7 @@ export default function MessageList() {
       setIsLoading(false);
       return;
     }
-
     setIsLoading(true);
-
-    console.log("<====запрос на сервер====>");
     socket.emit("get_messages", {
       page: currentPage,
       limit: 5,
@@ -49,16 +46,29 @@ export default function MessageList() {
       search: searchQuery,
     });
 
-    socket.on("messages", ({ messages, totalPages }) => {
-      // console.log("Получены сообщения:", messages); // Отладка
-      // dispatch(setMessages(Array.isArray(messages) ? messages : []));
-      // setTotalPages(totalPages);
-      // setIsLoading(false);
+    const handleMessages = ({ messages, totalPages }) => {
       console.log("Получены сообщения:", messages);
       dispatch(setMessages(Array.isArray(messages) ? messages : []));
       setTotalPages(totalPages || 1);
       setIsLoading(false);
-    });
+    };
+
+    const handleNewMessage = (newMessage: any) => {
+      setSortOrder("desc");
+      setCurrentPage(1);
+      setSelectedAuthorId(null);
+      setSearchQuery("");
+      socket.emit("get_messages", {
+        page: 1,
+        limit: 5,
+        sortOrder: "asc",
+        authorId: null,
+        search: "",
+      });
+    };
+
+    socket.on("messages", handleMessages);
+    socket.on("new_message", handleNewMessage);
 
     socket.on("error", (error) => {
       console.error("Socket error:", error);

@@ -57,10 +57,6 @@ const SocketInitializer: React.FC = () => {
       dispatch(setMessages(messages));
     });
 
-    // Получение нового сообщения
-    socket.on("new_message", (newMessage: any) => {
-      dispatch(addMessage(newMessage));
-    });
     socket.on("message_updated", (updatedMessage: any) => {
       dispatch(updateMessage(updatedMessage));
     });
@@ -122,7 +118,6 @@ const SocketInitializer: React.FC = () => {
     // Очистка
     return () => {
       socket.off("messages");
-      socket.off("new_message");
       socket.off("users");
       socket.off("new_user");
       socket.off("connect_error");
