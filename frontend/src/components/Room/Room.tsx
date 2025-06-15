@@ -136,7 +136,7 @@ const Room: React.FC<RoomProps> = ({ chatRoom, open, setOpenChatId }) => {
 
   return (
     <div
-      className={`room fixed bg-blue-300 w-full  h-full top-[64px] z-20 transition-all duration-300 bg-slate-300 border border-gray-400 rounded-md ${
+      className={`room fixed bg-blue-300  w-full sm:w-[500px]  h-full top-[64px] z-20 transition-all duration-300 bg-slate-300 border border-gray-400 rounded-md ${
         open ? "right-0" : "right-[-100%]"
       }`}
     >
