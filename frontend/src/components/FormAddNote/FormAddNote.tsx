@@ -135,6 +135,7 @@ const FormNote: React.FC<FormNoteProps> = ({
           required
           disabled={isLoading}
           rows={50}
+          className="border border-gray-300 rounded-md p-2 w-full resize-none h-96 bg-white"
         />
       </div>
 
