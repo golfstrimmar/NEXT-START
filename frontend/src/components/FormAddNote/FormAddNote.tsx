@@ -135,7 +135,7 @@ const FormNote: React.FC<FormNoteProps> = ({
           onChange={(e) => setText(e.target.value)}
           required
           disabled={isLoading}
-          rows={5}
+          rows={50}
         />
       </div>
 
