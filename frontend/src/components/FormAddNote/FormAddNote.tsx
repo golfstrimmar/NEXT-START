@@ -129,8 +129,7 @@ const FormNote: React.FC<FormNoteProps> = ({
         <label className="block text-sm font-medium text-gray-700">
           Содержимое (каждый пункт с новой строки)
         </label>
-        <Input
-          typeInput="textarea"
+        <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           required
